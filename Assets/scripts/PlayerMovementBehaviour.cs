@@ -1,19 +1,17 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Android;
-using UnityEngine.InputSystem.Controls;
 
 public class PlayerMovementBehaviour : MonoBehaviour
 {
+    [SerializeField] float movementSpeed = 5f;   // Speed of movement
+    [SerializeField] float rotationSpeed = 720f; // Speed of rotation in degrees per second
 
-    [SerializeField] float movementSpeed;
-    [SerializeField] float rotationSpeed;
-
-    //Control keys
-    [SerializeField] Key fowardKey;
-    [SerializeField] Key backwardKey;
-    [SerializeField] Key leftKey;
-    [SerializeField] Key rightKey;
+    /* Control keys with default values set to WASD.
+       These can still be customized in the Unity Inspector. */
+    [SerializeField] Key forwardKey = Key.W;   // Default forward key
+    [SerializeField] Key backwardKey = Key.S;  // Default backward key
+    [SerializeField] Key leftKey = Key.A;      // Default left key
+    [SerializeField] Key rightKey = Key.D;     // Default right key
 
     // Update is called once per frame
     void Update()
@@ -21,58 +19,51 @@ public class PlayerMovementBehaviour : MonoBehaviour
         Move();
     }
 
+    // Handles movement and rotation
     void Move()
     {
         Vector3 moveDirection = CalculateMoveDirection();
 
-        transform.position = transform.position + moveDirection * movementSpeed * Time.deltaTime;
+        // Move the player in the chosen direction
+        transform.position += moveDirection * movementSpeed * Time.deltaTime;
 
+        // Rotate towards movement direction if moving
         if (moveDirection.magnitude != 0)
         {
             LookAt(moveDirection);
         }
     }
 
+    // Smoothly rotates the player to face the movement direction
     void LookAt(Vector3 lookDirection)
     {
-        Quaternion targetRotation;
-        targetRotation = Quaternion.LookRotation(lookDirection); //Esto lo que hace es calcular la rotación que debería tener si estuviese girado para donde va realmente
-
-        Quaternion newRotation;
-        newRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-
+        Quaternion targetRotation = Quaternion.LookRotation(lookDirection); // Desired rotation
+        Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime); // Smooth rotation
         transform.rotation = newRotation;
     }
 
+    // Calculates the movement direction based on pressed keys
     Vector3 CalculateMoveDirection()
     {
-        Vector3 moveVector;
-        Vector3 moveNormalized;
+        Vector3 moveVector = Vector3.zero;
 
-        moveVector = new Vector3(0, 0, 0);
+        // Forward movement (W by default)
+        if (Keyboard.current[forwardKey].isPressed)
+            moveVector.z -= 1;
 
-        if (Keyboard.current[fowardKey].isPressed)
-        {
-            moveVector.z = moveVector.z + 1;
-        }
-
+        // Backward movement (S by default)
         if (Keyboard.current[backwardKey].isPressed)
-        {
-            moveVector.z = moveVector.z - 1;
-        }
+            moveVector.z += 1;
 
+        // Left movement (A by default)
         if (Keyboard.current[leftKey].isPressed)
-        {
-            moveVector.x = moveVector.x - 1;
-        }
+            moveVector.x -= 1;
 
+        // Right movement (D by default)
         if (Keyboard.current[rightKey].isPressed)
-        {
-            moveVector.x = moveVector.x + 1;
-        }
+            moveVector.x += 1;
 
-        moveNormalized = moveVector.normalized;
-
-        return moveNormalized;
+        // Normalize to prevent faster diagonal movement
+        return moveVector.normalized;
     }
 }

@@ -1,0 +1,288 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+/*
+ * InventoryManager
+ * ----------------
+ * Central system for managing the player's inventory.
+ * Handles adding/removing items, opening/closing the inventory UI,
+ * slot replacement when full, item usage, and selling callbacks.
+ */
+public class InventoryManager : MonoBehaviour
+{
+    public static InventoryManager Instance { get; private set; }
+
+    [Header("Inventory UI")]
+    [SerializeField] private GameObject inventoryMenu;
+    [SerializeField] private ItemSlot[] itemSlots;
+
+    [Header("Item Data")]
+    [SerializeField] private ItemSO[] itemSOs;
+
+    private bool menuActivated;
+
+    // Lookup dictionary for ItemSO by name
+    private Dictionary<string, ItemSO> itemLookup;
+
+    // Replacement mode (when inventory is full)
+    private bool waitingForReplace;
+    private ItemSO pendingItem;
+    private int pendingQuantity;
+
+    // Active SellPedestal (if selling mode is active)
+    private SellPedestal activeSellPedestal = null;
+
+    private void Awake()
+    {
+        // Singleton setup
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
+        // Build lookup dictionary
+        itemLookup = new Dictionary<string, ItemSO>();
+        foreach (var item in itemSOs)
+        {
+            if (!itemLookup.ContainsKey(item.itemName))
+                itemLookup[item.itemName] = item;
+        }
+
+        // Hide inventory at start
+        if (inventoryMenu != null)
+            inventoryMenu.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        StartCoroutine(RefreshSlotsNextFrame());
+    }
+
+    private IEnumerator RefreshSlotsNextFrame()
+    {
+        yield return null;
+
+        if (inventoryMenu != null && inventoryMenu.activeSelf)
+        {
+            foreach (var slot in itemSlots)
+                slot?.RefreshUI();
+        }
+    }
+
+    public ItemSlot[] ItemSlots => itemSlots;
+
+    /*
+     * Inventory open/close
+     * --------------------
+     * Now supports a parameter pauseGame:
+     * - pauseGame = true -> freezes gameplay (default).
+     * - pauseGame = false -> keeps gameplay running (used for selling).
+     */
+    public void ToggleInventory()
+    {
+        if (menuActivated)
+            CloseInventory();
+        else
+            OpenInventory();
+    }
+
+    public void OpenInventory(bool pauseGame = true)
+    {
+        menuActivated = true;
+        inventoryMenu?.SetActive(true);
+        StartCoroutine(RefreshSlotsNextFrame());
+
+        if (pauseGame)
+            Time.timeScale = 0f; // Pause game
+        else
+            Time.timeScale = 1f; // Keep game running
+    }
+
+    public void CloseInventory()
+    {
+        menuActivated = false;
+        inventoryMenu?.SetActive(false);
+        Time.timeScale = 1f; // Always resume game
+
+        // Cancel replacement mode if active
+        if (waitingForReplace)
+        {
+            waitingForReplace = false;
+            pendingItem = null;
+        }
+
+        // Clear selling mode if active
+        activeSellPedestal = null;
+    }
+
+    /*
+     * Selling mode control
+     * --------------------
+     * SellPedestal registers itself here so that slot clicks are routed to it.
+     */
+    public void SetActiveSellPedestal(SellPedestal pedestal)
+    {
+        activeSellPedestal = pedestal;
+    }
+
+    public void ClearActiveSellPedestal()
+    {
+        activeSellPedestal = null;
+    }
+
+    /*
+     * Item usage
+     */
+    public void UseItem(string itemName)
+    {
+        if (itemLookup.TryGetValue(itemName, out var item))
+            item.UseItem();
+        else
+            Debug.LogWarning("Item " + itemName + " not found.");
+    }
+
+    /*
+     * Adding items
+     */
+    public int AddItem(ItemSO item, int quantity)
+    {
+        return AddItem(item.itemName, quantity, item.icon, item.itemDescription);
+    }
+
+    public int AddItem(string itemName, int quantity, Sprite itemSprite, string itemDescription)
+    {
+        foreach (var slot in itemSlots)
+        {
+            if ((!slot.isFull && slot.itemName == itemName) || slot.quantity == 0)
+            {
+                int leftover = slot.AddItem(itemName, quantity, itemSprite, itemDescription);
+
+                if (leftover > 0)
+                    return AddItem(itemName, leftover, itemSprite, itemDescription);
+
+                return 0;
+            }
+        }
+
+        // Inventory full (SPANISH)
+        if (OptionPopupManager.Instance != null)
+        {
+            OptionPopupManager.Instance.ShowInventoryFullPopup(itemName, quantity, itemSprite, itemDescription);
+        }
+        else
+        {
+            PrepareReplace(itemName, quantity, itemSprite, itemDescription);
+            OpenInventory();
+        }
+
+        return quantity;
+    }
+
+    /*
+     * Slot click handler
+     * ------------------
+     * This is the MOST IMPORTANT part for selling.
+     * If selling mode is active, notify SellPedestal.
+     */
+    public void OnSlotClicked(ItemSlot slot)
+    {
+        // Replacement mode
+        if (waitingForReplace)
+        {
+            ReplaceInSlot(slot);
+            return;
+        }
+
+        // Selling mode: notify SellPedestal
+        if (activeSellPedestal != null)
+        {
+            activeSellPedestal.OnItemClicked(slot);
+            return;
+        }
+
+        // Normal behavior: use item
+        slot.SelectSlot();
+    }
+
+    /*
+     * Replacement mode
+     */
+    public void PrepareReplace(string itemName, int quantity, Sprite sprite, string description)
+    {
+        waitingForReplace = true;
+        pendingItem = new ItemSO { itemName = itemName, icon = sprite, itemDescription = description };
+        pendingQuantity = quantity;
+    }
+
+    public void ReplaceInSlot(ItemSlot slot)
+    {
+        if (pendingItem == null) return;
+
+        if (OptionPopupManager.Instance != null)
+        {
+            OptionPopupManager.Instance.ShowConfirmReplacePopup(slot, () =>
+            {
+                slot.ClearSlot();
+                slot.AddItem(pendingItem.itemName, pendingQuantity, pendingItem.icon, pendingItem.itemDescription);
+                waitingForReplace = false;
+                pendingItem = null;
+                CloseInventory();
+            });
+        }
+        else
+        {
+            slot.ClearSlot();
+            slot.AddItem(pendingItem.itemName, pendingQuantity, pendingItem.icon, pendingItem.itemDescription);
+            waitingForReplace = false;
+            pendingItem = null;
+            CloseInventory();
+        }
+    }
+
+    /*
+     * Removing items
+     */
+    public void RemoveItem(string itemName, int quantity)
+    {
+        foreach (var slot in itemSlots)
+        {
+            if (slot.itemName == itemName && slot.quantity > 0)
+            {
+                int removeAmount = Mathf.Min(quantity, slot.quantity);
+                slot.quantity -= removeAmount;
+                quantity -= removeAmount;
+
+                if (slot.quantity <= 0)
+                    slot.ClearSlot();
+                else
+                    slot.RefreshUI();
+
+                if (quantity <= 0) return;
+            }
+        }
+    }
+
+    /*
+     * Utility
+     */
+    public void DeselectAllSlots()
+    {
+        foreach (var slot in itemSlots)
+        {
+            slot.selectedShader?.SetActive(false);
+            slot.thisItemSelected = false;
+        }
+    }
+
+    public ItemSO GetItemSO(string itemName)
+    {
+        if (string.IsNullOrEmpty(itemName)) return null;
+        if (itemLookup == null) return null;
+
+        ItemSO result;
+        return itemLookup.TryGetValue(itemName, out result) ? result : null;
+    }
+}
