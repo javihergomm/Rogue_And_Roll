@@ -2753,7 +2753,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: c6cb3a931eda0eb4aa96215092fc79bb, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 747de1f3679a12e45a3953bbd76c6777, type: 2}
+      objectReference: {fileID: 2100000, guid: 079c6880e3776c741a8d60025076dd80, type: 2}
     - target: {fileID: 919132149155446097, guid: c6cb3a931eda0eb4aa96215092fc79bb, type: 3}
       propertyPath: m_Name
       value: Tablero
@@ -3253,8 +3253,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   possibleItems:
   - {fileID: 11400000, guid: 139968f657dff0245a74676e6314a17d, type: 2}
-  - {fileID: 11400000, guid: 8b4f7b43f8048d147ae604282ea98eba, type: 2}
-  - {fileID: 11400000, guid: 4ccbf7814439409488d39828f69c7fdd, type: 2}
+  - {fileID: 11400000, guid: 81ddf4a26161fa848921c64b0cf5818c, type: 2}
+  - {fileID: 11400000, guid: 39f19cb645d2fa04c974c06b1b80508e, type: 2}
   displayPoint: {fileID: 691661218}
   displayYOffset: 0.1
   isAwaitingDecision: 0
@@ -4481,8 +4481,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   possibleItems:
   - {fileID: 11400000, guid: 139968f657dff0245a74676e6314a17d, type: 2}
-  - {fileID: 11400000, guid: 8b4f7b43f8048d147ae604282ea98eba, type: 2}
-  - {fileID: 11400000, guid: 4ccbf7814439409488d39828f69c7fdd, type: 2}
+  - {fileID: 11400000, guid: 81ddf4a26161fa848921c64b0cf5818c, type: 2}
+  - {fileID: 11400000, guid: 39f19cb645d2fa04c974c06b1b80508e, type: 2}
   displayPoint: {fileID: 1912633484}
   displayYOffset: 0.1
   isAwaitingDecision: 0
@@ -4800,8 +4800,8 @@ MonoBehaviour:
   - {fileID: 1621341119}
   itemSOs:
   - {fileID: 11400000, guid: 139968f657dff0245a74676e6314a17d, type: 2}
-  - {fileID: 11400000, guid: 8b4f7b43f8048d147ae604282ea98eba, type: 2}
-  - {fileID: 11400000, guid: 4ccbf7814439409488d39828f69c7fdd, type: 2}
+  - {fileID: 11400000, guid: 81ddf4a26161fa848921c64b0cf5818c, type: 2}
+  - {fileID: 11400000, guid: 39f19cb645d2fa04c974c06b1b80508e, type: 2}
 --- !u!114 &1548563259
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4831,9 +4831,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c0a026fbb9977d44bd5872af8c66c2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatManager
-  statBindings:
-  - statType: 1
-    statText: {fileID: 583795536}
+  statsText: {fileID: 583795536}
   startingGold: 25
   maxGold: 50
   startingRolls: 1

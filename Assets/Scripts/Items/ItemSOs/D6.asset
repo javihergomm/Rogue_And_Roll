@@ -9,16 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b3bae51b7edf964aa6c3a3bac405190, type: 3}
-  m_Name: RandomObject
-  m_EditorClassIdentifier: Assembly-CSharp::ItemSO
-  itemName: aaaaaaaaaaaa
+  m_Script: {fileID: 11500000, guid: c0e0478710a59644598f369f2732eff1, type: 3}
+  m_Name: D6
+  m_EditorClassIdentifier: Assembly-CSharp::DiceSO
+  itemName: D6
   icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
   itemDescription: 
-  prefab3D: {fileID: 919132149155446097, guid: 5865bb7bea7c8e64386c3b51d64dcf95, type: 3}
-  itemType: 0
-  statToChange: 1
-  amountToChangeStat: 3
+  prefab3D: {fileID: 7982418613138095591, guid: 87766ee552e338447858d84b4264e351, type: 3}
+  buyPrice: 8
+  sellPrice: 4
   diceFaces: 6
-  buyPrice: 5
-  sellPrice: 3

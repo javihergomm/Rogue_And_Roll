@@ -11,13 +11,13 @@ using System.Collections.Generic;
 public class ShopPedestalRandomizer : MonoBehaviour
 {
     [Header("Possible items for this pedestal")]
-    [SerializeField] private ItemSO[] possibleItems;
+    [SerializeField] private BaseItemSO[] possibleItems; // <-- updated
 
     [Header("Visuals")]
     [SerializeField] private Transform displayPoint;
     [SerializeField] private float displayYOffset = 0.1f;
 
-    private ItemSO chosenItem;
+    private BaseItemSO chosenItem; // <-- updated
     private GameObject spawnedModel;
     private bool hasGeneratedThisVisit = false;
 
@@ -25,7 +25,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
     public bool isAwaitingDecision = false;
 
     // Track items used this visit to avoid duplicates
-    private static HashSet<ItemSO> usedItemsThisVisit = new HashSet<ItemSO>();
+    private static HashSet<BaseItemSO> usedItemsThisVisit = new HashSet<BaseItemSO>(); // <-- updated
 
     private void Start()
     {
@@ -70,7 +70,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
         if (spawnedModel != null)
             Destroy(spawnedModel);
 
-        List<ItemSO> availableItems = new List<ItemSO>();
+        List<BaseItemSO> availableItems = new List<BaseItemSO>();
         foreach (var item in possibleItems)
             if (!usedItemsThisVisit.Contains(item))
                 availableItems.Add(item);
@@ -126,10 +126,10 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
         if (answer == OuijaAnswerZone.AnswerType.Yes)
         {
-            int currentGold = StatManager.Instance.GetCurrentValue(ItemSO.StatType.gold);
+            int currentGold = StatManager.Instance.GetCurrentValue(StatType.Gold); // <-- updated
             if (currentGold >= chosenItem.buyPrice)
             {
-                StatManager.Instance.ChangeStat(ItemSO.StatType.gold, -chosenItem.buyPrice);
+                StatManager.Instance.ChangeStat(StatType.Gold, -chosenItem.buyPrice); // <-- updated
                 InventoryManager.Instance.AddItem(chosenItem, 1);
 
                 if (spawnedModel != null)
@@ -140,7 +140,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
             }
             else
             {
-                Debug.Log("Not enough gold to buy " + chosenItem.itemName);
+                Debug.Log("Not enough Pesetas to buy " + chosenItem.itemName);
             }
         }
         else
@@ -168,8 +168,8 @@ public class ShopPedestalRandomizer : MonoBehaviour
         if (OptionPopupManager.Instance != null && chosenItem != null)
         {
             OptionPopupManager.Instance.ShowMessageOnly(
-                "Do you want to buy " + chosenItem.itemName + " for " + chosenItem.buyPrice + " gold?\n" +
-                "Move to YES or NO on the board."
+                $"¿Quieres comprar {chosenItem.itemName} por {chosenItem.buyPrice} Pesetas?\n" +
+                "Muévete al SÍ o al NO en el tablero."
             );
         }
     }

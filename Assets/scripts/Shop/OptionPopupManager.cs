@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 /*
  * OptionPopupManager
+ * ------------------
  * Manages a single popup panel in the UI Canvas.
  * Supports:
  *   - Choice popups (text + dynamically created buttons)
@@ -150,17 +151,20 @@ public class OptionPopupManager : MonoBehaviour
     {
         var options = new Dictionary<string, System.Action>
         {
-            { "Sí, elegir objeto a reemplazar", () =>
+            { "Yes, choose slot to replace", () =>
                 {
-                    InventoryManager.Instance.PrepareReplace(itemName, quantity, itemSprite, itemDescription);
+                    InventoryManager.Instance.PrepareReplace(
+                        InventoryManager.Instance.GetItemSO(itemName),
+                        quantity
+                    );
                     InventoryManager.Instance.OpenInventory();
-                    Debug.Log("Selecciona un slot en el inventario para reemplazar");
+                    Debug.Log("Select a slot in inventory to replace.");
                 }
             },
-            { "No reemplazar", () => Debug.Log("Mantener inventario actual") }
+            { "Do not replace", () => Debug.Log("Keep current inventory.") }
         };
 
-        ShowPopup("Inventario lleno. ¿Quieres reemplazar un objeto?", options);
+        ShowPopup("Inventory full. Do you want to replace an item?", options);
     }
 
     /*
@@ -169,11 +173,11 @@ public class OptionPopupManager : MonoBehaviour
      */
     public void ShowConfirmReplacePopup(ItemSlot slot, System.Action onConfirm)
     {
-        string message = $"¿Seguro que quieres reemplazar el objeto '{slot.itemName}' en este slot?";
+        string message = $"Are you sure you want to replace the item '{slot.itemName}' in this slot?";
         var options = new Dictionary<string, System.Action>
         {
-            { "Confirmar", () => onConfirm?.Invoke() },
-            { "Cancelar", () => Debug.Log("Reemplazo cancelado") }
+            { "Confirm", () => onConfirm?.Invoke() },
+            { "Cancel", () => Debug.Log("Replace cancelled.") }
         };
 
         ShowPopup(message, options);
@@ -187,8 +191,8 @@ public class OptionPopupManager : MonoBehaviour
     {
         var options = new Dictionary<string, System.Action>
         {
-            { "Eliminar 1 unidad", () => InventoryManager.Instance.RemoveItem(itemName, 1) },
-            { "Eliminar todas", () =>
+            { "Remove 1 unit", () => InventoryManager.Instance.RemoveItem(itemName, 1) },
+            { "Remove all", () =>
                 {
                     int total = 0;
                     foreach (var slot in itemSlots)
@@ -196,7 +200,7 @@ public class OptionPopupManager : MonoBehaviour
                     InventoryManager.Instance.RemoveItem(itemName, total);
                 }
             },
-            { "Eliminar cantidad personalizada", () =>
+            { "Remove custom amount", () =>
                 {
                     int total = 0;
                     foreach (var slot in itemSlots)
@@ -204,10 +208,10 @@ public class OptionPopupManager : MonoBehaviour
                     ShowNumberSliderPopup(itemName, total);
                 }
             },
-            { "Cancelar", () => Debug.Log("Eliminación cancelada") }
+            { "Cancel", () => Debug.Log("Remove cancelled.") }
         };
 
-        ShowPopup($"¿Cómo quieres eliminar {itemName}?", options);
+        ShowPopup($"How do you want to remove {itemName}?", options);
     }
 
     /*
@@ -218,12 +222,12 @@ public class OptionPopupManager : MonoBehaviour
     {
         var options = new Dictionary<string, System.Action>
         {
-            { "Confirmar", () => {} }, // Action handled via onConfirmWithNumber
-            { "Cancelar", () => Debug.Log("Eliminación personalizada cancelada") }
+            { "Confirm", () => {} }, // Action handled via onConfirmWithNumber
+            { "Cancel", () => Debug.Log("Custom remove cancelled.") }
         };
 
         ShowPopup(
-            $"Selecciona la cantidad de {itemName} a eliminar:",
+            $"Select the amount of {itemName} to remove:",
             options,
             useSlider: true,
             sliderMax: maxQuantity,
@@ -235,12 +239,10 @@ public class OptionPopupManager : MonoBehaviour
     // Internal helpers
     // --------------------------------------------------------------------
 
-    // Removes previously created option buttons under the popup panel
     private void ClearPopupButtons()
     {
         if (popupPanel == null) return;
 
-        // Iterate children and destroy those tagged as "PopupButton"
         var toDestroy = new List<GameObject>();
         foreach (Transform child in popupPanel.transform)
         {
@@ -251,12 +253,10 @@ public class OptionPopupManager : MonoBehaviour
             Destroy(go);
     }
 
-    // Configures the slider block visibility and behavior
     private void SetupSlider(bool useSlider, int sliderMax)
     {
         if (popupSlider == null || sliderLabel == null)
         {
-            // If slider references are missing, just ensure it is hidden
             HideSlider();
             return;
         }
@@ -279,14 +279,13 @@ public class OptionPopupManager : MonoBehaviour
         }
     }
 
-    // Hides the slider UI block
     private void HideSlider()
     {
         if (popupSlider != null) popupSlider.gameObject.SetActive(false);
         if (sliderLabel != null) sliderLabel.gameObject.SetActive(false);
     }
 
-    // Creates an option button under the popup panel and tags it for cleanup
+        // Creates an option button under the popup panel and tags it for cleanup
     private Button CreateOptionButton(string optionName)
     {
         if (buttonPrefab == null || popupPanel == null)
@@ -300,6 +299,9 @@ public class OptionPopupManager : MonoBehaviour
 
         TextMeshProUGUI label = newButton.GetComponentInChildren<TextMeshProUGUI>();
         if (label != null) label.text = optionName;
+
+        // Ensure the button is enabled and visible
+        newButton.gameObject.SetActive(true);
 
         return newButton;
     }

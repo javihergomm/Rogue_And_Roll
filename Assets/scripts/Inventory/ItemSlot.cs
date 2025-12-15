@@ -105,19 +105,17 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
      */
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Left click -> forward to InventoryManager
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             InventoryManager.Instance.OnSlotClicked(this);
         }
-        // Right click -> delete popup (SPANISH)
         else if (eventData.button == PointerEventData.InputButton.Right)
         {
             OnRightClick();
         }
     }
 
-    // Select this slot visually
+    // Select this slot visually AND trigger item usage
     public void SelectSlot()
     {
         InventoryManager.Instance?.DeselectAllSlots();
@@ -133,6 +131,12 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
 
         if (itemDescriptionImage != null)
             itemDescriptionImage.sprite = itemSprite ?? emptySprite;
+
+        // NEW: actually use the item if present
+        if (!string.IsNullOrEmpty(itemName) && quantity > 0)
+        {
+            InventoryManager.Instance.UseItem(itemName);
+        }
     }
 
     // Clear slot completely
@@ -156,7 +160,6 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
         if (selectedShader != null) selectedShader.SetActive(false);
     }
 
-    // Right click -> delete popup (SPANISH)
     private void OnRightClick()
     {
         if (string.IsNullOrEmpty(itemName) || quantity <= 0)

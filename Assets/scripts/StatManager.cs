@@ -2,36 +2,20 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 
-/* 
- * Serializable binding so you can connect each stat type
- * to a TextMeshProUGUI element in the Inspector.
- */
-[System.Serializable]
-public class StatUIBinding
-{
-    public ItemSO.StatType statType;       // Which stat this binding represents
-    public TextMeshProUGUI statText;       // UI text element to update
-}
-
 public class StatManager : MonoBehaviour
 {
     public static StatManager Instance { get; private set; }
 
-    [Header("UI Bindings")]
-    [SerializeField] private List<StatUIBinding> statBindings;
+    [SerializeField] private TextMeshProUGUI statsText;
 
-    [Header("Starting Values")]
     [SerializeField] private int startingGold = 0;
     [SerializeField] private int maxGold = 1000;
+    [SerializeField] private int startingRolls = 1;
 
-    [SerializeField] private int startingRolls = 1; // Rolls always start at minimum 1
+    private Dictionary<StatType, int> currentValues = new Dictionary<StatType, int>();
+    private Dictionary<StatType, int> maxValues = new Dictionary<StatType, int>();
 
-    private Dictionary<ItemSO.StatType, int> currentValues = new Dictionary<ItemSO.StatType, int>();
-    private Dictionary<ItemSO.StatType, int> maxValues = new Dictionary<ItemSO.StatType, int>();
-
-    private Dictionary<ItemSO.StatType, TextMeshProUGUI> statTextLookup = new Dictionary<ItemSO.StatType, TextMeshProUGUI>();
-
-    private ItemSO pendingItem;
+    private ConsumableSO pendingConsumable;
 
     private void Awake()
     {
@@ -42,137 +26,84 @@ public class StatManager : MonoBehaviour
         }
         Instance = this;
 
-        foreach (var binding in statBindings)
-        {
-            if (!statTextLookup.ContainsKey(binding.statType))
-                statTextLookup[binding.statType] = binding.statText;
-        }
+        currentValues[StatType.Gold] = startingGold;
+        maxValues[StatType.Gold] = maxGold;
 
-        currentValues[ItemSO.StatType.gold] = startingGold;
-        maxValues[ItemSO.StatType.gold] = maxGold;
+        currentValues[StatType.Rolls] = Mathf.Max(1, startingRolls);
+        maxValues[StatType.Rolls] = int.MaxValue;
 
-        currentValues[ItemSO.StatType.rolls] = Mathf.Max(1, startingRolls);
-        maxValues[ItemSO.StatType.rolls] = int.MaxValue;
-
-        UpdateAllUI();
+        UpdateUI();
     }
 
-    public void TryUseItem(ItemSO item)
+    public void TryUseItem(ConsumableSO item)
     {
-        pendingItem = item;
-        var stat = item.statToChange;
-
-        if (stat == ItemSO.StatType.rolls)
-        {
-            ApplyChange(stat, item.amountToChangeStat);
-            ConsumePendingItem();
-            return;
-        }
-
-        int current = GetCurrentValue(stat);
-        int max = GetMaxValue(stat);
-
-        if (current + item.amountToChangeStat > max)
-        {
-            if (OptionPopupManager.Instance != null)
-            {
-                OptionPopupManager.Instance.ShowPopup(
-                    $"Usar este objeto superará el máximo de {GetDisplayName(stat)} ({max}). ¿Quieres usarlo?",
-                    new Dictionary<string, System.Action> {
-                        { "Sí", () => {
-                            ApplyChange(stat, item.amountToChangeStat);
-                            ConsumePendingItem();
-                        }},
-                        { "No", () => { pendingItem = null; }}
-                    }
-                );
-            }
-            else
-            {
-                ApplyChange(stat, item.amountToChangeStat);
-                ConsumePendingItem();
-            }
-        }
-        else
-        {
-            ApplyChange(stat, item.amountToChangeStat);
-            ConsumePendingItem();
-        }
+        pendingConsumable = item;
+        ApplyChange(item.statToChange, item.amountToChangeStat);
+        ConsumePendingItem();
     }
 
-    public void ChangeStat(ItemSO.StatType stat, int amount)
+    public void ChangeStat(StatType stat, int amount)
     {
         ApplyChange(stat, amount);
     }
 
-    private void ApplyChange(ItemSO.StatType stat, int amount)
+    private void ApplyChange(StatType stat, int amount)
     {
         if (!currentValues.ContainsKey(stat)) currentValues[stat] = 0;
-
         currentValues[stat] += amount;
 
-        if (stat == ItemSO.StatType.rolls)
-        {
-            if (currentValues[stat] < 1)
-                currentValues[stat] = 1;
-
-            UpdateAllUI();
-            return;
-        }
+        if (stat == StatType.Rolls && currentValues[stat] < 1)
+            currentValues[stat] = 1;
 
         if (!maxValues.ContainsKey(stat)) maxValues[stat] = int.MaxValue;
-
         if (currentValues[stat] > maxValues[stat]) currentValues[stat] = maxValues[stat];
         if (currentValues[stat] < 0) currentValues[stat] = 0;
 
-        UpdateAllUI();
+        UpdateUI();
     }
 
     private void ConsumePendingItem()
     {
-        if (pendingItem != null)
+        if (pendingConsumable != null)
         {
-            InventoryManager.Instance.RemoveItem(pendingItem.itemName, 1);
-            pendingItem = null;
+            InventoryManager.Instance.RemoveItem(pendingConsumable.itemName, 1);
+            pendingConsumable = null;
         }
     }
 
-    private void UpdateAllUI()
+    private void UpdateUI()
     {
-        foreach (var kvp in statTextLookup)
+        if (statsText == null) return;
+
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        foreach (var kvp in currentValues)
         {
-            ItemSO.StatType stat = kvp.Key;
-            TextMeshProUGUI text = kvp.Value;
+            StatType stat = kvp.Key;
+            int current = kvp.Value;
+            int max = GetMaxValue(stat);
 
-            int current = GetCurrentValue(stat);
-
-            if (stat == ItemSO.StatType.rolls)
-            {
-                text.text = $"Tiradas: {current}";
-            }
+            if (stat == StatType.Rolls)
+                sb.AppendLine("Tiradas: " + current);
             else
-            {
-                int max = GetMaxValue(stat);
-                string displayName = GetDisplayName(stat);
-                text.text = $"{displayName}: {current}/{max}";
-            }
+                sb.AppendLine(GetDisplayName(stat) + ": " + current + "/" + max);
         }
+        statsText.text = sb.ToString();
     }
 
-    private string GetDisplayName(ItemSO.StatType stat)
+    private string GetDisplayName(StatType stat)
     {
         switch (stat)
         {
-            case ItemSO.StatType.gold: return "Pesetas";
-            case ItemSO.StatType.rolls: return "Tiradas";
-            case ItemSO.StatType.None: return "None";
+            case StatType.Gold: return "Pesetas";
+            case StatType.Rolls: return "Tiradas";
+            case StatType.None: return "None";
             default: return stat.ToString();
         }
     }
 
-    public int GetCurrentValue(ItemSO.StatType stat) =>
+    public int GetCurrentValue(StatType stat) =>
         currentValues.ContainsKey(stat) ? currentValues[stat] : 0;
 
-    public int GetMaxValue(ItemSO.StatType stat) =>
+    public int GetMaxValue(StatType stat) =>
         maxValues.ContainsKey(stat) ? maxValues[stat] : int.MaxValue;
 }

@@ -6,8 +6,6 @@ using System.Collections.Generic;
  * InventoryManager
  * ----------------
  * Central system for managing the player's inventory.
- * Handles adding/removing items, opening/closing the inventory UI,
- * slot replacement when full, item usage, and selling callbacks.
  */
 public class InventoryManager : MonoBehaviour
 {
@@ -18,16 +16,15 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private ItemSlot[] itemSlots;
 
     [Header("Item Data")]
-    [SerializeField] private ItemSO[] itemSOs;
-
+    [SerializeField] private BaseItemSO[] itemSOs; 
     private bool menuActivated;
 
-    // Lookup dictionary for ItemSO by name
-    private Dictionary<string, ItemSO> itemLookup;
+    // Lookup dictionary for items by name
+    private Dictionary<string, BaseItemSO> itemLookup;
 
     // Replacement mode (when inventory is full)
     private bool waitingForReplace;
-    private ItemSO pendingItem;
+    private BaseItemSO pendingItem;
     private int pendingQuantity;
 
     // Active SellPedestal (if selling mode is active)
@@ -44,7 +41,7 @@ public class InventoryManager : MonoBehaviour
         Instance = this;
 
         // Build lookup dictionary
-        itemLookup = new Dictionary<string, ItemSO>();
+        itemLookup = new Dictionary<string, BaseItemSO>();
         foreach (var item in itemSOs)
         {
             if (!itemLookup.ContainsKey(item.itemName))
@@ -63,7 +60,7 @@ public class InventoryManager : MonoBehaviour
 
     private IEnumerator RefreshSlotsNextFrame()
     {
-        yield return null;
+        yield return null; // wait one frame
 
         if (inventoryMenu != null && inventoryMenu.activeSelf)
         {
@@ -74,13 +71,7 @@ public class InventoryManager : MonoBehaviour
 
     public ItemSlot[] ItemSlots => itemSlots;
 
-    /*
-     * Inventory open/close
-     * --------------------
-     * Now supports a parameter pauseGame:
-     * - pauseGame = true -> freezes gameplay (default).
-     * - pauseGame = false -> keeps gameplay running (used for selling).
-     */
+    // ---------------- Inventory open/close ----------------
     public void ToggleInventory()
     {
         if (menuActivated)
@@ -92,37 +83,28 @@ public class InventoryManager : MonoBehaviour
     public void OpenInventory(bool pauseGame = true)
     {
         menuActivated = true;
-        inventoryMenu?.SetActive(true);
+        if (inventoryMenu != null)
+            inventoryMenu.SetActive(true);
+
         StartCoroutine(RefreshSlotsNextFrame());
 
-        if (pauseGame)
-            Time.timeScale = 0f; // Pause game
-        else
-            Time.timeScale = 1f; // Keep game running
+        Time.timeScale = pauseGame ? 0f : 1f;
     }
 
     public void CloseInventory()
     {
         menuActivated = false;
-        inventoryMenu?.SetActive(false);
-        Time.timeScale = 1f; // Always resume game
+        if (inventoryMenu != null)
+            inventoryMenu.SetActive(false);
 
-        // Cancel replacement mode if active
-        if (waitingForReplace)
-        {
-            waitingForReplace = false;
-            pendingItem = null;
-        }
+        Time.timeScale = 1f;
 
-        // Clear selling mode if active
+        waitingForReplace = false;
+        pendingItem = null;
         activeSellPedestal = null;
     }
 
-    /*
-     * Selling mode control
-     * --------------------
-     * SellPedestal registers itself here so that slot clicks are routed to it.
-     */
+    // ---------------- Selling mode ----------------
     public void SetActiveSellPedestal(SellPedestal pedestal)
     {
         activeSellPedestal = pedestal;
@@ -133,21 +115,21 @@ public class InventoryManager : MonoBehaviour
         activeSellPedestal = null;
     }
 
-    /*
-     * Item usage
-     */
+    // ---------------- Item usage ----------------
     public void UseItem(string itemName)
     {
         if (itemLookup.TryGetValue(itemName, out var item))
-            item.UseItem();
+        {
+            item.UseItem(); // polymorphic call
+        }
         else
+        {
             Debug.LogWarning("Item " + itemName + " not found.");
+        }
     }
 
-    /*
-     * Adding items
-     */
-    public int AddItem(ItemSO item, int quantity)
+    // ---------------- Adding items ----------------
+    public int AddItem(BaseItemSO item, int quantity)
     {
         return AddItem(item.itemName, quantity, item.icon, item.itemDescription);
     }
@@ -167,53 +149,45 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
-        // Inventory full (SPANISH)
+        // Inventory full
         if (OptionPopupManager.Instance != null)
         {
             OptionPopupManager.Instance.ShowInventoryFullPopup(itemName, quantity, itemSprite, itemDescription);
         }
         else
         {
-            PrepareReplace(itemName, quantity, itemSprite, itemDescription);
+            PrepareReplace(itemLookup[itemName], quantity);
             OpenInventory();
         }
 
         return quantity;
     }
 
-    /*
-     * Slot click handler
-     * ------------------
-     * This is the MOST IMPORTANT part for selling.
-     * If selling mode is active, notify SellPedestal.
-     */
+    // ---------------- Slot click handler ----------------
     public void OnSlotClicked(ItemSlot slot)
     {
-        // Replacement mode
         if (waitingForReplace)
         {
             ReplaceInSlot(slot);
             return;
         }
 
-        // Selling mode: notify SellPedestal
         if (activeSellPedestal != null)
         {
             activeSellPedestal.OnItemClicked(slot);
             return;
         }
 
-        // Normal behavior: use item
+        // Ensure SelectSlot calls UseItem
         slot.SelectSlot();
     }
 
-    /*
-     * Replacement mode
-     */
-    public void PrepareReplace(string itemName, int quantity, Sprite sprite, string description)
+
+    // ---------------- Replacement mode ----------------
+    public void PrepareReplace(BaseItemSO item, int quantity)
     {
         waitingForReplace = true;
-        pendingItem = new ItemSO { itemName = itemName, icon = sprite, itemDescription = description };
+        pendingItem = item;
         pendingQuantity = quantity;
     }
 
@@ -242,9 +216,7 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    /*
-     * Removing items
-     */
+    // ---------------- Removing items ----------------
     public void RemoveItem(string itemName, int quantity)
     {
         foreach (var slot in itemSlots)
@@ -265,9 +237,7 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    /*
-     * Utility
-     */
+    // ---------------- Utility ----------------
     public void DeselectAllSlots()
     {
         foreach (var slot in itemSlots)
@@ -277,12 +247,11 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public ItemSO GetItemSO(string itemName)
+    public BaseItemSO GetItemSO(string itemName)
     {
         if (string.IsNullOrEmpty(itemName)) return null;
         if (itemLookup == null) return null;
 
-        ItemSO result;
-        return itemLookup.TryGetValue(itemName, out result) ? result : null;
+        return itemLookup.TryGetValue(itemName, out var result) ? result : null;
     }
 }

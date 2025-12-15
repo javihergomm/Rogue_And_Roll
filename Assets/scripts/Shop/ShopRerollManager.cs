@@ -46,15 +46,15 @@ public class ShopRerollManager : MonoBehaviour
             return;
         }
 
-        int currentGold = StatManager.Instance.GetCurrentValue(ItemSO.StatType.gold);
+        int currentGold = StatManager.Instance.GetCurrentValue(StatType.Gold);
         if (currentGold < globalRerollCost)
         {
-            Debug.Log("Not enough gold to reroll the shop.");
+            Debug.Log("Not enough Pesetas to reroll the shop.");
             return;
         }
 
         // Deduct gold and increment reroll counter
-        StatManager.Instance.ChangeStat(ItemSO.StatType.gold, -globalRerollCost);
+        StatManager.Instance.ChangeStat(StatType.Gold, -globalRerollCost);
         globalRerollsUsedThisVisit++;
 
         // Find all pedestals and refresh them

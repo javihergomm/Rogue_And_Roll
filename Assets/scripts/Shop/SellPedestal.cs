@@ -13,7 +13,7 @@ public class SellPedestal : MonoBehaviour
     private bool sellingMode = false;
 
     // Pending item info to sell after Ouija confirmation
-    private ItemSO pendingItem;
+    private BaseItemSO pendingItem;
     private ItemSlot pendingSlot;
 
     // Static reference so Ouija zones know which pedestal to notify
@@ -47,7 +47,7 @@ public class SellPedestal : MonoBehaviour
         if (!sellingMode) return;
         if (slot == null || slot.quantity <= 0) return;
 
-        ItemSO item = InventoryManager.Instance.GetItemSO(slot.itemName);
+        BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.itemName);
         if (item == null) return;
 
         // Store pending sale data
@@ -65,12 +65,12 @@ public class SellPedestal : MonoBehaviour
         if (OptionPopupManager.Instance != null)
         {
             OptionPopupManager.Instance.ShowMessageOnly(
-                "¿Quieres vender " + item.itemName + " por " + item.sellPrice + " Pesetas?\n" +
+                $"¿Quieres vender {item.itemName} por {item.sellPrice} Pesetas?\n" +
                 "Muévete al SÍ o al NO en el tablero."
             );
         }
 
-        Debug.Log("Pending sale set for: " + item.itemName + ". Inventory closed, awaiting Ouija decision.");
+        Debug.Log($"Pending sale set for: {item.itemName}. Inventory closed, awaiting Ouija decision.");
     }
 
     /*
@@ -89,9 +89,9 @@ public class SellPedestal : MonoBehaviour
             InventoryManager.Instance.RemoveItem(pendingItem.itemName, 1);
 
             // Add gold
-            StatManager.Instance.ChangeStat(ItemSO.StatType.gold, pendingItem.sellPrice);
+            StatManager.Instance.ChangeStat(StatType.Gold, pendingItem.sellPrice);
 
-            Debug.Log("Has vendido: " + pendingItem.itemName + " por " + pendingItem.sellPrice + " Pesetas.");
+            Debug.Log($"Has vendido: {pendingItem.itemName} por {pendingItem.sellPrice} Pesetas.");
         }
         else
         {
