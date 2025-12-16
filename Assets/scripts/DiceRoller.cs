@@ -3,6 +3,14 @@ using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
 
+/*
+ * DiceRoller
+ * ----------
+ * Handles rolling physics and face detection for a dice prefab.
+ * - Dice spawns passively (no force applied on Awake/Start).
+ * - Roll effect only happens when explicitly triggered.
+ * - Roll launches dice upward, then gravity brings it back down.
+ */
 public class DiceRoller : MonoBehaviour
 {
     private Rigidbody rb;
@@ -21,8 +29,18 @@ public class DiceRoller : MonoBehaviour
         InitFaceMap();
     }
 
+    void OnEnable()
+    {
+        // Ensure dice starts idle when spawned
+        if (rb == null) rb = GetComponent<Rigidbody>();
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.Sleep(); // puts Rigidbody into rest state until force is applied
+    }
+
     void Update()
     {
+        // Allow manual roll by clicking the dice with the mouse
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
@@ -37,12 +55,22 @@ public class DiceRoller : MonoBehaviour
         }
     }
 
-    private void RollDice()
+    /*
+     * RollDice
+     * --------
+     * Applies upward force and random torque.
+     * Dice flies up, then falls back down due to gravity.
+     */
+    public void RollDice()
     {
+        // Reset physics state before applying force
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
+        // Launch straight upward
         rb.AddForce(Vector3.up * 10f, ForceMode.Impulse);
+
+        // Add random spin
         rb.AddTorque(Random.insideUnitSphere * 50f, ForceMode.Impulse);
     }
 
@@ -53,7 +81,7 @@ public class DiceRoller : MonoBehaviour
             yield return null;
         }
 
-        int faceUp = GetFaceUp(true); // pass true to enable detailed debug
+        int faceUp = GetFaceUp(true);
         Debug.Log("[" + diceType + "] Final face up: " + faceUp);
     }
 
@@ -149,13 +177,11 @@ public class DiceRoller : MonoBehaviour
         }
     }
 
-    // Expose faceMap for editor helper
     public Dictionary<Vector3, int> FaceMap => faceMap;
 
-    // Editor-only helper to test face up without rolling
     public int EditorTestFaceUp()
     {
-        return GetFaceUp(true); // always verbose in editor
+        return GetFaceUp(true);
     }
 }
 

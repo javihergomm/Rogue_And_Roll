@@ -3,20 +3,27 @@ using UnityEngine;
 /*
  * DiceSO
  * ------
- * Specialized ScriptableObject for dice items.
- * Defines dice faces and roll behavior.
+ * ScriptableObject especializado para dados.
+ * Define el tipo de dado, número de caras y comportamiento de tirada.
  */
 [CreateAssetMenu(fileName = "NewDice", menuName = "Inventory/Dice")]
 public class DiceSO : BaseItemSO
 {
     [Header("Dice Settings")]
-    public int diceFaces = 6;
+    public DiceType diceType;   // Enum que ya tienes definido en DiceRoller
+    public int diceFaces = 6;   // Número de caras (por claridad, aunque coincide con diceType)
 
     public override void UseItem()
     {
         int result = Random.Range(1, diceFaces + 1);
-        Debug.Log("Dice " + itemName + " rolled: " + result);
+        Debug.Log("Dice " + itemName + " (" + diceType + ") rolled: " + result);
 
-        // Later: integrate with DiceSelector to ensure only the active dice is rolled
+        // Aquí puedes integrar con DiceRollManager o UI para mostrar el resultado
+    }
+
+    // Método auxiliar para tiradas desde DiceRollManager
+    public int Roll()
+    {
+        return Random.Range(1, diceFaces + 1);
     }
 }

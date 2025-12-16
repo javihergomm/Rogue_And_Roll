@@ -1,21 +1,19 @@
-using UnityEngine;
+using System.Linq;
 using TMPro;
-using UnityEngine.UI;
+using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /*
  * ItemSlot
  * --------
- * Represents a single inventory slot.
- * It stores item data and updates its UI.
- * IMPORTANT:
- * - This class does NOT decide whether to use, sell, or replace items.
- * - All click logic is forwarded to InventoryManager.
- * - InventoryManager decides what to do depending on the current mode.
+ * Representa un slot de inventario.
+ * - Almacena datos del ítem y actualiza su UI.
+ * - NO decide si usar, vender o reemplazar: delega en InventoryManager.
  */
 public class ItemSlot : MonoBehaviour, IPointerClickHandler
 {
-    //====== ITEM DATA ======//
+    // DATOS DEL ITEM
     public string itemName;
     public int quantity;
     public Sprite itemSprite;
@@ -25,16 +23,17 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
 
     [SerializeField] private int maxNumberOfItems = 10;
 
-    //====== UI REFERENCES ======//
+    // REFERENCIAS UI
     [SerializeField] private TMP_Text quantityText;
     [SerializeField] private Image itemImage;
 
-    //====== ITEM DESCRIPTION UI ======//
+    // UI de descripción
     public Image itemDescriptionImage;
     public TMP_Text itemDescriptionNameText;
     public TMP_Text itemDescriptionText;
 
-    //====== SELECTION ======//
+    // SELECCIÓN
+    [Header("Selection Highlight")]
     public GameObject selectedShader;
     public bool thisItemSelected;
 
@@ -46,18 +45,26 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
             quantityText.enabled = false;
         }
 
-        selectedShader?.SetActive(false);
+        if (selectedShader != null)
+            selectedShader.SetActive(false);
+
+        if (itemImage != null)
+            itemImage.sprite = emptySprite;
     }
 
-    // Add items to this slot
+    // Añadir ítems al slot
     public int AddItem(string itemName, int quantity, Sprite itemSprite, string itemDescription)
     {
+        Debug.Log($"[AddItem] Sprite recibido: {(itemSprite != null ? itemSprite.name : "null")}");
+
         if (isFull) return quantity;
 
         this.itemName = itemName;
         this.itemSprite = itemSprite;
         this.itemDescription = itemDescription;
+
         itemImage.sprite = itemSprite;
+        Debug.Log($"[AddItem] itemImage.sprite asignado: {(itemImage.sprite != null ? itemImage.sprite.name : "null")}");
 
         this.quantity += quantity;
 
@@ -74,13 +81,14 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
         return 0;
     }
 
-    // Refresh UI
+
+    // Refrescar UI
     public void RefreshUI()
     {
+        Debug.Log($"[RefreshUI] Slot: {name} | Qty: {quantity} | itemSprite: {(itemSprite != null ? itemSprite.name : "null")} | itemImage BEFORE: {(itemImage.sprite != null ? itemImage.sprite.name : "null")}");
+
         if (quantityText != null)
         {
-            quantityText.ForceMeshUpdate();
-
             if (quantity > 0)
             {
                 quantityText.text = quantity.ToString();
@@ -92,16 +100,18 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
                 quantityText.enabled = false;
             }
         }
+
+        if (itemImage != null)
+            itemImage.sprite = quantity > 0 ? itemSprite : emptySprite;
+
+        Debug.Log($"[RefreshUI] Slot: {name} | itemImage AFTER: {(itemImage.sprite != null ? itemImage.sprite.name : "null")}");
     }
+
 
     /*
      * OnPointerClick
      * --------------
-     * Forwards all clicks to InventoryManager.
-     * InventoryManager decides:
-     * - Use item (normal mode)
-     * - Replace item (inventory full mode)
-     * - Sell item (sell pedestal mode)
+     * Reenvía los clicks a InventoryManager.
      */
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -115,14 +125,17 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // Select this slot visually AND trigger item usage
+    // Seleccionar visualmente este slot
     public void SelectSlot()
     {
         InventoryManager.Instance?.DeselectAllSlots();
 
-        selectedShader?.SetActive(true);
+        if (selectedShader != null)
+            selectedShader.SetActive(true);
+
         thisItemSelected = true;
 
+        // Actualiza panel de descripción
         if (itemDescriptionNameText != null)
             itemDescriptionNameText.text = itemName;
 
@@ -132,14 +145,21 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
         if (itemDescriptionImage != null)
             itemDescriptionImage.sprite = itemSprite ?? emptySprite;
 
-        // NEW: actually use the item if present
-        if (!string.IsNullOrEmpty(itemName) && quantity > 0)
-        {
-            InventoryManager.Instance.UseItem(itemName);
-        }
+        Debug.Log("[ItemSlot] Slot seleccionado: " + itemName);
     }
 
-    // Clear slot completely
+    // Deseleccionar visualmente este slot
+    public void DeselectSlot()
+    {
+        if (selectedShader != null)
+            selectedShader.SetActive(false);
+
+        thisItemSelected = false;
+
+        Debug.Log("[ItemSlot] Slot deseleccionado: " + itemName);
+    }
+
+    // Limpiar slot completamente
     public void ClearSlot()
     {
         quantity = 0;
@@ -150,24 +170,32 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
         itemSprite = null;
         itemDescription = string.Empty;
 
-        if (quantityText != null) quantityText.enabled = false;
-        if (itemImage != null) itemImage.sprite = emptySprite;
+        if (quantityText != null)
+        {
+            quantityText.text = string.Empty;
+            quantityText.enabled = false;
+        }
+
+        if (itemImage != null)
+            itemImage.sprite = emptySprite;
 
         if (itemDescriptionNameText != null) itemDescriptionNameText.text = "";
         if (itemDescriptionText != null) itemDescriptionText.text = "";
         if (itemDescriptionImage != null) itemDescriptionImage.sprite = emptySprite;
 
         if (selectedShader != null) selectedShader.SetActive(false);
+
+        Debug.Log("[ItemSlot] Slot limpiado.");
     }
 
     private void OnRightClick()
     {
         if (string.IsNullOrEmpty(itemName) || quantity <= 0)
         {
-            Debug.Log("Has hecho clic derecho en un hueco vacio.");
+            Debug.Log("[ItemSlot] Click derecho en slot vacío.");
             return;
         }
 
-        OptionPopupManager.Instance.ShowRemoveItemPopup(itemName, InventoryManager.Instance.ItemSlots);
+        OptionPopupManager.Instance.ShowRemoveItemPopup(itemName, InventoryManager.Instance.ItemSlots.ToArray());
     }
 }

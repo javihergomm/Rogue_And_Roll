@@ -14,11 +14,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 598d103613c93c44dbc7b739384d3425, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.37
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 598d103613c93c44dbc7b739384d3425, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.36
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 598d103613c93c44dbc7b739384d3425, type: 3}
       propertyPath: m_LocalRotation.w
@@ -140,3 +140,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a20bddb740654446bc0d7ff8769ea01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DiceRoller
+  diceType: 1
