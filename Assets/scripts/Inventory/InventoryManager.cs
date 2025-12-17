@@ -1,6 +1,7 @@
-using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro; // for the optional active dice label
+using UnityEngine;
 
 /*
  * InventoryManager
@@ -80,8 +81,40 @@ public class InventoryManager : MonoBehaviour
 
         // Initialize active dice label
         if (activeDiceText != null)
-            activeDiceText.text = "Ningún dado activo";
+            activeDiceText.text = "Ningun dado activo";
     }
+
+    private void Start()
+    {
+        // Initialize inventory with a D6 once everything is ready
+        DiceSO d6Item = itemSOs.OfType<DiceSO>().FirstOrDefault(d => d.itemName == "D6");
+        if (d6Item == null) return;
+
+        AddItem(d6Item, 1);
+
+        // Find the slot where the D6 was placed
+        ItemSlot d6Slot = diceSlots.FirstOrDefault(s => s.itemName == d6Item.itemName && s.quantity > 0);
+        if (d6Slot == null) return;
+
+        // Mark as active dice
+        activeDiceSlot = d6Slot;
+
+        // Update UI state
+        UpdateActiveDiceUI();
+
+        // Spawn the dice immediately
+        if (DiceRollManager.Instance != null)
+        {
+            DiceRollManager.Instance.SpawnDice(d6Item, 0, d6Slot);
+        }
+
+        Debug.Log("[InventoryManager] Inventory initialized with a D6 active and spawned.");
+    }
+
+
+
+
+
     // -------------------------------------------------------------------------
     // Item lookup
     // -------------------------------------------------------------------------

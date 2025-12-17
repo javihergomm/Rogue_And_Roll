@@ -1402,6 +1402,73 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &409411470
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 409411473}
+  - component: {fileID: 409411472}
+  - component: {fileID: 409411471}
+  m_Layer: 0
+  m_Name: Goodbye
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &409411471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 409411470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 769d631b1590d8b4d9de5fc63058f8e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OuijaAnswerZone
+  answerType: 2
+--- !u!65 &409411472
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 409411470}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &409411473
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 409411470}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.225, z: 1.45}
+  m_LocalScale: {x: 1.7493, y: 0.3, z: 0.3}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -2848,6 +2915,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 4.6543016, y: 0.45453632, z: 4.6543016}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &842110734 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c6cb3a931eda0eb4aa96215092fc79bb, type: 3}
+  m_PrefabInstance: {fileID: 842110725}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &862718584
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4871,6 +4943,7 @@ GameObject:
   - component: {fileID: 1548563260}
   - component: {fileID: 1548563261}
   - component: {fileID: 1548563262}
+  - component: {fileID: 1548563263}
   m_Layer: 0
   m_Name: GameManagers
   m_TagString: Untagged
@@ -4963,6 +5036,7 @@ MonoBehaviour:
   startingGold: 25
   maxGold: 50
   startingRolls: 1
+  maxShopRerolls: 2
 --- !u!114 &1548563261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4999,7 +5073,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopRerollManager
   rerollKey: 32
   globalRerollCost: 2
-  maxGlobalRerollsPerVisit: 20
+  inShop: 1
+--- !u!114 &1548563263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548563255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14fc06db4af400b49b7da69ffdefaa99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopExitManager
+  shopPedestals:
+  - {fileID: 1317587674}
+  - {fileID: 898091452}
+  - {fileID: 400455920}
+  decisionEmpties:
+  - {fileID: 1915413510}
+  - {fileID: 1225340512}
+  - {fileID: 409411470}
+  boardTransform: {fileID: 842110734}
+  exitRotationZ: 0
+  shopRotationZ: 180
+  inShop: 1
 --- !u!114 &1549685808 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
@@ -6267,4 +6365,5 @@ SceneRoots:
   - {fileID: 842110725}
   - {fileID: 1915413515}
   - {fileID: 1225340514}
+  - {fileID: 409411473}
   - {fileID: 371584076}

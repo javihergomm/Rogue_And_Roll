@@ -1,8 +1,18 @@
 using UnityEngine;
 
+/*
+ * OuijaAnswerZone
+ * ---------------
+ * Detects when the player enters a specific zone on the ouija board.
+ * Zones can represent Yes, No, or Goodbye.
+ * Responsibilities:
+ * - Handle buy/sell pedestal decisions (Yes/No)
+ * - Trigger shop exit confirmation popup when Goodbye zone is entered
+ */
 public class OuijaAnswerZone : MonoBehaviour
 {
-    public enum AnswerType { Yes, No }
+    public enum AnswerType { Yes, No, Goodbye }
+
     [SerializeField] private AnswerType answerType;
 
     private void OnTriggerEnter(Collider other)
@@ -25,6 +35,19 @@ public class OuijaAnswerZone : MonoBehaviour
         {
             Debug.Log("Calling HandleOuijaAnswer (SELL): " + answerType);
             sellPedestal.HandleOuijaAnswer(answerType);
+            return;
+        }
+
+        // Handle Goodbye zone
+        if (answerType == AnswerType.Goodbye)
+        {
+            Debug.Log("Player triggered Goodbye zone, showing confirmation popup...");
+            var exitManager = Object.FindFirstObjectByType<ShopExitManager>();
+            if (exitManager != null)
+            {
+                // Show confirmation popup instead of exiting immediately
+                exitManager.TriggerGoodbye();
+            }
             return;
         }
 

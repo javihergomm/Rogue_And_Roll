@@ -5,10 +5,8 @@ using UnityEngine.InputSystem; // Required for the new Input System
  * ShopRerollManager
  * -----------------
  * Handles global reroll input for the shop.
+ * Uses StatManager.ShopRerolls to track available rerolls.
  * Allows the player to reroll all pedestals at once using a customizable hotkey.
- * Default hotkey is 'R', but can be changed in the inspector.
- * 
- * Uses the new Input System (Keyboard.current).
  */
 public class ShopRerollManager : MonoBehaviour
 {
@@ -20,13 +18,15 @@ public class ShopRerollManager : MonoBehaviour
     [Tooltip("Gold cost for rerolling all pedestals at once.")]
     [SerializeField] private int globalRerollCost = 20;
 
-    [Tooltip("Maximum rerolls allowed per shop visit.")]
-    [SerializeField] private int maxGlobalRerollsPerVisit = 2;
-
-    private int globalRerollsUsedThisVisit = 0;
+    [Header("Shop State")]
+    [Tooltip("Flag to indicate if the player is currently inside the shop.")]
+    [SerializeField] private bool inShop = true; // starts as true, editable in inspector
 
     private void Update()
     {
+        // Only allow reroll if inside the shop
+        if (!inShop) return;
+
         // Check if the configured key was pressed this frame
         if (Keyboard.current[rerollKey].wasPressedThisFrame)
         {
@@ -36,28 +36,31 @@ public class ShopRerollManager : MonoBehaviour
 
     /*
      * Attempts to reroll all pedestals in the shop.
-     * Checks gold cost and reroll limits before executing.
+     * Checks gold cost and available shop rerolls before executing.
      */
     private void TryRerollAllPedestals()
     {
-        if (globalRerollsUsedThisVisit >= maxGlobalRerollsPerVisit)
+        // Check if there are shop rerolls available
+        int shopRerolls = StatManager.Instance.GetCurrentValue(StatType.ShopRerolls);
+        if (shopRerolls <= 0)
         {
-            Debug.Log("Global reroll limit reached for this visit.");
+            Debug.Log("No shop rerolls remaining.");
             return;
         }
 
+        // Check if the player has enough gold
         int currentGold = StatManager.Instance.GetCurrentValue(StatType.Gold);
         if (currentGold < globalRerollCost)
         {
-            Debug.Log("Not enough Pesetas to reroll the shop.");
+            Debug.Log("Not enough gold to reroll the shop.");
             return;
         }
 
-        // Deduct gold and increment reroll counter
+        // Deduct gold and consume one shop reroll
         StatManager.Instance.ChangeStat(StatType.Gold, -globalRerollCost);
-        globalRerollsUsedThisVisit++;
+        StatManager.Instance.UseShopReroll();
 
-        // Find all pedestals and refresh them
+        // Find all shop pedestals and refresh them
         var pedestals = Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsSortMode.None);
         foreach (var pedestal in pedestals)
         {
@@ -65,16 +68,7 @@ public class ShopRerollManager : MonoBehaviour
             pedestal.GenerateIfNeeded();
         }
 
-        Debug.Log("Shop rerolled. Global rerolls remaining: " +
-                  (maxGlobalRerollsPerVisit - globalRerollsUsedThisVisit));
-    }
-
-    /*
-     * Resets the reroll counter for the next shop visit.
-     * Should be called when the player leaves or enters a new shop.
-     */
-    public void ResetForNextVisit()
-    {
-        globalRerollsUsedThisVisit = 0;
+        Debug.Log("Shop rerolled. Shop rerolls remaining: " +
+                  StatManager.Instance.GetCurrentValue(StatType.ShopRerolls));
     }
 }

@@ -305,4 +305,24 @@ public class OptionPopupManager : MonoBehaviour
 
         return newButton;
     }
+
+     /*
+     * ShowExitShopPopup
+     * -----------------
+     * Displays a confirmation popup when the player tries to leave the shop.
+     * Options:
+     *   - "Si" -> confirm exit
+     *   - "No" -> cancel exit
+     */
+    public void ShowExitShopPopup(System.Action onConfirm, System.Action onCancel)
+    {
+        var options = new Dictionary<string, System.Action>
+    {
+        { "Si", () => onConfirm?.Invoke() },
+        { "No", () => onCancel?.Invoke() }
+    };
+
+        ShowPopup("Seguro que quieres salir de la tienda?", options);
+    }
+
 }

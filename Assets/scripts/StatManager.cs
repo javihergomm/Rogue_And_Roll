@@ -2,15 +2,32 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 
+/*
+ * StatManager
+ * -----------
+ * Centralized manager for player stats such as Gold, Rolls, and ShopRerolls.
+ * Responsibilities:
+ * - Initialize stats with starting and maximum values
+ * - Apply changes to stats while enforcing min/max limits
+ * - Update UI text to reflect current values
+ * - Provide helper methods to query and consume stats
+ * - Consult ShopExitManager to know if the player is inside the shop
+ */
 public class StatManager : MonoBehaviour
 {
     public static StatManager Instance { get; private set; }
 
     [SerializeField] private TextMeshProUGUI statsText;
 
+    [Header("Gold Settings")]
     [SerializeField] private int startingGold = 0;
     [SerializeField] private int maxGold = 1000;
+
+    [Header("Roll Settings")]
     [SerializeField] private int startingRolls = 1;
+
+    [Header("Shop Reroll Settings")]
+    [SerializeField] private int maxShopRerolls = 2;
 
     private Dictionary<StatType, int> currentValues = new Dictionary<StatType, int>();
     private Dictionary<StatType, int> maxValues = new Dictionary<StatType, int>();
@@ -31,6 +48,9 @@ public class StatManager : MonoBehaviour
 
         currentValues[StatType.Rolls] = Mathf.Max(1, startingRolls);
         maxValues[StatType.Rolls] = int.MaxValue;
+
+        currentValues[StatType.ShopRerolls] = maxShopRerolls;
+        maxValues[StatType.ShopRerolls] = maxShopRerolls;
 
         UpdateUI();
     }
@@ -83,9 +103,19 @@ public class StatManager : MonoBehaviour
             int max = GetMaxValue(stat);
 
             if (stat == StatType.Rolls)
-                sb.AppendLine("Tiradas: " + current);
+            {
+                sb.AppendLine("Rolls: " + current);
+            }
+            else if (stat == StatType.ShopRerolls)
+            {
+                // Only show rerolls if player is inside the shop
+                if (IsPlayerInShop())
+                    sb.AppendLine("Shop rerolls: " + current + "/" + max);
+            }
             else
+            {
                 sb.AppendLine(GetDisplayName(stat) + ": " + current + "/" + max);
+            }
         }
         statsText.text = sb.ToString();
     }
@@ -94,8 +124,9 @@ public class StatManager : MonoBehaviour
     {
         switch (stat)
         {
-            case StatType.Gold: return "Pesetas";
-            case StatType.Rolls: return "Tiradas";
+            case StatType.Gold: return "Gold";
+            case StatType.Rolls: return "Rolls";
+            case StatType.ShopRerolls: return "Shop rerolls";
             case StatType.None: return "None";
             default: return stat.ToString();
         }
@@ -106,4 +137,16 @@ public class StatManager : MonoBehaviour
 
     public int GetMaxValue(StatType stat) =>
         maxValues.ContainsKey(stat) ? maxValues[stat] : int.MaxValue;
+
+    public void UseShopReroll()
+    {
+        ChangeStat(StatType.ShopRerolls, -1);
+    }
+
+    // Consult ShopExitManager to know if the player is inside the shop
+    public bool IsPlayerInShop()
+    {
+        var exitManager = Object.FindFirstObjectByType<ShopExitManager>();
+        return exitManager != null && exitManager.IsInShop();
+    }
 }

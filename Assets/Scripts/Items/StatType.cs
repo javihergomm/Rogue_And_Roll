@@ -3,5 +3,7 @@ public enum StatType
 {
     None,
     Gold,
-    Rolls
+    Rolls,
+    ShopRerolls
 }
+
