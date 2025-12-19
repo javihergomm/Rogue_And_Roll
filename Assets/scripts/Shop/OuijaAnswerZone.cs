@@ -17,8 +17,13 @@ public class OuijaAnswerZone : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Trigger entered: " + other.name);
-        if (!other.CompareTag("Player")) return;
+        Debug.Log("OnTriggerEnter called with object: " + other.name + " tag: " + other.tag);
+
+        if (!other.CompareTag("Player"))
+        {
+            Debug.Log("Ignored because tag is not Player");
+            return;
+        }
 
         // Check buy pedestal first
         var buyPedestal = ShopPedestalRandomizer.currentPedestal;
@@ -45,8 +50,12 @@ public class OuijaAnswerZone : MonoBehaviour
             var exitManager = Object.FindFirstObjectByType<ShopExitManager>();
             if (exitManager != null)
             {
-                // Show confirmation popup instead of exiting immediately
+                Debug.Log("Found ShopExitManager, calling TriggerGoodbye()");
                 exitManager.TriggerGoodbye();
+            }
+            else
+            {
+                Debug.LogWarning("No ShopExitManager found in scene!");
             }
             return;
         }

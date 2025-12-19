@@ -15,21 +15,17 @@ using System.Collections.Generic;
  */
 public class OptionPopupManager : MonoBehaviour
 {
-    // Singleton instance so other scripts can call OptionPopupManager.Instance
     public static OptionPopupManager Instance { get; private set; }
 
-    // Core popup references (assign in Inspector)
-    [SerializeField] private GameObject popupPanel;       // Root UI panel for the popup
-    [SerializeField] private TextMeshProUGUI popupText;   // Text component for the message
-    [SerializeField] private Button buttonPrefab;         // Prefab used to create option buttons
+    [SerializeField] private GameObject popupPanel;
+    [SerializeField] private TextMeshProUGUI popupText;
+    [SerializeField] private Button buttonPrefab;
 
-    // Optional slider references for numeric inputs
-    [SerializeField] private Slider popupSlider;          // Slider used when asking for a quantity
-    [SerializeField] private TextMeshProUGUI sliderLabel; // Label to display current slider value
+    [SerializeField] private Slider popupSlider;
+    [SerializeField] private TextMeshProUGUI sliderLabel;
 
     private void Awake()
     {
-        // Ensure a single instance exists
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -37,18 +33,11 @@ public class OptionPopupManager : MonoBehaviour
         }
         Instance = this;
 
-        // Initialize hidden state
         if (popupPanel != null) popupPanel.SetActive(false);
         if (popupSlider != null) popupSlider.gameObject.SetActive(false);
         if (sliderLabel != null) sliderLabel.gameObject.SetActive(false);
     }
 
-    /*
-     * ShowPopup
-     * Displays a message and creates one button per entry in 'options'.
-     * Optionally shows a slider if 'useSlider' is true.
-     * onConfirmWithNumber is invoked with the slider value when a "Confirm" option is clicked.
-     */
     public void ShowPopup(
         string message,
         Dictionary<string, System.Action> options,
@@ -67,17 +56,12 @@ public class OptionPopupManager : MonoBehaviour
             return;
         }
 
-        // Activate panel and set message
         popupPanel.SetActive(true);
         popupText.text = message;
 
-        // Remove any previously created buttons
         ClearPopupButtons();
-
-        // Configure slider visibility and behavior
         SetupSlider(useSlider, sliderMax);
 
-        // Create a button for each option
         foreach (var kvp in options)
         {
             string optionName = kvp.Key;
@@ -88,28 +72,25 @@ public class OptionPopupManager : MonoBehaviour
             newButton.onClick.RemoveAllListeners();
             newButton.onClick.AddListener(() =>
             {
-                // Hide panel on click
+                Debug.Log("Popup button clicked: " + optionName);
+
                 popupPanel.SetActive(false);
 
-                // If using slider and this is a confirm action, pass the chosen value
                 if (useSlider && onConfirmWithNumber != null && optionName.ToLower().Contains("confirm"))
                 {
                     int value = popupSlider != null ? Mathf.RoundToInt(popupSlider.value) : 1;
+                    Debug.Log("Popup confirm with slider value: " + value);
                     onConfirmWithNumber(value);
                 }
                 else
                 {
+                    Debug.Log("Invoking action for option: " + optionName);
                     optionAction?.Invoke();
                 }
             });
         }
     }
 
-    /*
-     * ShowMessageOnly
-     * Displays only a message without creating any buttons.
-     * Useful for informational prompts when another system will handle input (e.g., Ouija zones).
-     */
     public void ShowMessageOnly(string message)
     {
         if (popupPanel == null || popupText == null)
@@ -121,15 +102,10 @@ public class OptionPopupManager : MonoBehaviour
         popupPanel.SetActive(true);
         popupText.text = message;
 
-        // Ensure there are no buttons or slider visible
         ClearPopupButtons();
         HideSlider();
     }
 
-    /*
-     * HidePopup
-     * Hides the panel and clears transient UI elements.
-     */
     public void HidePopup()
     {
         if (popupPanel != null)
@@ -139,14 +115,6 @@ public class OptionPopupManager : MonoBehaviour
         HideSlider();
     }
 
-    // --------------------------------------------------------------------
-    // Convenience wrappers for common flows used elsewhere in your project
-    // --------------------------------------------------------------------
-
-    /*
-     * ShowInventoryFullPopup
-     * Prompts the player to replace an item when inventory is full.
-     */
     public void ShowInventoryFullPopup(string itemName, int quantity, Sprite itemSprite, string itemDescription)
     {
         var options = new Dictionary<string, System.Action>
@@ -167,26 +135,21 @@ public class OptionPopupManager : MonoBehaviour
         ShowPopup("Inventory full. Do you want to replace an item?", options);
     }
 
-    /*
-     * ShowConfirmReplacePopup
-     * Asks for confirmation before replacing an item in a slot.
-     */
     public void ShowConfirmReplacePopup(ItemSlot slot, System.Action onConfirm)
     {
         string message = $"Are you sure you want to replace the item '{slot.itemName}' in this slot?";
         var options = new Dictionary<string, System.Action>
         {
-            { "Confirm", () => onConfirm?.Invoke() },
+            { "Confirm", () => {
+                Debug.Log("ConfirmReplacePopup: Confirm pressed");
+                onConfirm?.Invoke();
+            }},
             { "Cancel", () => Debug.Log("Replace cancelled.") }
         };
 
         ShowPopup(message, options);
     }
 
-    /*
-     * ShowRemoveItemPopup
-     * Stage 1: Asks how to remove an item (one, all, custom amount).
-     */
     public void ShowRemoveItemPopup(string itemName, ItemSlot[] itemSlots)
     {
         var options = new Dictionary<string, System.Action>
@@ -214,15 +177,11 @@ public class OptionPopupManager : MonoBehaviour
         ShowPopup($"How do you want to remove {itemName}?", options);
     }
 
-    /*
-     * ShowNumberSliderPopup
-     * Stage 2: Shows a slider to choose a quantity and a confirm/cancel pair.
-     */
     private void ShowNumberSliderPopup(string itemName, int maxQuantity)
     {
         var options = new Dictionary<string, System.Action>
         {
-            { "Confirm", () => {} }, // Action handled via onConfirmWithNumber
+            { "Confirm", () => {} },
             { "Cancel", () => Debug.Log("Custom remove cancelled.") }
         };
 
@@ -231,13 +190,12 @@ public class OptionPopupManager : MonoBehaviour
             options,
             useSlider: true,
             sliderMax: maxQuantity,
-            onConfirmWithNumber: (amount) => InventoryManager.Instance.RemoveItem(itemName, amount)
+            onConfirmWithNumber: (amount) => {
+                Debug.Log("NumberSliderPopup: Confirm pressed with amount " + amount);
+                InventoryManager.Instance.RemoveItem(itemName, amount);
+            }
         );
     }
-
-    // --------------------------------------------------------------------
-    // Internal helpers
-    // --------------------------------------------------------------------
 
     private void ClearPopupButtons()
     {
@@ -285,7 +243,6 @@ public class OptionPopupManager : MonoBehaviour
         if (sliderLabel != null) sliderLabel.gameObject.SetActive(false);
     }
 
-        // Creates an option button under the popup panel and tags it for cleanup
     private Button CreateOptionButton(string optionName)
     {
         if (buttonPrefab == null || popupPanel == null)
@@ -300,29 +257,27 @@ public class OptionPopupManager : MonoBehaviour
         TextMeshProUGUI label = newButton.GetComponentInChildren<TextMeshProUGUI>();
         if (label != null) label.text = optionName;
 
-        // Ensure the button is enabled and visible
         newButton.gameObject.SetActive(true);
+
+        Debug.Log("Created popup button: " + optionName);
 
         return newButton;
     }
 
-     /*
-     * ShowExitShopPopup
-     * -----------------
-     * Displays a confirmation popup when the player tries to leave the shop.
-     * Options:
-     *   - "Si" -> confirm exit
-     *   - "No" -> cancel exit
-     */
     public void ShowExitShopPopup(System.Action onConfirm, System.Action onCancel)
     {
         var options = new Dictionary<string, System.Action>
-    {
-        { "Si", () => onConfirm?.Invoke() },
-        { "No", () => onCancel?.Invoke() }
-    };
+        {
+            { "Si", () => {
+                Debug.Log("ExitShopPopup: Confirm pressed");
+                onConfirm?.Invoke();
+            }},
+            { "No", () => {
+                Debug.Log("ExitShopPopup: Cancel pressed");
+                onCancel?.Invoke();
+            }}
+        };
 
         ShowPopup("Seguro que quieres salir de la tienda?", options);
     }
-
 }

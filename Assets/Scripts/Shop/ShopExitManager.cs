@@ -1,40 +1,27 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/*
- * ShopExitManager
- * ---------------
- * Handles entering and leaving the shop.
- * Responsibilities:
- * - Track shop state with the inShop flag
- * - Enable/disable multiple pedestals and empties (Yes/No/Goodbye)
- * - Reset or clear shop rerolls in StatManager
- * - Rotate the board to indicate shop/game state
- * - Show a confirmation popup when Goodbye is triggered (Spanish UI)
- */
 public class ShopExitManager : MonoBehaviour
 {
     [Header("References (assign in Inspector)")]
-    [Tooltip("List of all pedestal GameObjects (buy/sell pedestals).")]
     [SerializeField] private List<GameObject> shopPedestals = new List<GameObject>();
-
-    [Tooltip("List of empties for Yes/No/Goodbye zones.")]
     [SerializeField] private List<GameObject> decisionEmpties = new List<GameObject>();
-
-    [Tooltip("Transform of the board that rotates when entering/leaving the shop.")]
     [SerializeField] private Transform boardTransform;
 
-    [Header("Rotation Settings")]
-    [Tooltip("Rotation angle (Z axis) when leaving the shop.")]
-    [SerializeField] private float exitRotationZ = 0f;
+    [Tooltip("Reference to the cup (selector).")]
+    [SerializeField] private GameObject cupObject;
 
-    [Tooltip("Rotation angle (Z axis) when entering the shop.")]
+    [Header("Selection Areas")]
+    [Tooltip("List of all selection areas (Azul, Rojo, Amarillo, Verde).")]
+    [SerializeField] private List<GameObject> selectionAreas = new List<GameObject>();
+
+    [Header("Rotation Settings")]
+    [SerializeField] private float exitRotationZ = 0f;
     [SerializeField] private float shopRotationZ = 180f;
 
     [Header("Shop State")]
     [SerializeField] private bool inShop = true;
 
-    // Called when entering the shop
     public void EnterShop()
     {
         if (inShop) return;
@@ -42,22 +29,24 @@ public class ShopExitManager : MonoBehaviour
 
         Debug.Log("[ShopExitManager] Entering shop...");
 
-        // Activate all pedestals
         foreach (var pedestal in shopPedestals)
+        {
             if (pedestal != null) pedestal.SetActive(true);
+        }
 
-        // Activate empties (Yes/No/Goodbye zones)
         foreach (var empty in decisionEmpties)
+        {
             if (empty != null) empty.SetActive(true);
+        }
 
-        // Reset rerolls
+        if (cupObject != null) cupObject.SetActive(false); // hide cup in shop
+
         if (StatManager.Instance != null)
         {
             int maxRerolls = StatManager.Instance.GetMaxValue(StatType.ShopRerolls);
             StatManager.Instance.ChangeStat(StatType.ShopRerolls, maxRerolls);
         }
 
-        // Rotate board
         if (boardTransform != null)
         {
             Vector3 euler = boardTransform.eulerAngles;
@@ -66,7 +55,6 @@ public class ShopExitManager : MonoBehaviour
         }
     }
 
-    // Called when Goodbye zone is triggered -> show confirmation popup
     public void TriggerGoodbye()
     {
         if (!inShop) return;
@@ -79,28 +67,60 @@ public class ShopExitManager : MonoBehaviour
         );
     }
 
-    // Called when player confirms exit
     public void ConfirmExit()
     {
-        if (!inShop) return;
+        if (!inShop)
+        {
+            Debug.Log("[ShopExitManager] ConfirmExit called but already outside shop.");
+            return;
+        }
+
         inShop = false;
+        Debug.Log("[ShopExitManager] Exiting shop... inShop set to false");
 
-        Debug.Log("[ShopExitManager] Exiting shop...");
-
-        // Deactivate all pedestals
+        // Deactivate pedestals and shop empties
         foreach (var pedestal in shopPedestals)
-            if (pedestal != null) pedestal.SetActive(false);
+        {
+            if (pedestal != null)
+            {
+                pedestal.SetActive(false);
+                Debug.Log("ConfirmExit: Deactivated pedestal " + pedestal.name);
+            }
+        }
 
-        // Deactivate empties (Yes/No/Goodbye zones)
         foreach (var empty in decisionEmpties)
-            if (empty != null) empty.SetActive(false);
+        {
+            if (empty != null)
+            {
+                empty.SetActive(false);
+                Debug.Log("ConfirmExit: Deactivated empty " + empty.name);
+            }
+        }
+
+        // Activate selection areas (Azul, Rojo, Amarillo, Verde)
+        Debug.Log("ConfirmExit: selectionAreas count = " + selectionAreas.Count);
+        foreach (var area in selectionAreas)
+        {
+            if (area != null)
+            {
+                area.SetActive(true);
+                Debug.Log("ConfirmExit: Activated area " + area.name + " | Active? " + area.activeSelf);
+            }
+            else
+            {
+                Debug.LogWarning("ConfirmExit: Found null area in selectionAreas list");
+            }
+        }
 
         // Clear rerolls
         if (StatManager.Instance != null)
         {
             int currentRerolls = StatManager.Instance.GetCurrentValue(StatType.ShopRerolls);
             if (currentRerolls > 0)
+            {
                 StatManager.Instance.ChangeStat(StatType.ShopRerolls, -currentRerolls);
+                Debug.Log("ConfirmExit: Cleared rerolls, removed " + currentRerolls);
+            }
         }
 
         // Rotate board back
@@ -109,17 +129,20 @@ public class ShopExitManager : MonoBehaviour
             Vector3 euler = boardTransform.eulerAngles;
             euler.z = exitRotationZ;
             boardTransform.eulerAngles = euler;
+            Debug.Log("ConfirmExit: Board rotated to " + exitRotationZ);
         }
 
         Debug.Log("[ShopExitManager] Shop closed, returning to game.");
     }
 
-    // Called when player cancels exit
+
     public void CancelExit()
     {
         Debug.Log("[ShopExitManager] Exit cancelled, staying in shop.");
     }
 
-    // Public getter for shop state
-    public bool IsInShop() => inShop;
+    public bool IsInShop()
+    {
+        return inShop;
+    }
 }
