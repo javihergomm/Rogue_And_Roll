@@ -32,7 +32,9 @@ public class StatManager : MonoBehaviour
     private Dictionary<StatType, int> currentValues = new Dictionary<StatType, int>();
     private Dictionary<StatType, int> maxValues = new Dictionary<StatType, int>();
 
+    // Pending consumable and its slot (needed for correct removal)
     private ConsumableSO pendingConsumable;
+    private ItemSlot pendingSlot;
 
     private void Awake()
     {
@@ -55,9 +57,15 @@ public class StatManager : MonoBehaviour
         UpdateUI();
     }
 
-    public void TryUseItem(ConsumableSO item)
+    /*
+     * Called when a consumable is used.
+     * Receives the slot so the correct item instance can be removed.
+     */
+    public void TryUseItem(ConsumableSO item, ItemSlot slot)
     {
         pendingConsumable = item;
+        pendingSlot = slot;
+
         ApplyChange(item.statToChange, item.amountToChangeStat);
         ConsumePendingItem();
     }
@@ -67,30 +75,49 @@ public class StatManager : MonoBehaviour
         ApplyChange(stat, amount);
     }
 
+    /*
+     * Applies a stat change while enforcing limits.
+     */
     private void ApplyChange(StatType stat, int amount)
     {
-        if (!currentValues.ContainsKey(stat)) currentValues[stat] = 0;
+        if (!currentValues.ContainsKey(stat))
+            currentValues[stat] = 0;
+
         currentValues[stat] += amount;
 
+        // Rolls can never drop below 1
         if (stat == StatType.Rolls && currentValues[stat] < 1)
             currentValues[stat] = 1;
 
-        if (!maxValues.ContainsKey(stat)) maxValues[stat] = int.MaxValue;
-        if (currentValues[stat] > maxValues[stat]) currentValues[stat] = maxValues[stat];
-        if (currentValues[stat] < 0) currentValues[stat] = 0;
+        if (!maxValues.ContainsKey(stat))
+            maxValues[stat] = int.MaxValue;
+
+        if (currentValues[stat] > maxValues[stat])
+            currentValues[stat] = maxValues[stat];
+
+        if (currentValues[stat] < 0)
+            currentValues[stat] = 0;
 
         UpdateUI();
     }
 
+    /*
+     * Removes the pending consumable from the correct slot.
+     */
     private void ConsumePendingItem()
     {
-        if (pendingConsumable != null)
+        if (pendingConsumable != null && pendingSlot != null)
         {
-            InventoryManager.Instance.RemoveItem(pendingConsumable.itemName, 1);
+            InventoryManager.Instance.RemoveItem(pendingSlot, 1);
             pendingConsumable = null;
+            pendingSlot = null;
         }
     }
 
+    /*
+     * Updates the UI text shown to the player.
+     * All player-visible text must be in Spanish.
+     */
     private void UpdateUI()
     {
         if (statsText == null) return;
@@ -104,29 +131,34 @@ public class StatManager : MonoBehaviour
 
             if (stat == StatType.Rolls)
             {
-                sb.AppendLine("Rolls: " + current);
+                sb.AppendLine("Tiradas: " + current);
             }
             else if (stat == StatType.ShopRerolls)
             {
                 // Only show rerolls if player is inside the shop
                 if (IsPlayerInShop())
-                    sb.AppendLine("Shop rerolls: " + current + "/" + max);
+                    sb.AppendLine("Reintentos de tienda: " + current + "/" + max);
             }
-            else
+            else if (stat == StatType.Gold)
             {
-                sb.AppendLine(GetDisplayName(stat) + ": " + current + "/" + max);
+                sb.AppendLine("Oro: " + current + "/" + max);
             }
         }
+
         statsText.text = sb.ToString();
     }
 
+    /*
+     * Returns the display name for a stat (internal use only).
+     * Player-visible text is handled in UpdateUI.
+     */
     private string GetDisplayName(StatType stat)
     {
         switch (stat)
         {
             case StatType.Gold: return "Gold";
             case StatType.Rolls: return "Rolls";
-            case StatType.ShopRerolls: return "Shop rerolls";
+            case StatType.ShopRerolls: return "ShopRerolls";
             case StatType.None: return "None";
             default: return stat.ToString();
         }
@@ -138,12 +170,17 @@ public class StatManager : MonoBehaviour
     public int GetMaxValue(StatType stat) =>
         maxValues.ContainsKey(stat) ? maxValues[stat] : int.MaxValue;
 
+    /*
+     * Consumes one shop reroll.
+     */
     public void UseShopReroll()
     {
         ChangeStat(StatType.ShopRerolls, -1);
     }
 
-    // Consult ShopExitManager to know if the player is inside the shop
+    /*
+     * Checks if the player is currently inside the shop.
+     */
     public bool IsPlayerInShop()
     {
         var exitManager = Object.FindFirstObjectByType<ShopExitManager>();

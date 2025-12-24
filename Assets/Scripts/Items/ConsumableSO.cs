@@ -7,13 +7,6 @@ public class ConsumableSO : BaseItemSO
     public StatType statToChange;
     public int amountToChangeStat;
 
-    public override void UseItem()
-    {
-        Debug.Log("[Consumable] Using " + itemName);
-
-        if (StatManager.Instance != null)
-        {
-            StatManager.Instance.TryUseItem(this);
-        }
-    }
+    // Consumables are used through InventoryManager, not directly here
+    public override void UseItem() { }
 }

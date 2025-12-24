@@ -11,7 +11,8 @@ using System.Collections.Generic;
  *   - Choice popups (text + dynamically created buttons)
  *   - Number input popups (text + slider + confirm/cancel)
  *   - Message-only popups (text only, without buttons)
- * Provides helper methods to hide the popup, clear old buttons, and show common flows.
+ * Provides helper methods to hide the popup, clear old buttons,
+ * and show common popup flows.
  */
 public class OptionPopupManager : MonoBehaviour
 {
@@ -38,6 +39,10 @@ public class OptionPopupManager : MonoBehaviour
         if (sliderLabel != null) sliderLabel.gameObject.SetActive(false);
     }
 
+    /*
+     * Shows a generic popup with text and dynamic buttons.
+     * Can optionally include a slider for numeric input.
+     */
     public void ShowPopup(
         string message,
         Dictionary<string, System.Action> options,
@@ -46,15 +51,10 @@ public class OptionPopupManager : MonoBehaviour
         System.Action<int> onConfirmWithNumber = null)
     {
         if (popupPanel == null || popupText == null)
-        {
-            Debug.LogWarning("Popup references not set.");
             return;
-        }
+
         if (options == null)
-        {
-            Debug.LogWarning("Options dictionary is null.");
             return;
-        }
 
         popupPanel.SetActive(true);
         popupText.text = message;
@@ -72,32 +72,30 @@ public class OptionPopupManager : MonoBehaviour
             newButton.onClick.RemoveAllListeners();
             newButton.onClick.AddListener(() =>
             {
-                Debug.Log("Popup button clicked: " + optionName);
-
                 popupPanel.SetActive(false);
 
-                if (useSlider && onConfirmWithNumber != null && optionName.ToLower().Contains("confirm"))
+                bool isConfirm = optionName.ToLower().Contains("confirmar");
+
+                if (useSlider && onConfirmWithNumber != null && isConfirm)
                 {
                     int value = popupSlider != null ? Mathf.RoundToInt(popupSlider.value) : 1;
-                    Debug.Log("Popup confirm with slider value: " + value);
                     onConfirmWithNumber(value);
                 }
                 else
                 {
-                    Debug.Log("Invoking action for option: " + optionName);
                     optionAction?.Invoke();
                 }
             });
         }
     }
 
+    /*
+     * Shows a popup with only a message and no buttons.
+     */
     public void ShowMessageOnly(string message)
     {
         if (popupPanel == null || popupText == null)
-        {
-            Debug.LogWarning("Popup references not set.");
             return;
-        }
 
         popupPanel.SetActive(true);
         popupText.text = message;
@@ -106,6 +104,9 @@ public class OptionPopupManager : MonoBehaviour
         HideSlider();
     }
 
+    /*
+     * Hides the popup and clears its content.
+     */
     public void HidePopup()
     {
         if (popupPanel != null)
@@ -115,88 +116,126 @@ public class OptionPopupManager : MonoBehaviour
         HideSlider();
     }
 
+    /*
+     * Popup shown when the inventory is full.
+     */
     public void ShowInventoryFullPopup(string itemName, int quantity, Sprite itemSprite, string itemDescription)
     {
         var options = new Dictionary<string, System.Action>
         {
-            { "Yes, choose slot to replace", () =>
+            { "Si, reemplazar un objeto", () =>
                 {
                     InventoryManager.Instance.PrepareReplace(
                         InventoryManager.Instance.GetItemSO(itemName),
                         quantity
                     );
                     InventoryManager.Instance.OpenInventory();
-                    Debug.Log("Select a slot in inventory to replace.");
                 }
             },
-            { "Do not replace", () => Debug.Log("Keep current inventory.") }
+            { "No reemplazar", () => {} }
         };
 
-        ShowPopup("Inventory full. Do you want to replace an item?", options);
+        ShowPopup("Inventario lleno. Deseas reemplazar un objeto?", options);
     }
 
+    /*
+     * Popup to confirm replacing an item in a slot.
+     */
     public void ShowConfirmReplacePopup(ItemSlot slot, System.Action onConfirm)
     {
-        string message = $"Are you sure you want to replace the item '{slot.itemName}' in this slot?";
+        string message = "Seguro que quieres reemplazar el objeto '" + slot.itemName + "' en este hueco?";
+
         var options = new Dictionary<string, System.Action>
         {
-            { "Confirm", () => {
-                Debug.Log("ConfirmReplacePopup: Confirm pressed");
-                onConfirm?.Invoke();
-            }},
-            { "Cancel", () => Debug.Log("Replace cancelled.") }
+            { "Confirmar", () => { onConfirm?.Invoke(); }},
+            { "Cancelar", () => {} }
         };
 
         ShowPopup(message, options);
     }
 
-    public void ShowRemoveItemPopup(string itemName, ItemSlot[] itemSlots)
+    /*
+     * Popup to remove items from one or more slots.
+     */
+    public void ShowRemoveItemPopup(ItemSlot[] itemSlots)
     {
+        if (itemSlots == null || itemSlots.Length == 0)
+            return;
+
+        string itemName = itemSlots[0].itemName;
+
         var options = new Dictionary<string, System.Action>
         {
-            { "Remove 1 unit", () => InventoryManager.Instance.RemoveItem(itemName, 1) },
-            { "Remove all", () =>
+            { "Eliminar 1 unidad", () =>
+                {
+                    InventoryManager.Instance.RemoveItem(itemSlots[0], 1);
+                }
+            },
+
+            { "Eliminar todo", () =>
+                {
+                    foreach (var slot in itemSlots)
+                    {
+                        if (slot.quantity > 0)
+                            InventoryManager.Instance.RemoveItem(slot, slot.quantity);
+                    }
+                }
+            },
+
+            { "Eliminar cantidad personalizada", () =>
                 {
                     int total = 0;
                     foreach (var slot in itemSlots)
-                        if (slot.itemName == itemName) total += slot.quantity;
-                    InventoryManager.Instance.RemoveItem(itemName, total);
+                        total += slot.quantity;
+
+                    ShowNumberSliderPopup(itemSlots, total);
                 }
             },
-            { "Remove custom amount", () =>
-                {
-                    int total = 0;
-                    foreach (var slot in itemSlots)
-                        if (slot.itemName == itemName) total += slot.quantity;
-                    ShowNumberSliderPopup(itemName, total);
-                }
-            },
-            { "Cancel", () => Debug.Log("Remove cancelled.") }
+
+            { "Cancelar", () => {} }
         };
 
-        ShowPopup($"How do you want to remove {itemName}?", options);
+        ShowPopup("Como quieres eliminar " + itemName + "?", options);
     }
 
-    private void ShowNumberSliderPopup(string itemName, int maxQuantity)
+    /*
+     * Popup with slider to choose a custom amount to remove.
+     */
+    private void ShowNumberSliderPopup(ItemSlot[] itemSlots, int maxQuantity)
     {
+        string itemName = itemSlots[0].itemName;
+
         var options = new Dictionary<string, System.Action>
         {
-            { "Confirm", () => {} },
-            { "Cancel", () => Debug.Log("Custom remove cancelled.") }
+            { "Confirmar", () => {} },
+            { "Cancelar", () => {} }
         };
 
         ShowPopup(
-            $"Select the amount of {itemName} to remove:",
+            "Selecciona la cantidad de " + itemName + " a eliminar:",
             options,
             useSlider: true,
             sliderMax: maxQuantity,
-            onConfirmWithNumber: (amount) => {
-                Debug.Log("NumberSliderPopup: Confirm pressed with amount " + amount);
-                InventoryManager.Instance.RemoveItem(itemName, amount);
+            onConfirmWithNumber: (amount) =>
+            {
+                int remaining = amount;
+
+                foreach (var slot in itemSlots)
+                {
+                    if (remaining <= 0)
+                        break;
+
+                    int remove = Mathf.Min(slot.quantity, remaining);
+                    InventoryManager.Instance.RemoveItem(slot, remove);
+                    remaining -= remove;
+                }
             }
         );
     }
 
+    /*
+     * Removes old popup buttons.
+     */
     private void ClearPopupButtons()
     {
         if (popupPanel == null) return;
@@ -211,6 +250,9 @@ public class OptionPopupManager : MonoBehaviour
             Destroy(go);
     }
 
+    /*
+     * Configures the slider if needed.
+     */
     private void SetupSlider(bool useSlider, int sliderMax)
     {
         if (popupSlider == null || sliderLabel == null)
@@ -237,19 +279,22 @@ public class OptionPopupManager : MonoBehaviour
         }
     }
 
+    /*
+     * Hides the slider.
+     */
     private void HideSlider()
     {
         if (popupSlider != null) popupSlider.gameObject.SetActive(false);
         if (sliderLabel != null) sliderLabel.gameObject.SetActive(false);
     }
 
+    /*
+     * Creates a new option button.
+     */
     private Button CreateOptionButton(string optionName)
     {
         if (buttonPrefab == null || popupPanel == null)
-        {
-            Debug.LogWarning("Cannot create option button. Missing references.");
             return null;
-        }
 
         Button newButton = Instantiate(buttonPrefab, popupPanel.transform);
         newButton.tag = "PopupButton";
@@ -259,23 +304,18 @@ public class OptionPopupManager : MonoBehaviour
 
         newButton.gameObject.SetActive(true);
 
-        Debug.Log("Created popup button: " + optionName);
-
         return newButton;
     }
 
+    /*
+     * Popup to confirm exiting the shop.
+     */
     public void ShowExitShopPopup(System.Action onConfirm, System.Action onCancel)
     {
         var options = new Dictionary<string, System.Action>
         {
-            { "Si", () => {
-                Debug.Log("ExitShopPopup: Confirm pressed");
-                onConfirm?.Invoke();
-            }},
-            { "No", () => {
-                Debug.Log("ExitShopPopup: Cancel pressed");
-                onCancel?.Invoke();
-            }}
+            { "Si", () => { onConfirm?.Invoke(); }},
+            { "No", () => { onCancel?.Invoke(); }}
         };
 
         ShowPopup("Seguro que quieres salir de la tienda?", options);

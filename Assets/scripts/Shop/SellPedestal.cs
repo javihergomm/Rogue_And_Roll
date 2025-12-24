@@ -81,12 +81,22 @@ public class SellPedestal : MonoBehaviour
         Debug.Log("SellPedestal.HandleOuijaAnswer: " + answer);
 
         if (!isAwaitingDecision) return;
-        if (pendingItem == null || pendingSlot == null) { isAwaitingDecision = false; return; }
+        if (pendingItem == null || pendingSlot == null)
+        {
+            isAwaitingDecision = false;
+            return;
+        }
 
         if (answer == OuijaAnswerZone.AnswerType.Yes)
         {
-            // Remove one item
-            InventoryManager.Instance.RemoveItem(pendingItem.itemName, 1);
+            // If the item is an active dice, remove it from active slots
+            if (pendingItem is DiceSO)
+            {
+                InventoryManager.Instance.TryRemoveActiveDice(pendingSlot);
+            }
+
+            // Remove exactly the clicked slot, not by name
+            InventoryManager.Instance.RemoveItem(pendingSlot, 1);
 
             // Add gold
             StatManager.Instance.ChangeStat(StatType.Gold, pendingItem.sellPrice);

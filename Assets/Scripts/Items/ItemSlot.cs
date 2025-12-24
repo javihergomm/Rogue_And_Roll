@@ -49,7 +49,6 @@ public class ItemSlot : MonoBehaviour,
 
     private void Awake()
     {
-        // Add CanvasGroup for transparency and raycast control
         canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
         if (quantityText != null)
@@ -65,7 +64,6 @@ public class ItemSlot : MonoBehaviour,
             itemImage.sprite = emptySprite;
     }
 
-    // Inserts item data into this slot and updates its visuals
     public int AddItem(string itemName, int quantity, Sprite itemSprite, string itemDescription)
     {
         if (isFull) return quantity;
@@ -91,7 +89,6 @@ public class ItemSlot : MonoBehaviour,
         return 0;
     }
 
-    // Updates the slot visuals to match its current data
     public void RefreshUI()
     {
         if (quantityText != null)
@@ -112,7 +109,6 @@ public class ItemSlot : MonoBehaviour,
             itemImage.sprite = quantity > 0 ? itemSprite : emptySprite;
     }
 
-    // Handles left and right click interactions
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left)
@@ -125,7 +121,6 @@ public class ItemSlot : MonoBehaviour,
         }
     }
 
-    // Highlights this slot and updates the description panel
     public void SelectSlot()
     {
         InventoryManager.Instance?.DeselectAllSlots();
@@ -145,7 +140,6 @@ public class ItemSlot : MonoBehaviour,
             itemDescriptionImage.sprite = itemSprite ?? emptySprite;
     }
 
-    // Removes highlight from this slot
     public void DeselectSlot()
     {
         if (selectedShader != null)
@@ -154,7 +148,6 @@ public class ItemSlot : MonoBehaviour,
         thisItemSelected = false;
     }
 
-    // Resets this slot to an empty state
     public void ClearSlot()
     {
         quantity = 0;
@@ -182,14 +175,13 @@ public class ItemSlot : MonoBehaviour,
             selectedShader.SetActive(false);
     }
 
-    // Opens the remove-item popup
+    // ASCII ONLY FIX: Right click opens the remove popup using slot-based API
     private void OnRightClick()
     {
         if (string.IsNullOrEmpty(itemName) || quantity <= 0)
             return;
 
         OptionPopupManager.Instance.ShowRemoveItemPopup(
-            itemName,
             InventoryManager.Instance.ItemSlots.ToArray()
         );
     }
@@ -200,16 +192,13 @@ public class ItemSlot : MonoBehaviour,
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        // Cannot drag empty slots
         if (quantity <= 0)
             return;
 
-        // Only dice can be dragged
         BaseItemSO item = InventoryManager.Instance.GetItemSO(itemName);
         if (!(item is DiceSO))
             return;
 
-        // Create drag icon
         dragCanvas = FindFirstObjectByType<Canvas>();
 
         dragIcon = new GameObject("DragIcon");
@@ -240,12 +229,10 @@ public class ItemSlot : MonoBehaviour,
         if (dragIcon != null)
             Destroy(dragIcon);
 
-        // If the item was not a dice, no drag happened
         BaseItemSO item = InventoryManager.Instance.GetItemSO(itemName);
         if (!(item is DiceSO))
             return;
 
-        // Detect drop target
         var results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
 

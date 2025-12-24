@@ -191,8 +191,7 @@ public class InventoryManager : MonoBehaviour
                 return;
             }
 
-            StatManager.Instance?.TryUseItem(cons);
-            RemoveItem(cons.itemName, 1);
+            StatManager.Instance?.TryUseItem(cons, slot); 
             return;
         }
     }
@@ -326,6 +325,28 @@ public class InventoryManager : MonoBehaviour
         activeSellPedestal = null;
     }
 
+    // Removes a dice from the active dice list if the sold item was an active dice
+    public void TryRemoveActiveDice(ItemSlot slot)
+    {
+        if (slot == null)
+            return;
+
+        // If this slot is one of the active dice slots
+        if (activeDiceSlots.Contains(slot))
+        {
+            // Remove the dice from the world
+            DiceRollManager.Instance.RemoveDiceFromWorld(slot);
+
+            // If this was the currently selected active dice, clear it
+            if (activeDiceSlot == slot)
+                activeDiceSlot = null;
+
+            // Update UI
+            UpdateActiveDiceUI();
+        }
+    }
+
+
     // -------------------------------------------------------------------------
     // Slot utilities
     // -------------------------------------------------------------------------
@@ -338,32 +359,33 @@ public class InventoryManager : MonoBehaviour
     // -------------------------------------------------------------------------
     // Item management
     // -------------------------------------------------------------------------
-    public void RemoveItem(string itemName, int amount)
+    public void RemoveItem(ItemSlot slot, int amount)
     {
-        foreach (var slot in allSlots)
+        if (slot == null)
+            return;
+
+        slot.quantity -= amount;
+
+        if (slot.quantity <= 0)
         {
-            if (slot != null && slot.itemName == itemName && slot.quantity > 0)
+            // Clear the slot completely
+            slot.ClearSlot();
+
+            // If this was an active dice slot, clean up its state
+            if (activeDiceSlots.Contains(slot))
             {
-                slot.quantity -= amount;
+                DiceRollManager.Instance.RemoveDiceFromWorld(slot);
 
-                if (slot.quantity > 0)
-                {
-                    slot.RefreshUI();
-                }
-                else
-                {
-                    slot.ClearSlot();
-                    SyncActiveDiceSlot(slot);
+                if (activeDiceSlot == slot)
+                    activeDiceSlot = null;
 
-
-                    if (slot == activeDiceSlot)
-                    {
-                        activeDiceSlot = null;
-                        UpdateActiveDiceUI();
-                    }
-                }
-                return;
+                UpdateActiveDiceUI();
             }
+        }
+        else
+        {
+            // Just refresh the UI if the slot still has items
+            slot.RefreshUI();
         }
     }
 
