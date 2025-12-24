@@ -435,6 +435,8 @@ public class InventoryManager : MonoBehaviour
 
         menuActivated = false;
         inventoryMenu?.SetActive(false);
+        DeselectAllSlots();
+
 
         Time.timeScale = 1f;
 
