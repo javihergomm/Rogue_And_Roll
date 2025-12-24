@@ -4,12 +4,10 @@ using System.Collections.Generic;
 /*
  * DiceRollManager
  * ----------------
- * Responsible for spawning and rolling dice prefabs.
- * - Supports multiple prefab variants per dice type (e.g. different D6 or D4 designs).
- * - Ensures only one active dice exists at a time.
- * - Resets scale to prefab defaults when spawning.
- * - Tracks which DiceSO is active for UI feedback.
- * - Keeps the active dice slot highlighted.
+ * Manages all dice that exist in the world.
+ * Each active dice slot has exactly one world dice instance.
+ * Dice appear when a slot becomes active and disappear when it stops being active.
+ * Dice only roll when clicked by the player.
  */
 public class DiceRollManager : MonoBehaviour
 {
@@ -24,17 +22,11 @@ public class DiceRollManager : MonoBehaviour
     [SerializeField] private List<GameObject> d20Prefabs;
 
     [Header("Spawn Settings")]
-    [SerializeField] private Transform spawnPoint;
-    [SerializeField] private float spawnLift = 0.05f; // lift dice slightly above surfaces
+    [SerializeField] private Transform[] activeDiceSpawnPoints;
+    [SerializeField] private float spawnLift = 0.05f;
 
-    // Reference to the currently active dice prefab
-    private GameObject activeDice;
-
-    // Reference to the currently active dice data
-    public DiceSO ActiveDiceSO { get; private set; }
-
-    // Reference to the currently active slot in UI
-    private ItemSlot activeDiceSlot;
+    // One world dice per active slot
+    private Dictionary<ItemSlot, GameObject> worldDice = new Dictionary<ItemSlot, GameObject>();
 
     private void Awake()
     {
@@ -47,115 +39,79 @@ public class DiceRollManager : MonoBehaviour
     }
 
     /*
-     * SpawnDice
-     * ---------
-     * Instantiates the correct prefab for the given DiceSO.
-     * Does NOT roll automatically.
+     * SpawnDiceInWorld
+     * ----------------
+     * Creates a dice instance for the given slot.
+     * Does not roll automatically.
      */
-    public void SpawnDice(DiceSO dice, int variantIndex = 0, ItemSlot slot = null)
+    public GameObject SpawnDiceInWorld(DiceSO dice, ItemSlot slot)
     {
-        if (activeDice != null)
-        {
-            Debug.Log("[DiceRollManager] Destroying previous dice: " + activeDice.name);
-            Destroy(activeDice);
-            activeDice = null;
-        }
+        if (worldDice.ContainsKey(slot))
+            return worldDice[slot];
 
         List<GameObject> prefabList = GetPrefabListForDice(dice.diceType);
         if (prefabList == null || prefabList.Count == 0)
-        {
-            Debug.LogWarning("[DiceRollManager] No prefabs found for dice type: " + dice.diceType);
-            return;
-        }
+            return null;
 
-        if (variantIndex < 0 || variantIndex >= prefabList.Count) variantIndex = 0;
-        GameObject prefab = prefabList[variantIndex];
+        GameObject prefab = prefabList[0];
 
-        // Instantiate new dice
-        activeDice = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
-        activeDice.transform.localScale = prefab.transform.localScale;
+        int index = InventoryManager.Instance.GetActiveDiceSlotIndex(slot);
+        if (index < 0 || index >= activeDiceSpawnPoints.Length)
+            return null;
 
-        Debug.Log("[DiceRollManager] Spawned dice prefab: " + prefab.name + " at " + spawnPoint.position);
+        Transform spawnPoint = activeDiceSpawnPoints[index];
 
-        // Lift dice above board to avoid collider overlap
-        Collider col = activeDice.GetComponent<Collider>();
+        GameObject instance = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
+        instance.transform.localScale = prefab.transform.localScale;
+
+        Collider col = instance.GetComponent<Collider>();
         if (col != null)
         {
             float halfHeight = col.bounds.extents.y;
-            Vector3 p = activeDice.transform.position;
-            activeDice.transform.position = new Vector3(p.x, p.y + halfHeight + spawnLift, p.z);
-
-            Debug.Log("[DiceRollManager] Adjusted spawn height by " + (halfHeight + spawnLift) +
-                      " | Final position: " + activeDice.transform.position);
+            Vector3 p = instance.transform.position;
+            instance.transform.position = new Vector3(p.x, p.y + halfHeight + spawnLift, p.z);
         }
 
-        // Reset Rigidbody state
-        Rigidbody rb = activeDice.GetComponent<Rigidbody>();
+        Rigidbody rb = instance.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            Debug.Log("[DiceRollManager] Rigidbody settings -> isKinematic: " + rb.isKinematic +
-                      ", useGravity: " + rb.useGravity +
-                      ", velocity: " + rb.linearVelocity +
-                      ", angularVelocity: " + rb.angularVelocity);
-
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
             rb.Sleep();
-
-            Debug.Log("[DiceRollManager] Rigidbody reset complete. Dice should be idle.");
         }
 
-        // Track active dice data
-        ActiveDiceSO = dice;
-
-        // Highlight slot in UI
-        if (slot != null)
-        {
-            HighlightActiveDiceSlot(slot);
-        }
+        worldDice[slot] = instance;
+        return instance;
     }
 
     /*
-     * RollActiveDice
-     * --------------
-     * Applies roll logic to the currently active dice.
+     * RemoveDiceFromWorld
+     * -------------------
+     * Deletes the dice instance associated with a slot.
      */
-    public void RollActiveDice()
+    public void RemoveDiceFromWorld(ItemSlot slot)
     {
-        if (activeDice == null)
-        {
-            Debug.LogWarning("[DiceRollManager] No active dice to roll.");
+        if (!worldDice.ContainsKey(slot))
             return;
-        }
 
-        DiceRoller roller = activeDice.GetComponent<DiceRoller>();
-        if (roller != null)
-        {
-            Debug.Log("[DiceRollManager] Rolling active dice: " + activeDice.name);
-            roller.RollDice();
-        }
-        else
-        {
-            Debug.LogWarning("[DiceRollManager] DiceRoller component missing on active dice.");
-        }
+        Destroy(worldDice[slot]);
+        worldDice.Remove(slot);
     }
 
     /*
-     * HighlightActiveDiceSlot
-     * -----------------------
-     * Keeps the active dice slot marked in the UI.
+     * RollDiceInSlot
+     * --------------
+     * Rolls the dice associated with the given slot.
      */
-    private void HighlightActiveDiceSlot(ItemSlot slot)
+    public void RollDiceInSlot(ItemSlot slot)
     {
-        if (activeDiceSlot != null && activeDiceSlot != slot)
-        {
-            activeDiceSlot.DeselectSlot();
-        }
+        if (!worldDice.ContainsKey(slot))
+            return;
 
-        activeDiceSlot = slot;
-        activeDiceSlot.SelectSlot();
-
-        Debug.Log("[DiceRollManager] Active dice slot highlighted: " + slot.itemName);
+        GameObject die = worldDice[slot];
+        DiceRoller roller = die.GetComponent<DiceRoller>();
+        if (roller != null)
+            roller.RollDice();
     }
 
     private List<GameObject> GetPrefabListForDice(DiceType type)
@@ -168,24 +124,7 @@ public class DiceRollManager : MonoBehaviour
             case DiceType.D10: return d10Prefabs;
             case DiceType.D12: return d12Prefabs;
             case DiceType.D20: return d20Prefabs;
-            default: return null;
         }
-    }
-
-    public void ClearActiveDice()
-    {
-        if (activeDice != null)
-        {
-            Debug.Log("[DiceRollManager] Clearing active dice: " + activeDice.name);
-            Destroy(activeDice);
-            activeDice = null;
-            ActiveDiceSO = null;
-
-            if (activeDiceSlot != null)
-            {
-                activeDiceSlot.DeselectSlot();
-                activeDiceSlot = null;
-            }
-        }
+        return null;
     }
 }

@@ -143,9 +143,6 @@ public class ShopPedestalRandomizer : MonoBehaviour
                 // Aquí añadimos el objeto al inventario
                 InventoryManager.Instance.AddItem(chosenItem, 1);
 
-                // Y justo después lanzamos la depuración
-                InventoryManager.Instance.DebugSlotVisuals();
-
                 if (spawnedModel != null)
                     Destroy(spawnedModel);
 
