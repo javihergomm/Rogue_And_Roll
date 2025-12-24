@@ -5,12 +5,8 @@ using System.Collections.Generic;
  * ShopPedestalRandomizer
  * ----------------------
  * Handles item display for a single shop pedestal.
- * Responsibilities:
- * - Spawns a random item from the possible list.
- * - Ensures no duplicate items across pedestals in the same visit.
- * - Displays the item visually without changing its scale.
- * - Handles purchase confirmation via Ouija zones.
- * - Prevents opening/closing purchase popups if another transaction is already in progress.
+ * Ensures unique items across all pedestals per shop visit.
+ * Only the first pedestal to initialize clears the used item list.
  */
 public class ShopPedestalRandomizer : MonoBehaviour
 {
@@ -28,11 +24,15 @@ public class ShopPedestalRandomizer : MonoBehaviour
     public static ShopPedestalRandomizer currentPedestal;
     public bool isAwaitingDecision = false;
 
-    // Track items used this visit to avoid duplicates across pedestals
+    // Shared list of used items across all pedestals
     private static HashSet<BaseItemSO> usedItemsThisVisit = new HashSet<BaseItemSO>();
 
     private void Start()
     {
+        // Only the first pedestal clears the used list
+        if (usedItemsThisVisit.Count == 0)
+            usedItemsThisVisit.Clear();
+
         RefreshItem();
         hasGeneratedThisVisit = true;
     }
@@ -51,17 +51,17 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
     /*
      * Reset pedestal state for the next shop visit.
+     * Does NOT clear the used item list (only the first pedestal does).
      */
     public void ResetForNextVisit()
     {
         hasGeneratedThisVisit = false;
         isAwaitingDecision = false;
-        usedItemsThisVisit.Clear();
     }
 
     /*
      * Refresh the item displayed on this pedestal.
-     * Picks a random item from the possible list, avoiding duplicates across pedestals.
+     * Picks a random item from the possible list, avoiding duplicates.
      */
     public void RefreshItem()
     {
@@ -74,6 +74,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
         if (spawnedModel != null)
             Destroy(spawnedModel);
 
+        // Build list of items not used yet
         List<BaseItemSO> availableItems = new List<BaseItemSO>();
         foreach (var item in possibleItems)
         {
@@ -88,10 +89,12 @@ public class ShopPedestalRandomizer : MonoBehaviour
             return;
         }
 
+        // Pick a random unique item
         int index = Random.Range(0, availableItems.Count);
         chosenItem = availableItems[index];
         usedItemsThisVisit.Add(chosenItem);
 
+        // Spawn the 3D model
         if (chosenItem.prefab3D != null && displayPoint != null)
         {
             Collider pedestalCollider = GetComponentInChildren<Collider>();
@@ -113,10 +116,10 @@ public class ShopPedestalRandomizer : MonoBehaviour
             spawnedModel.transform.localPosition = localSpawnPos;
             spawnedModel.transform.localRotation = Quaternion.identity;
 
-            // Preserve original prefab scale (do not resize)
+            // Preserve original prefab scale
             spawnedModel.transform.localScale = chosenItem.prefab3D.transform.localScale;
 
-            // Remove physics components from the spawned model
+            // Remove physics components
             foreach (var rb in spawnedModel.GetComponentsInChildren<Rigidbody>())
                 Destroy(rb);
             foreach (var col in spawnedModel.GetComponentsInChildren<Collider>())
@@ -125,11 +128,18 @@ public class ShopPedestalRandomizer : MonoBehaviour
     }
 
     /*
+     * Returns the chosen item for debugging or stress testing.
+     */
+    public BaseItemSO GetChosenItem()
+    {
+        return chosenItem;
+    }
+
+    /*
      * Handles Ouija answer (Yes/No) for purchase confirmation.
      */
     public void HandleOuijaAnswer(OuijaAnswerZone.AnswerType answer)
     {
-        Debug.Log("HandleOuijaAnswer called with: " + answer);
         if (!isAwaitingDecision) return;
         if (chosenItem == null) { isAwaitingDecision = false; return; }
 
@@ -140,23 +150,14 @@ public class ShopPedestalRandomizer : MonoBehaviour
             {
                 StatManager.Instance.ChangeStat(StatType.Gold, -chosenItem.buyPrice);
 
-                // Aquí añadimos el objeto al inventario
+                // Add item to inventory
                 InventoryManager.Instance.AddItem(chosenItem, 1);
 
                 if (spawnedModel != null)
                     Destroy(spawnedModel);
 
                 chosenItem = null;
-                Debug.Log("Item purchased.");
             }
-            else
-            {
-                Debug.Log("Not enough Pesetas to buy " + chosenItem.itemName);
-            }
-        }
-        else
-        {
-            Debug.Log("Purchase cancelled for " + chosenItem.itemName);
         }
 
         // Hide popup
@@ -169,27 +170,23 @@ public class ShopPedestalRandomizer : MonoBehaviour
             currentPedestal = null;
     }
 
-
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
 
-        // Prevent opening a new popup if another transaction is already in progress
+        // Prevent opening a new popup if another transaction is in progress
         if (currentPedestal != null && currentPedestal.isAwaitingDecision)
-        {
-            Debug.Log("[ShopPedestal] Transaction already in progress, skipping popup.");
             return;
-        }
 
         currentPedestal = this;
         isAwaitingDecision = true;
 
         if (OptionPopupManager.Instance != null && chosenItem != null)
         {
-            // Player-facing text remains in Spanish
             OptionPopupManager.Instance.ShowMessageOnly(
-                $"¿Quieres comprar {chosenItem.itemName} por {chosenItem.buyPrice} Pesetas?\n" +
-                "Muévete al SÍ o al NO en el tablero."
+                "Quieres comprar " + chosenItem.itemName +
+                " por " + chosenItem.buyPrice + " Pesetas?\n" +
+                "Muevete al SI o al NO en el tablero."
             );
         }
     }
@@ -198,10 +195,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        // Only clear if no decision is pending
         if (!isAwaitingDecision && currentPedestal == this)
-        {
             currentPedestal = null;
-        }
     }
 }
