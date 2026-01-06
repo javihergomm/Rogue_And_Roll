@@ -18,3 +18,4 @@ MonoBehaviour:
   prefab3D: {fileID: 919132149155446097, guid: 5865bb7bea7c8e64386c3b51d64dcf95, type: 3}
   buyPrice: 10
   sellPrice: 5
+  diceEffect: {fileID: 11400000, guid: 3f000150d1f8a004dbdefc8c464f19e2, type: 2}

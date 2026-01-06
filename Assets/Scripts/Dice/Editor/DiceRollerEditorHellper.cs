@@ -6,7 +6,7 @@ using System.Collections.Generic;
  * DiceRollerEditorHelper
  * ----------------------
  * Custom inspector for DiceRoller.
- * Lets you edit and test axis -> face mappings directly in the Unity Editor.
+ * Lets you view and edit axis -> face mappings directly in the Unity Editor.
  */
 [CustomEditor(typeof(DiceRoller))]
 public class DiceRollerEditorHelper : Editor
@@ -38,14 +38,6 @@ public class DiceRollerEditorHelper : Editor
                 int value = roller.FaceMap[axis];
                 roller.FaceMap[axis] = EditorGUILayout.IntField(axis.ToString(), value);
             }
-        }
-
-        EditorGUILayout.Space();
-
-        if (GUILayout.Button("Test Current Face Up"))
-        {
-            int faceUp = roller.EditorTestFaceUp();
-            Debug.Log("[Editor Test] " + roller.name + " face up: " + faceUp);
         }
 
         if (GUI.changed)

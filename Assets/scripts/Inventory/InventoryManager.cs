@@ -73,6 +73,14 @@ public class InventoryManager : MonoBehaviour
 
     private void Start()
     {
+        // DEBUG: print all slots and their contents
+        Debug.Log("========== DEBUG INVENTARIO AL INICIAR ==========");
+        foreach (var slot in allSlots)
+        {
+            Debug.Log(slot.name + " -> item=" + slot.itemName + " qty=" + slot.quantity);
+        }
+        Debug.Log("=================================================");
+
         DiceSO d6Item = itemSOs.OfType<DiceSO>().FirstOrDefault(d => d.itemName == "D6");
         if (d6Item == null) return;
 
@@ -83,8 +91,8 @@ public class InventoryManager : MonoBehaviour
         UpdateActiveDiceUI();
 
         SyncActiveDiceSlot(d6Slot);
-
     }
+
 
     // -------------------------------------------------------------------------
     // Active dice slot assignment
@@ -145,6 +153,13 @@ public class InventoryManager : MonoBehaviour
     // -------------------------------------------------------------------------
     public void OnSlotClicked(ItemSlot slot)
     {
+        // Prevent shop items from triggering inventory actions
+        if (slot.transform.root.GetComponent<ShopExitManager>() != null)
+        {
+            Debug.Log("[DEBUG] Click blocked: this object belongs to the shop");
+            return;
+        }
+
         bool wasSelected = slot.thisItemSelected;
 
         if (waitingForReplace)
@@ -161,28 +176,21 @@ public class InventoryManager : MonoBehaviour
 
         BaseItemSO item = GetItemSO(slot.itemName);
 
-        // ---------------------------------------------------------
         // DICE LOGIC (inventory click DOES NOT roll)
-        // ---------------------------------------------------------
         if (item is DiceSO)
         {
-            // Always just show info, even if it's an active dice slot
             slot.SelectSlot();
             return;
         }
 
-        // ---------------------------------------------------------
         // PERMANENT ITEMS
-        // ---------------------------------------------------------
         if (item is PermanentSO)
         {
             slot.SelectSlot();
             return;
         }
 
-        // ---------------------------------------------------------
         // CONSUMABLE ITEMS
-        // ---------------------------------------------------------
         if (item is ConsumableSO cons)
         {
             if (!wasSelected)
@@ -191,10 +199,11 @@ public class InventoryManager : MonoBehaviour
                 return;
             }
 
-            StatManager.Instance?.TryUseItem(cons, slot); 
+            StatManager.Instance?.TryUseItem(cons, slot);
             return;
         }
     }
+
     public void HandleSlotDrop(ItemSlot from, ItemSlot to)
     {
         BaseItemSO item = GetItemSO(from.itemName);

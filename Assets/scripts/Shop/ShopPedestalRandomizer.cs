@@ -4,9 +4,10 @@ using System.Collections.Generic;
 /*
  * ShopPedestalRandomizer
  * ----------------------
- * Handles item display for a single shop pedestal.
- * Ensures unique items across all pedestals per shop visit.
- * Only the first pedestal to initialize clears the used item list.
+ * Manages the item shown on a shop pedestal.
+ * Selects an item from a list of possible items.
+ * Avoids showing items already purchased during the current visit.
+ * Avoids repeating items between pedestals during the same reroll.
  */
 public class ShopPedestalRandomizer : MonoBehaviour
 {
@@ -24,21 +25,29 @@ public class ShopPedestalRandomizer : MonoBehaviour
     public static ShopPedestalRandomizer currentPedestal;
     public bool isAwaitingDecision = false;
 
-    // Shared list of used items across all pedestals
+    // Items purchased during the current shop visit
     private static HashSet<BaseItemSO> usedItemsThisVisit = new HashSet<BaseItemSO>();
+
+    // Items selected during the current reroll
+    private static HashSet<BaseItemSO> usedItemsThisReroll = new HashSet<BaseItemSO>();
 
     private void Start()
     {
-        // Only the first pedestal clears the used list
-        if (usedItemsThisVisit.Count == 0)
-            usedItemsThisVisit.Clear();
-
         RefreshItem();
         hasGeneratedThisVisit = true;
     }
 
     /*
-     * Generate item if not already generated this visit.
+     * Clears the list of items used in the current reroll.
+     * Called before generating new items after a reroll.
+     */
+    public static void PrepareForReroll()
+    {
+        usedItemsThisReroll.Clear();
+    }
+
+    /*
+     * Generates an item if this pedestal has not generated one yet during this visit.
      */
     public void GenerateIfNeeded()
     {
@@ -50,8 +59,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
     }
 
     /*
-     * Reset pedestal state for the next shop visit.
-     * Does NOT clear the used item list (only the first pedestal does).
+     * Resets pedestal state for the next shop visit.
      */
     public void ResetForNextVisit()
     {
@@ -60,41 +68,42 @@ public class ShopPedestalRandomizer : MonoBehaviour
     }
 
     /*
-     * Refresh the item displayed on this pedestal.
-     * Picks a random item from the possible list, avoiding duplicates.
+     * Selects and displays an item.
+     * Excludes items purchased during the visit.
+     * Excludes items already used in the current reroll.
      */
     public void RefreshItem()
     {
         if (possibleItems == null || possibleItems.Length == 0)
-        {
-            Debug.LogWarning("No possible items assigned to ShopPedestalRandomizer!");
             return;
-        }
 
         if (spawnedModel != null)
             Destroy(spawnedModel);
 
-        // Build list of items not used yet
         List<BaseItemSO> availableItems = new List<BaseItemSO>();
+
         foreach (var item in possibleItems)
         {
-            if (!usedItemsThisVisit.Contains(item))
+            if (!usedItemsThisVisit.Contains(item) &&
+                !usedItemsThisReroll.Contains(item))
+            {
                 availableItems.Add(item);
+            }
         }
 
         if (availableItems.Count == 0)
         {
-            Debug.LogWarning("No unique items left for pedestal!");
             chosenItem = null;
             return;
         }
 
-        // Pick a random unique item
         int index = Random.Range(0, availableItems.Count);
         chosenItem = availableItems[index];
-        usedItemsThisVisit.Add(chosenItem);
 
-        // Spawn the 3D model
+        // Marks the item as used during this reroll
+        usedItemsThisReroll.Add(chosenItem);
+
+        // Spawns the item's 3D model
         if (chosenItem.prefab3D != null && displayPoint != null)
         {
             Collider pedestalCollider = GetComponentInChildren<Collider>();
@@ -115,20 +124,18 @@ public class ShopPedestalRandomizer : MonoBehaviour
             spawnedModel = Instantiate(chosenItem.prefab3D, displayPoint);
             spawnedModel.transform.localPosition = localSpawnPos;
             spawnedModel.transform.localRotation = Quaternion.identity;
-
-            // Preserve original prefab scale
             spawnedModel.transform.localScale = chosenItem.prefab3D.transform.localScale;
 
-            // Remove physics components
             foreach (var rb in spawnedModel.GetComponentsInChildren<Rigidbody>())
                 Destroy(rb);
+
             foreach (var col in spawnedModel.GetComponentsInChildren<Collider>())
                 Destroy(col);
         }
     }
 
     /*
-     * Returns the chosen item for debugging or stress testing.
+     * Returns the item currently assigned to this pedestal.
      */
     public BaseItemSO GetChosenItem()
     {
@@ -136,7 +143,9 @@ public class ShopPedestalRandomizer : MonoBehaviour
     }
 
     /*
-     * Handles Ouija answer (Yes/No) for purchase confirmation.
+     * Handles the purchase confirmation result.
+     * Deducts gold and adds the item to the inventory if confirmed.
+     * Marks purchased items so they do not appear again during the visit.
      */
     public void HandleOuijaAnswer(OuijaAnswerZone.AnswerType answer)
     {
@@ -149,9 +158,9 @@ public class ShopPedestalRandomizer : MonoBehaviour
             if (currentGold >= chosenItem.buyPrice)
             {
                 StatManager.Instance.ChangeStat(StatType.Gold, -chosenItem.buyPrice);
-
-                // Add item to inventory
                 InventoryManager.Instance.AddItem(chosenItem, 1);
+
+                usedItemsThisVisit.Add(chosenItem);
 
                 if (spawnedModel != null)
                     Destroy(spawnedModel);
@@ -160,11 +169,9 @@ public class ShopPedestalRandomizer : MonoBehaviour
             }
         }
 
-        // Hide popup
         if (OptionPopupManager.Instance != null)
             OptionPopupManager.Instance.HidePopup();
 
-        // Clear state
         isAwaitingDecision = false;
         if (currentPedestal == this)
             currentPedestal = null;
@@ -174,7 +181,6 @@ public class ShopPedestalRandomizer : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        // Prevent opening a new popup if another transaction is in progress
         if (currentPedestal != null && currentPedestal.isAwaitingDecision)
             return;
 

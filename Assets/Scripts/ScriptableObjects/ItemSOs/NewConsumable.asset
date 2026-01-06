@@ -20,3 +20,4 @@ MonoBehaviour:
   sellPrice: 2
   statToChange: 1
   amountToChangeStat: 12
+  diceEffect: {fileID: 11400000, guid: ea4d82284f25b704aaa7b632e255f566, type: 2}

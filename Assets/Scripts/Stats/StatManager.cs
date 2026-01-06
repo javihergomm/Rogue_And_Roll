@@ -5,13 +5,10 @@ using System.Collections.Generic;
 /*
  * StatManager
  * -----------
- * Centralized manager for player stats such as Gold, Rolls, and ShopRerolls.
- * Responsibilities:
- * - Initialize stats with starting and maximum values
- * - Apply changes to stats while enforcing min/max limits
- * - Update UI text to reflect current values
- * - Provide helper methods to query and consume stats
- * - Consult ShopExitManager to know if the player is inside the shop
+ * Central manager for player-related stats such as gold, rolls, and shop rerolls.
+ * Stores global turn information and the last dice result.
+ * Handles consumable usage, stat changes, and UI updates.
+ * Provides data required by dice effects through the roll context.
  */
 public class StatManager : MonoBehaviour
 {
@@ -29,12 +26,22 @@ public class StatManager : MonoBehaviour
     [Header("Shop Reroll Settings")]
     [SerializeField] private int maxShopRerolls = 2;
 
+    // Stores current and maximum values for each stat
     private Dictionary<StatType, int> currentValues = new Dictionary<StatType, int>();
     private Dictionary<StatType, int> maxValues = new Dictionary<StatType, int>();
 
-    // Pending consumable and its slot (needed for correct removal)
+    // Tracks consumables waiting to be removed after use
     private ConsumableSO pendingConsumable;
     private ItemSlot pendingSlot;
+
+    // Stores the last dice result
+    public int PreviousRoll { get; set; }
+
+    // Tracks the current turn number
+    public int CurrentTurn { get; private set; } = 1;
+
+    // Active consumable effects applied to the next roll
+    public List<BaseDiceEffect> ActiveConsumableEffects { get; private set; } = new List<BaseDiceEffect>();
 
     private void Awake()
     {
@@ -58,17 +65,30 @@ public class StatManager : MonoBehaviour
     }
 
     /*
-     * Called when a consumable is used.
-     * Receives the slot so the correct item instance can be removed.
+     * Uses a consumable that modifies stats or roll behavior.
+     * Stores the slot so the correct item instance can be removed.
      */
     public void TryUseItem(ConsumableSO item, ItemSlot slot)
     {
+        Debug.Log("[DEBUG] TryUseItem CALLED for: " + item.itemName + " en slot: " + slot.name);
+
         pendingConsumable = item;
         pendingSlot = slot;
 
-        ApplyChange(item.statToChange, item.amountToChangeStat);
+        // If the consumable modifies stats
+        if (item.statToChange != StatType.None)
+            ApplyChange(item.statToChange, item.amountToChangeStat);
+
+        // If the consumable modifies dice rolls
+        if (item.diceEffect != null)
+        {
+            Debug.Log("[DEBUG] Añadiendo efecto consumible: " + item.diceEffect.GetType().Name);
+            ActiveConsumableEffects.Add(item.diceEffect);
+        }
+
         ConsumePendingItem();
     }
+
 
     public void ChangeStat(StatType stat, int amount)
     {
@@ -76,7 +96,7 @@ public class StatManager : MonoBehaviour
     }
 
     /*
-     * Applies a stat change while enforcing limits.
+     * Applies a stat change while enforcing minimum and maximum limits.
      */
     private void ApplyChange(StatType stat, int amount)
     {
@@ -85,7 +105,6 @@ public class StatManager : MonoBehaviour
 
         currentValues[stat] += amount;
 
-        // Rolls can never drop below 1
         if (stat == StatType.Rolls && currentValues[stat] < 1)
             currentValues[stat] = 1;
 
@@ -102,7 +121,7 @@ public class StatManager : MonoBehaviour
     }
 
     /*
-     * Removes the pending consumable from the correct slot.
+     * Removes the consumable that was just used.
      */
     private void ConsumePendingItem()
     {
@@ -115,6 +134,24 @@ public class StatManager : MonoBehaviour
     }
 
     /*
+     * Called by DiceRollManager after all effects have been applied.
+     * Stores the final roll and clears temporary consumable effects.
+     */
+    public void OnDiceFinalResult(int finalRoll)
+    {
+        PreviousRoll = finalRoll;
+        ActiveConsumableEffects.Clear();
+    }
+
+    /*
+     * Advances the global turn counter.
+     */
+    public void NextTurn()
+    {
+        CurrentTurn++;
+    }
+
+    /*
      * Updates the UI text shown to the player.
      * All player-visible text must be in Spanish.
      */
@@ -123,6 +160,7 @@ public class StatManager : MonoBehaviour
         if (statsText == null) return;
 
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
         foreach (var kvp in currentValues)
         {
             StatType stat = kvp.Key;
@@ -135,7 +173,6 @@ public class StatManager : MonoBehaviour
             }
             else if (stat == StatType.ShopRerolls)
             {
-                // Only show rerolls if player is inside the shop
                 if (IsPlayerInShop())
                     sb.AppendLine("Reintentos de tienda: " + current + "/" + max);
             }
@@ -148,10 +185,6 @@ public class StatManager : MonoBehaviour
         statsText.text = sb.ToString();
     }
 
-    /*
-     * Returns the display name for a stat (internal use only).
-     * Player-visible text is handled in UpdateUI.
-     */
     private string GetDisplayName(StatType stat)
     {
         switch (stat)

@@ -6,8 +6,10 @@ using System.Collections.Generic;
 /*
  * DiceRoller
  * ----------
- * Handles physics-based rolling and face detection for a dice prefab.
- * Compatible with DiceRollerEditorHelper.
+ * Handles the physical behavior of a dice.
+ * Applies force when clicked.
+ * Reads the upward face after the dice settles.
+ * Applies mid-air correction and final snap correction if needed.
  */
 public class DiceRoller : MonoBehaviour
 {
@@ -20,7 +22,6 @@ public class DiceRoller : MonoBehaviour
     [Header("Dice Settings")]
     [SerializeField] private DiceType diceType = DiceType.D6;
 
-    // PUBLIC so the custom editor can access it
     public Dictionary<Vector3, int> FaceMap { get; private set; }
 
     private bool isRolling = false;
@@ -42,6 +43,9 @@ public class DiceRoller : MonoBehaviour
         rb.Sleep();
     }
 
+    /*
+     * Stores the dice data and the slot that spawned it.
+     */
     public void AssignDice(DiceSO data, ItemSlot slot)
     {
         diceData = data;
@@ -60,12 +64,15 @@ public class DiceRoller : MonoBehaviour
                 if (hit.collider.gameObject == gameObject)
                 {
                     RollDice();
-                    StartCoroutine(WaitForStop());
+                    StartCoroutine(HandleRoll());
                 }
             }
         }
     }
 
+    /*
+     * Applies an upward impulse and random torque.
+     */
     public void RollDice()
     {
         if (isRolling)
@@ -80,20 +87,148 @@ public class DiceRoller : MonoBehaviour
         rb.AddTorque(Random.insideUnitSphere * 50f, ForceMode.Impulse);
     }
 
-    private IEnumerator WaitForStop()
+    /*
+     * Roll sequence:
+     * - Waits until the dice starts rotating
+     * - Waits until it slows down again
+     * - Reads the physical face
+     * - Asks DiceRollManager for a target face
+     * - Applies mid-air correction if needed
+     * - Waits until the dice stops
+     * - Applies final snap correction if needed
+     * - Reports the final face
+     */
+    private IEnumerator HandleRoll()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForFixedUpdate();
 
+        // Wait until dice is spinning
+        while (rb.angularVelocity.magnitude < 2f)
+            yield return null;
+
+        // Wait until dice slows down again
+        while (rb.angularVelocity.magnitude > 0.5f)
+            yield return null;
+
+        int physicalRoll = GetFaceUp(false);
+
+        DiceContext ctx = new DiceContext
+        {
+            turnNumber = StatManager.Instance.CurrentTurn,
+            previousRoll = StatManager.Instance.PreviousRoll,
+            slot = linkedSlot
+        };
+
+        int? targetFace = DiceRollManager.Instance.GetTargetFaceForRoll(linkedSlot, physicalRoll, ctx);
+
+        // Mid-air correction
+        if (targetFace.HasValue && targetFace.Value != physicalRoll)
+            StartCoroutine(ApplyMidAirCorrection(targetFace.Value));
+
+        // Wait until dice fully stops
         while (!rb.IsSleeping())
             yield return null;
 
-        int result = GetFaceUp(false);
+        int finalFace = GetFaceUp(false);
 
-        Debug.Log("Dice rolled: " + result);
+        // Final snap correction if needed
+        if (!DiceRollManager.Instance.IsFaceAllowed(linkedSlot, finalFace))
+        {
+            int? snapTarget = DiceRollManager.Instance.GetTargetFaceForRoll(linkedSlot, finalFace, ctx);
+            if (snapTarget.HasValue)
+                yield return StartCoroutine(SnapToFace(snapTarget.Value));
+
+            finalFace = GetFaceUp(false);
+        }
 
         isRolling = false;
+
+        DiceRollManager.Instance.OnDiceResult(linkedSlot, finalFace);
     }
 
+    /*
+     * Applies torque to rotate the dice toward a target face.
+     * The torque is soft and does not override physics.
+     */
+    private IEnumerator ApplyMidAirCorrection(int targetValue)
+    {
+        Vector3 targetLocalDir = Vector3.zero;
+
+        foreach (var kvp in FaceMap)
+        {
+            if (kvp.Value == targetValue)
+            {
+                targetLocalDir = kvp.Key;
+                break;
+            }
+        }
+
+        float timer = 0f;
+        float maxTime = 1.2f;
+
+        while (timer < maxTime && !rb.IsSleeping())
+        {
+            Vector3 targetWorldDir = transform.TransformDirection(targetLocalDir);
+            Vector3 currentUp = transform.up;
+
+            float alignment = Vector3.Dot(currentUp, targetWorldDir);
+            float strength = Mathf.Clamp01(1f - alignment);
+
+            Vector3 torqueDir = Vector3.Cross(currentUp, targetWorldDir);
+
+            rb.AddTorque(torqueDir * (strength * 6f), ForceMode.Acceleration);
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    /*
+     * Smoothly rotates the dice to the target face after it lands.
+     */
+    private IEnumerator SnapToFace(int targetValue)
+    {
+        // Find the local direction of the target face
+        Vector3 targetLocalDir = Vector3.zero;
+
+        foreach (var kvp in FaceMap)
+        {
+            if (kvp.Value == targetValue)
+            {
+                targetLocalDir = kvp.Key;
+                break;
+            }
+        }
+
+        // Compute the world direction that should point up
+        Vector3 targetWorldUp = transform.TransformDirection(targetLocalDir);
+
+        // Compute the final rotation that aligns that direction with Vector3.up
+        Quaternion startRot = transform.rotation;
+        Quaternion endRot = Quaternion.FromToRotation(targetWorldUp, Vector3.up) * transform.rotation;
+
+        float t = 0f;
+        float duration = 0.18f; // shorter, more natural
+
+        while (t < duration)
+        {
+            // Smooth easing (ease in-out)
+            float smooth = t / duration;
+            smooth = smooth * smooth * (3f - 2f * smooth);
+
+            transform.rotation = Quaternion.Slerp(startRot, endRot, smooth);
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.rotation = endRot;
+    }
+
+
+    /*
+     * Returns the face whose direction is closest to world up.
+     */
     private int GetFaceUp(bool verbose)
     {
         float bestDot = -1f;
@@ -114,12 +249,9 @@ public class DiceRoller : MonoBehaviour
         return bestValue;
     }
 
-    // REQUIRED by the custom editor
-    public int EditorTestFaceUp()
-    {
-        return GetFaceUp(false);
-    }
-
+    /*
+     * Maps local directions to face values.
+     */
     public void InitFaceMap()
     {
         FaceMap = new Dictionary<Vector3, int>();
