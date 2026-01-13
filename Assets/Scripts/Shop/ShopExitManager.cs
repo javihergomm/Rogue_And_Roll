@@ -8,9 +8,6 @@ public class ShopExitManager : MonoBehaviour
     [SerializeField] private List<GameObject> decisionEmpties = new List<GameObject>();
     [SerializeField] private Transform boardTransform;
 
-    [Tooltip("Reference to the cup (selector).")]
-    [SerializeField] private GameObject cupObject;
-
     [Header("Rotation Settings")]
     [SerializeField] private float exitRotationZ = 0f;
     [SerializeField] private float shopRotationZ = 180f;
@@ -18,7 +15,11 @@ public class ShopExitManager : MonoBehaviour
     [Header("Shop State")]
     [SerializeField] private bool inShop = true;
 
-    // Enter shop mode: enable pedestals, hide cup, restore rerolls, rotate board
+    // *** SOLO NECESARIO MIENTRAS EL JUEGO EMPIEZA EN LA TIENDA ***
+    // Cuando el juego empiece directamente en el tablero, puedes BORRAR esta variable.
+    private bool firstTimeExit = true;
+
+    // Enter shop mode: enable pedestals, restore rerolls, rotate board
     public void EnterShop()
     {
         if (inShop) return;
@@ -35,9 +36,6 @@ public class ShopExitManager : MonoBehaviour
             if (empty != null)
                 empty.SetActive(true);
         }
-
-        if (cupObject != null)
-            cupObject.SetActive(false);
 
         if (StatManager.Instance != null)
         {
@@ -95,6 +93,15 @@ public class ShopExitManager : MonoBehaviour
             euler.z = exitRotationZ;
             boardTransform.eulerAngles = euler;
         }
+
+        // *** SOLO NECESARIO MIENTRAS EL JUEGO EMPIEZA EN LA TIENDA ***
+        // Muestra el selector SOLO la primera vez que sales de la tienda.
+        // Cuando el juego empiece directamente en el tablero, puedes BORRAR este bloque entero.
+        if (firstTimeExit)
+        {
+            firstTimeExit = false;
+            CharacterSelectManager.Instance.ShowSelector();
+        }
     }
 
     // Cancel exit and stay inside the shop
@@ -116,10 +123,6 @@ public class ShopExitManager : MonoBehaviour
             if (empty != null)
                 empty.SetActive(true);
         }
-
-        // Cup stays hidden while inside the shop
-        if (cupObject != null)
-            cupObject.SetActive(false);
 
         // Keep board rotated to shop orientation
         if (boardTransform != null)

@@ -115,6 +115,22 @@ public class OptionPopupManager : MonoBehaviour
         ClearPopupButtons();
         HideSlider();
     }
+    /*
+    * Popup to confirm selecting a character.
+    */
+    public void ShowConfirmCharacterPopup(string characterName, System.Action onConfirm, System.Action onCancel)
+    {
+        var options = new Dictionary<string, System.Action>
+    {
+        { "Si", () => { onConfirm?.Invoke(); }},
+        { "No", () => { onCancel?.Invoke(); }}
+    };
+
+        ShowPopup(
+            "¿Estás seguro que quieres elegir " + characterName + " como tu personaje?",
+            options
+        );
+    }
 
     /*
      * Popup shown when the inventory is full.
