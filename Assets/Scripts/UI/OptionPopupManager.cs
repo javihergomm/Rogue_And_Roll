@@ -336,4 +336,15 @@ public class OptionPopupManager : MonoBehaviour
 
         ShowPopup("Seguro que quieres salir de la tienda?", options);
     }
+    /*
+     * Returns true if the popup panel is currently active.
+     */
+    public bool IsPopupOpen
+    {
+        get
+        {
+            return popupPanel != null && popupPanel.activeSelf;
+        }
+    }
+
 }

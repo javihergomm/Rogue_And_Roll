@@ -160,4 +160,36 @@ public class CharacterSelectManager : MonoBehaviour
         foreach (var mat in rend.materials)
             mat.color = selectedCharacter.characterColor;
     }
+
+    /*
+     * IsSelectorOpen
+     * --------------
+     * Returns true if the character selection panel is currently active
+     * and has not been permanently disabled.
+     */
+    public bool IsSelectorOpen()
+    {
+        return selectorPanel.activeSelf && !selectorDisabledForever;
+    }
+
+    /*
+     * IsAnySelectorUIOpen
+     * --------------------
+     * Returns true if the character selector panel or any popup
+     * from OptionPopupManager is currently active.
+     * Used to block other UI systems (e.g., inventory) while selecting a character.
+     */
+    public bool IsAnySelectorUIOpen()
+    {
+        // Selector panel active
+        if (selectorPanel.activeSelf && !selectorDisabledForever)
+            return true;
+
+        // Popup active
+        if (OptionPopupManager.Instance != null &&
+            OptionPopupManager.Instance.IsPopupOpen)
+            return true;
+
+        return false;
+    }
 }

@@ -441,6 +441,11 @@ public class InventoryManager : MonoBehaviour
     // -------------------------------------------------------------------------
     public void ToggleInventory()
     {
+        // Block inventory access during character selection or popup confirmation
+        if (CharacterSelectManager.Instance != null &&
+            CharacterSelectManager.Instance.IsAnySelectorUIOpen())
+            return;
+
         if (menuActivated)
             CloseInventory();
         else
@@ -449,7 +454,13 @@ public class InventoryManager : MonoBehaviour
 
     public void OpenInventory(bool pauseGame = true)
     {
-        if (menuActivated) return;
+        // Block inventory access during character selection or popup confirmation
+        if (CharacterSelectManager.Instance != null &&
+            CharacterSelectManager.Instance.IsAnySelectorUIOpen())
+            return;
+
+        if (menuActivated)
+            return;
 
         menuActivated = true;
         inventoryMenu?.SetActive(true);
