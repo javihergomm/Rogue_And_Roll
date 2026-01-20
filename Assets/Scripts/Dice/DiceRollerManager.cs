@@ -45,6 +45,7 @@ public class DiceRollManager : MonoBehaviour
     {
         Debug.Log("========== DEBUG ROLL EFFECTS ==========");
 
+        // Consumables
         if (StatManager.Instance.ActiveConsumableEffects.Count == 0)
             Debug.Log("Active consumables: none");
         else
@@ -54,6 +55,7 @@ public class DiceRollManager : MonoBehaviour
                 Debug.Log(" - " + eff.GetType().Name);
         }
 
+        // Permanents
         Debug.Log("Active permanents:");
         foreach (var slot in InventoryManager.Instance.ItemSlots)
         {
@@ -65,6 +67,12 @@ public class DiceRollManager : MonoBehaviour
             }
         }
 
+        // Character effects
+        Debug.Log("Character dice effects:");
+        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+            Debug.Log(" - " + eff.GetType().Name);
+
+        // Active dice effect
         ItemSlot activeSlot = InventoryManager.Instance.ActiveDiceSlot;
         if (activeSlot != null && activeSlot.quantity > 0)
         {
@@ -200,6 +208,10 @@ public class DiceRollManager : MonoBehaviour
             }
         }
 
+        // Character dice effects
+        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+            ApplyEffectToRange(eff, ref minAllowed, ref maxAllowed, ctx);
+
         // Consumable effects
         foreach (var effect in StatManager.Instance.ActiveConsumableEffects)
             ApplyEffectToRange(effect, ref minAllowed, ref maxAllowed, ctx);
@@ -222,10 +234,10 @@ public class DiceRollManager : MonoBehaviour
     private void ApplyEffectToRange(BaseDiceEffect effect, ref int minAllowed, ref int maxAllowed, DiceContext ctx)
     {
         if (effect is MinValueDiceEffect minEff)
-            minAllowed = Mathf.Max(minAllowed, minEff.minValue);
+            minAllowed = Mathf.Max(minAllowed, minEff.MinValue);
 
         else if (effect is MaxValueDiceEffect maxEff)
-            maxAllowed = Mathf.Min(maxAllowed, maxEff.maxValue);
+            maxAllowed = Mathf.Min(maxAllowed, maxEff.MaxValue);
 
         else if (effect is MultiplierDiceEffect)
         {
@@ -246,11 +258,9 @@ public class DiceRollManager : MonoBehaviour
 
         int preview = GetFinalRollPreview(physicalRoll, ctx, slot);
 
-        // If preview is allowed, use it
         if (allowed.Contains(preview))
             return preview;
 
-        // Otherwise clamp to closest allowed
         int closest = allowed[0];
         int bestDist = Mathf.Abs(preview - closest);
 
@@ -287,10 +297,12 @@ public class DiceRollManager : MonoBehaviour
 
         DebugActiveEffects();
 
+        // Dice effect
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.itemName);
         if (item is DiceSO dice && dice.diceEffect != null)
             finalRoll = dice.diceEffect.ModifyRoll(finalRoll, ctx);
 
+        // Permanent effects
         foreach (var s in InventoryManager.Instance.ItemSlots)
         {
             if (s.quantity > 0)
@@ -301,6 +313,11 @@ public class DiceRollManager : MonoBehaviour
             }
         }
 
+        // Character dice effects
+        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+            finalRoll = eff.ModifyRoll(finalRoll, ctx);
+
+        // Consumable effects
         foreach (var effect in StatManager.Instance.ActiveConsumableEffects)
             finalRoll = effect.ModifyRoll(finalRoll, ctx);
 
@@ -319,10 +336,12 @@ public class DiceRollManager : MonoBehaviour
     {
         int result = rawRoll;
 
+        // Dice effect
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.itemName);
         if (item is DiceSO dice && dice.diceEffect != null)
             result = dice.diceEffect.ModifyRoll(result, ctx);
 
+        // Permanent effects
         foreach (var s in InventoryManager.Instance.ItemSlots)
         {
             if (s.quantity > 0)
@@ -333,6 +352,11 @@ public class DiceRollManager : MonoBehaviour
             }
         }
 
+        // Character dice effects
+        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+            result = eff.ModifyRoll(result, ctx);
+
+        // Consumable effects
         foreach (var effect in StatManager.Instance.ActiveConsumableEffects)
             result = effect.ModifyRoll(result, ctx);
 

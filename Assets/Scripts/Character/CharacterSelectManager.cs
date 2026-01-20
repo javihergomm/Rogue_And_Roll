@@ -5,31 +5,37 @@ using System.Collections.Generic;
 /*
  * CharacterSelectManager
  * ----------------------
- * Manages the character selection UI.
- * Uses existing CharacterSlot objects placed in the scene.
- * Updates the info panel when a slot is selected.
- * Uses OptionPopupManager to confirm the chosen character.
- * Saves the selected character and spawns it in the correct board area.
+ * Handles the character (cup) selection UI.
+ * Assigns CharacterSO data to CharacterSlot objects,
+ * updates the info panel, and confirms the selected character.
+ *
+ * When a character is confirmed:
+ * - Saves the selection in PlayerPrefs
+ * - Spawns the cup prefab at the correct spawn point
+ * - Activates all character effects through CharacterEffectManager
  */
 public class CharacterSelectManager : MonoBehaviour
 {
     public static CharacterSelectManager Instance;
 
+    [Header("UI Panels")]
     [SerializeField] private GameObject selectorPanel;
 
+    [Header("Info Panel")]
     [SerializeField] private TMP_Text infoNameText;
     [SerializeField] private TMP_Text infoDescText;
 
+    [Header("Characters")]
     [SerializeField] private CharacterSO[] characters;
-
     [SerializeField] private List<CharacterSlot> slots;
 
+    [Header("Cup Prefab")]
     [SerializeField] private GameObject cupPrefab;
 
     private CharacterSO selectedCharacter;
     private GameObject spawnedCup;
 
-    // Tracks whether the selector should remain disabled for the rest of the session
+    // Prevents reopening the selector after a character is chosen
     private bool selectorDisabledForever = false;
 
     private void Awake()
@@ -49,7 +55,7 @@ public class CharacterSelectManager : MonoBehaviour
     /*
      * AssignCharactersToSlots
      * -----------------------
-     * Assigns each CharacterSO to an existing CharacterSlot in the scene.
+     * Assigns each CharacterSO to a CharacterSlot in the scene.
      */
     private void AssignCharactersToSlots()
     {
@@ -62,7 +68,7 @@ public class CharacterSelectManager : MonoBehaviour
     /*
      * ShowSelector
      * ------------
-     * Displays the character selection panel and pauses the game.
+     * Opens the character selection panel and pauses the game.
      */
     public void ShowSelector()
     {
@@ -76,7 +82,7 @@ public class CharacterSelectManager : MonoBehaviour
     /*
      * HideSelectorPanel
      * -----------------
-     * Temporarily hides the selector while a popup is open.
+     * Temporarily hides the selector (used when a popup appears).
      */
     public void HideSelectorPanel()
     {
@@ -98,7 +104,7 @@ public class CharacterSelectManager : MonoBehaviour
     /*
      * DisableSelectorForever
      * ----------------------
-     * Permanently disables the selector for the rest of the session.
+     * Permanently disables the selector after a character is chosen.
      */
     public void DisableSelectorForever()
     {
@@ -109,7 +115,7 @@ public class CharacterSelectManager : MonoBehaviour
     /*
      * DeselectAllSlots
      * ----------------
-     * Clears selection highlight from all slots.
+     * Removes highlight from all character slots.
      */
     public void DeselectAllSlots()
     {
@@ -120,25 +126,32 @@ public class CharacterSelectManager : MonoBehaviour
     /*
      * ConfirmCharacter
      * ----------------
-     * Saves the selected character and spawns it on the board.
+     * Saves the selected character, spawns it,
+     * and activates all its effects through CharacterEffectManager.
      */
     public void ConfirmCharacter(CharacterSO character)
     {
         selectedCharacter = character;
 
+        // Save selection
         PlayerPrefs.SetString("SelectedCharacterID", character.characterID);
         PlayerPrefs.SetInt("HasSelectedCharacter", 1);
 
+        // Close UI and resume game
         selectorPanel.SetActive(false);
         Time.timeScale = 1f;
 
+        // Spawn the cup in the world
         SpawnCharacter();
+
+        // Activate all character effects
+        CharacterEffectManager.Instance.ActivateCharacter(selectedCharacter);
     }
 
     /*
      * SpawnCharacter
      * --------------
-     * Instantiates the selected character's cup at the correct spawn point.
+     * Instantiates the selected cup prefab at the correct spawn point.
      */
     private void SpawnCharacter()
     {
@@ -155,8 +168,8 @@ public class CharacterSelectManager : MonoBehaviour
 
         spawnedCup = Instantiate(cupPrefab, spawnPoint.position, spawnPoint.rotation);
 
+        // Apply cup color to all materials
         Renderer rend = spawnedCup.GetComponent<Renderer>();
-
         foreach (var mat in rend.materials)
             mat.color = selectedCharacter.characterColor;
     }
@@ -164,8 +177,7 @@ public class CharacterSelectManager : MonoBehaviour
     /*
      * IsSelectorOpen
      * --------------
-     * Returns true if the character selection panel is currently active
-     * and has not been permanently disabled.
+     * Returns true if the selector is open and not permanently disabled.
      */
     public bool IsSelectorOpen()
     {
@@ -175,17 +187,14 @@ public class CharacterSelectManager : MonoBehaviour
     /*
      * IsAnySelectorUIOpen
      * --------------------
-     * Returns true if the character selector panel or any popup
-     * from OptionPopupManager is currently active.
-     * Used to block other UI systems (e.g., inventory) while selecting a character.
+     * Returns true if either the selector or a popup is open.
+     * Used to block other UI systems (inventory, shop, etc.).
      */
     public bool IsAnySelectorUIOpen()
     {
-        // Selector panel active
         if (selectorPanel.activeSelf && !selectorDisabledForever)
             return true;
 
-        // Popup active
         if (OptionPopupManager.Instance != null &&
             OptionPopupManager.Instance.IsPopupOpen)
             return true;

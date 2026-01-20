@@ -3,13 +3,20 @@ using UnityEngine;
 /*
  * MaxValueDiceEffect
  * ------------------
- * Ensures the roll result is never above a maximum value.
- * The maxValue is fully configurable in the inspector.
+ * Restricts the maximum allowed roll value.
+ * Does NOT define the initial max; DiceRollManager provides it.
  */
 [CreateAssetMenu(fileName = "MaxValueDiceEffect", menuName = "Effects/Dice/MaxValue")]
 public class MaxValueDiceEffect : BaseDiceEffect
 {
-    public int maxValue = 999;
+    [SerializeField]
+    [Tooltip("Maximum allowed roll value imposed by this effect.")]
+    private int maxValue = 999;
+
+    public int MaxValue
+    {
+        get { return maxValue; }
+    }
 
     public override int ModifyRoll(int roll, DiceContext ctx)
     {
