@@ -21,7 +21,7 @@ public class CharacterSO : ScriptableObject
     public Sprite icon;
 
     [Header("Visuals")]
-    public Color cupColor = Color.white;
+    public Color characterColor = Color.white;
 
     [Header("Spawn")]
     public string spawnPointName;
