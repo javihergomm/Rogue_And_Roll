@@ -70,7 +70,7 @@ public class StatManager : MonoBehaviour
      */
     public void TryUseItem(ConsumableSO item, ItemSlot slot)
     {
-        Debug.Log("[DEBUG] TryUseItem CALLED for: " + item.itemName + " en slot: " + slot.name);
+        Debug.Log("[DEBUG] TryUseItem CALLED for: " + item.itemName + " in slot: " + slot.name);
 
         pendingConsumable = item;
         pendingSlot = slot;
@@ -79,16 +79,26 @@ public class StatManager : MonoBehaviour
         if (item.statToChange != StatType.None)
             ApplyChange(item.statToChange, item.amountToChangeStat);
 
-        // If the consumable modifies dice rolls
-        if (item.diceEffect != null)
+        // If the consumable has ANY effects
+        if (item.effects != null)
         {
-            Debug.Log("[DEBUG] Añadiendo efecto consumible: " + item.diceEffect.GetType().Name);
-            ActiveConsumableEffects.Add(item.diceEffect);
+            foreach (var eff in item.effects)
+            {
+                if (eff is BaseDiceEffect diceEff)
+                {
+                    Debug.Log("[DEBUG] Adding consumable dice effect: " + diceEff.GetType().Name);
+                    ActiveConsumableEffects.Add(diceEff);
+                }
+                else if (eff is BaseConsumableEffect consEff)
+                {
+                    Debug.Log("[DEBUG] Activating consumable effect: " + consEff.GetType().Name);
+                    consEff.Activate(new ConsumableContext());
+                }
+            }
         }
 
         ConsumePendingItem();
     }
-
 
     public void ChangeStat(StatType stat, int amount)
     {

@@ -14,8 +14,8 @@ public class ConsumableSO : BaseItemSO
     public StatType statToChange;       // Optional stat to modify
     public int amountToChangeStat;      // Amount applied to the stat
 
-    [Header("Roll Effect (Optional)")]
-    public BaseDiceEffect diceEffect;   // Temporary effect applied to the next roll
+    [Header("Effects (Any Type)")]
+    public BaseEffect[] effects;
 
     // Consumables are used through StatManager and InventoryManager
     public override void UseItem() { }

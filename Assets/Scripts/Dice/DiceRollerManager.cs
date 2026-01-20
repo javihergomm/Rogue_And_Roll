@@ -62,8 +62,12 @@ public class DiceRollManager : MonoBehaviour
             if (slot.quantity > 0)
             {
                 BaseItemSO it = InventoryManager.Instance.GetItemSO(slot.itemName);
-                if (it is PermanentSO perm && perm.diceEffect != null)
-                    Debug.Log(" - " + perm.itemName + " (" + perm.diceEffect.GetType().Name + ")");
+                if (it is PermanentSO perm && perm.effects != null)
+                {
+                    foreach (var eff in perm.effects)
+                        if (eff is BaseDiceEffect diceEff)
+                            Debug.Log(" - " + perm.itemName + " (" + diceEff.GetType().Name + ")");
+                }
             }
         }
 
@@ -77,8 +81,12 @@ public class DiceRollManager : MonoBehaviour
         if (activeSlot != null && activeSlot.quantity > 0)
         {
             BaseItemSO item = InventoryManager.Instance.GetItemSO(activeSlot.itemName);
-            if (item is DiceSO dice && dice.diceEffect != null)
-                Debug.Log("Active dice effect: " + dice.diceEffect.GetType().Name);
+            if (item is DiceSO dice && dice.effects != null)
+            {
+                foreach (var eff in dice.effects)
+                    if (eff is BaseDiceEffect diceEff)
+                        Debug.Log("Active dice effect: " + diceEff.GetType().Name);
+            }
             else
                 Debug.Log("Active dice effect: none");
         }
@@ -193,9 +201,13 @@ public class DiceRollManager : MonoBehaviour
             slot = slot
         };
 
-        // Dice effect
-        if (dice.diceEffect != null)
-            ApplyEffectToRange(dice.diceEffect, ref minAllowed, ref maxAllowed, ctx);
+        // Dice effects
+        if (dice.effects != null)
+        {
+            foreach (var eff in dice.effects)
+                if (eff is BaseDiceEffect diceEff)
+                    ApplyEffectToRange(diceEff, ref minAllowed, ref maxAllowed, ctx);
+        }
 
         // Permanent effects
         foreach (var s in InventoryManager.Instance.ItemSlots)
@@ -203,12 +215,16 @@ public class DiceRollManager : MonoBehaviour
             if (s.quantity > 0)
             {
                 BaseItemSO it = InventoryManager.Instance.GetItemSO(s.itemName);
-                if (it is PermanentSO perm && perm.diceEffect != null)
-                    ApplyEffectToRange(perm.diceEffect, ref minAllowed, ref maxAllowed, ctx);
+                if (it is PermanentSO perm && perm.effects != null)
+                {
+                    foreach (var eff in perm.effects)
+                        if (eff is BaseDiceEffect diceEff)
+                            ApplyEffectToRange(diceEff, ref minAllowed, ref maxAllowed, ctx);
+                }
             }
         }
 
-        // Character dice effects
+        // Character effects
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             ApplyEffectToRange(eff, ref minAllowed, ref maxAllowed, ctx);
 
@@ -297,10 +313,14 @@ public class DiceRollManager : MonoBehaviour
 
         DebugActiveEffects();
 
-        // Dice effect
+        // Dice effects
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.itemName);
-        if (item is DiceSO dice && dice.diceEffect != null)
-            finalRoll = dice.diceEffect.ModifyRoll(finalRoll, ctx);
+        if (item is DiceSO dice && dice.effects != null)
+        {
+            foreach (var eff in dice.effects)
+                if (eff is BaseDiceEffect diceEff)
+                    finalRoll = diceEff.ModifyRoll(finalRoll, ctx);
+        }
 
         // Permanent effects
         foreach (var s in InventoryManager.Instance.ItemSlots)
@@ -308,12 +328,16 @@ public class DiceRollManager : MonoBehaviour
             if (s.quantity > 0)
             {
                 BaseItemSO it = InventoryManager.Instance.GetItemSO(s.itemName);
-                if (it is PermanentSO perm && perm.diceEffect != null)
-                    finalRoll = perm.diceEffect.ModifyRoll(finalRoll, ctx);
+                if (it is PermanentSO perm && perm.effects != null)
+                {
+                    foreach (var eff in perm.effects)
+                        if (eff is BaseDiceEffect diceEff)
+                            finalRoll = diceEff.ModifyRoll(finalRoll, ctx);
+                }
             }
         }
 
-        // Character dice effects
+        // Character effects
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             finalRoll = eff.ModifyRoll(finalRoll, ctx);
 
@@ -336,10 +360,14 @@ public class DiceRollManager : MonoBehaviour
     {
         int result = rawRoll;
 
-        // Dice effect
+        // Dice effects
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.itemName);
-        if (item is DiceSO dice && dice.diceEffect != null)
-            result = dice.diceEffect.ModifyRoll(result, ctx);
+        if (item is DiceSO dice && dice.effects != null)
+        {
+            foreach (var eff in dice.effects)
+                if (eff is BaseDiceEffect diceEff)
+                    result = diceEff.ModifyRoll(result, ctx);
+        }
 
         // Permanent effects
         foreach (var s in InventoryManager.Instance.ItemSlots)
@@ -347,12 +375,16 @@ public class DiceRollManager : MonoBehaviour
             if (s.quantity > 0)
             {
                 BaseItemSO it = InventoryManager.Instance.GetItemSO(s.itemName);
-                if (it is PermanentSO perm && perm.diceEffect != null)
-                    result = perm.diceEffect.ModifyRoll(result, ctx);
+                if (it is PermanentSO perm && perm.effects != null)
+                {
+                    foreach (var eff in perm.effects)
+                        if (eff is BaseDiceEffect diceEff)
+                            result = diceEff.ModifyRoll(result, ctx);
+                }
             }
         }
 
-        // Character dice effects
+        // Character effects
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             result = eff.ModifyRoll(result, ctx);
 

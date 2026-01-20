@@ -13,8 +13,8 @@ public class DiceSO : BaseItemSO
     [Header("Dice Settings")]
     public DiceType diceType;            // Type of dice (D4, D6, etc.)
 
-    [Header("Roll Effect (Optional)")]
-    public BaseDiceEffect diceEffect;    // Optional effect applied during roll processing
+    [Header("Effects (Any Type)")]
+    public BaseEffect[] effects;
 
     /*
      * Returns the maximum face value for this dice based on its type.

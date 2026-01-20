@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class BasePassiveEffect : ScriptableObject
+public abstract class BasePassiveEffect : BaseEffect
 {
     public virtual void OnTurnStart(PassiveContext ctx) { }
     public virtual void OnTurnEnd(PassiveContext ctx) { }

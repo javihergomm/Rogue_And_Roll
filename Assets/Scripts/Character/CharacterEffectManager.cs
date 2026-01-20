@@ -7,12 +7,6 @@ using System.Collections.Generic;
  * Central manager that stores and exposes all effects coming from
  * the selected cup-character (CharacterSO).
  *
- * Responsibilities:
- * - Store the active CharacterSO
- * - Register all dice effects and passive effects from the selected character
- * - Expose special character flags (e.g., random bonus, avoid bad tile every 3 turns)
- * - Provide global access for DiceRollManager, StatManager, etc.
- *
  * This manager does NOT execute effects directly.
  * It only stores them so other systems can query them.
  */
@@ -66,23 +60,19 @@ public class CharacterEffectManager : MonoBehaviour
         ActiveDiceEffects.Clear();
         ActivePassiveEffects.Clear();
 
-        // Load dice effects
-        if (character.diceEffects != null)
+        // Load all effects from the character
+        if (character.effects != null)
         {
-            foreach (var eff in character.diceEffects)
+            foreach (var eff in character.effects)
             {
-                if (eff != null)
-                    ActiveDiceEffects.Add(eff);
-            }
-        }
+                if (eff == null)
+                    continue;
 
-        // Load passive effects
-        if (character.passiveEffects != null)
-        {
-            foreach (var eff in character.passiveEffects)
-            {
-                if (eff != null)
-                    ActivePassiveEffects.Add(eff);
+                if (eff is BaseDiceEffect diceEff)
+                    ActiveDiceEffects.Add(diceEff);
+
+                else if (eff is BasePassiveEffect passiveEff)
+                    ActivePassiveEffects.Add(passiveEff);
             }
         }
 

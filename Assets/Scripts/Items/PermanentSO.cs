@@ -10,8 +10,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewPermanent", menuName = "Inventory/Permanent")]
 public class PermanentSO : BaseItemSO
 {
-    // Optional effect applied when a dice roll is processed
-    public BaseDiceEffect diceEffect;
+    [Header("Effects (Any Type)")]
+    public BaseEffect[] effects;
 
     public override void UseItem()
     {

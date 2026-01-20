@@ -7,8 +7,7 @@ using UnityEngine;
  * Each cup defines:
  * - Visual identity (name, icon, color)
  * - Spawn point
- * - Dice effects (modify rolls)
- * - Passive effects (turn-based or movement-based)
+ * - Effects (dice, passive, or any other BaseEffect)
  * - Special flags for unique cup behaviors
  */
 [CreateAssetMenu(fileName = "NewCupCharacter", menuName = "Game/Cup Character")]
@@ -26,17 +25,13 @@ public class CharacterSO : ScriptableObject
     [Header("Spawn")]
     public string spawnPointName;
 
-    [Header("Dice Effects")]
-    [Tooltip("Effects applied to every dice roll while this cup is active.")]
-    public BaseDiceEffect[] diceEffects;
-
-    [Header("Passive Effects")]
-    [Tooltip("Effects applied on turn start/end, movement, etc.")]
-    public BasePassiveEffect[] passiveEffects;
+    [Header("Effects")]
+    [Tooltip("All effects applied while this cup is active (dice, passive, etc.).")]
+    public BaseEffect[] effects;
 
     [Header("Special Cup Behaviors")]
-    public bool isBasicCup;            // Cubilete Básico
-    public bool hasRandomBonus;        // Cubilete del Azar (10% efecto extra)
-    public bool avoidsBadTileEvery3;   // Cubilete Encantado (cada 3 turnos evita casilla mala)
-    public bool isMetalCup;            // Cubilete Metálico (+1 a d4/d6)
+    public bool isBasicCup;            // Basic Cup
+    public bool hasRandomBonus;        // Random Bonus Cup (10% extra effect)
+    public bool avoidsBadTileEvery3;   // Enchanted Cup (avoids bad tile every 3 turns)
+    public bool isMetalCup;            // Metal Cup (+1 to d4/d6)
 }
