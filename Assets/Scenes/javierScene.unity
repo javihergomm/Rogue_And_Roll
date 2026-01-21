@@ -526,8 +526,8 @@ Transform:
   m_GameObject: {fileID: 204755151}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.046, y: 0.012, z: 0.19219999}
-  m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
+  m_LocalPosition: {x: -0.046, y: 0.27, z: 0.19219999}
+  m_LocalScale: {x: 0.099999994, y: 0.099999994, z: 0.099999994}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1262,8 +1262,8 @@ Transform:
   m_GameObject: {fileID: 611176248}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.0458, y: 0.012, z: 0.19219999}
-  m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
+  m_LocalPosition: {x: 0.0458, y: 0.27, z: 0.19219999}
+  m_LocalScale: {x: 0.099999994, y: 0.099999994, z: 0.099999994}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1861,7 +1861,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 27b5d172221e5c148ad1000314fe5dfb, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 0cc5767b84b2dbf49b3228f8cf86e141, type: 2}
+      objectReference: {fileID: 2100000, guid: c6b7594908df2074bb37020942785784, type: 2}
     - target: {fileID: 919132149155446097, guid: 27b5d172221e5c148ad1000314fe5dfb, type: 3}
       propertyPath: m_Name
       value: TableroFinal
