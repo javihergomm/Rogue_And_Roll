@@ -4016,7 +4016,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1548563265}
         m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
         m_MethodName: ToggleInventory
         m_Mode: 1
@@ -8808,6 +8808,7 @@ GameObject:
   - component: {fileID: 1548563263}
   - component: {fileID: 1548563264}
   - component: {fileID: 1548563265}
+  - component: {fileID: 1548563266}
   m_Layer: 0
   m_Name: GameManagers
   m_TagString: Untagged
@@ -9018,6 +9019,25 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
   - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
   - {fileID: 11400000, guid: 0cc5767b84b2dbf49b3228f8cf86e141, type: 2}
+--- !u!114 &1548563266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548563255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b698bcff0577a4f4886d7b9c21c381a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterEffectManager
+  activeCharacter: {fileID: 0}
+  ActiveDiceEffects: []
+  ActivePassiveEffects: []
+  isBasicCup: 0
+  hasRandomBonus: 0
+  avoidsBadTileEvery3: 0
+  isMetalCup: 0
 --- !u!1 &1561261657
 GameObject:
   m_ObjectHideFlags: 0
@@ -11098,8 +11118,38 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8062082443462226345, guid: 8e42e98d7f77e8d46ab89551bc43b6a4, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 6894667600040250209}
   m_SourcePrefab: {fileID: 100100000, guid: 8e42e98d7f77e8d46ab89551bc43b6a4, type: 3}
+--- !u!1 &6894667600040250208 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8062082443462226345, guid: 8e42e98d7f77e8d46ab89551bc43b6a4, type: 3}
+  m_PrefabInstance: {fileID: 6894667600040250207}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &6894667600040250209
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6894667600040250208}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 5296129568566095445, guid: c6cb3a931eda0eb4aa96215092fc79bb, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

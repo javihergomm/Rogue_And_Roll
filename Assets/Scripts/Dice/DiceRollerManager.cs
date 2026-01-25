@@ -4,11 +4,16 @@ using System.Collections.Generic;
 /*
  * DiceRollManager
  * ----------------
- * Handles the physical dice that exist in the world.
- * Each active dice slot has one physical dice instance.
- * Responsible for spawning, removing, and rolling dice.
- * Determines the allowed faces for each dice based on active effects.
- * Processes the final roll result and forwards it to the StatManager.
+ * Manages all physical dice in the world.
+ * Each active inventory slot corresponds to one physical dice instance.
+ * Responsibilities:
+ *   - Spawning dice in the scene
+ *   - Removing dice when slots are cleared
+ *   - Triggering dice rolls
+ *   - Determining allowed faces based on effects
+ *   - Selecting the best target face for correction
+ *   - Applying effects to compute the final roll
+ *   - Storing both the raw roll and the final modified roll
  */
 public class DiceRollManager : MonoBehaviour
 {
@@ -26,7 +31,13 @@ public class DiceRollManager : MonoBehaviour
     [SerializeField] private Transform[] activeDiceSpawnPoints;
     [SerializeField] private float spawnLift = 0.05f;
 
+    // Physical dice instance per slot
     private Dictionary<ItemSlot, GameObject> worldDice = new Dictionary<ItemSlot, GameObject>();
+
+    // Stores raw roll and final roll per slot
+    private Dictionary<ItemSlot, (int baseRoll, int finalRoll)> rollHistory
+        = new Dictionary<ItemSlot, (int baseRoll, int finalRoll)>();
+
 
     private void Awake()
     {
@@ -39,71 +50,14 @@ public class DiceRollManager : MonoBehaviour
     }
 
     // -------------------------------------------------------------------------
-    // DEBUG
-    // -------------------------------------------------------------------------
-    private void DebugActiveEffects()
-    {
-        Debug.Log("========== DEBUG ROLL EFFECTS ==========");
-
-        // Consumables
-        if (StatManager.Instance.ActiveConsumableEffects.Count == 0)
-            Debug.Log("Active consumables: none");
-        else
-        {
-            Debug.Log("Active consumables:");
-            foreach (var eff in StatManager.Instance.ActiveConsumableEffects)
-                Debug.Log(" - " + eff.GetType().Name);
-        }
-
-        // Permanents
-        Debug.Log("Active permanents:");
-        foreach (var slot in InventoryManager.Instance.ItemSlots)
-        {
-            if (slot.quantity > 0)
-            {
-                BaseItemSO it = InventoryManager.Instance.GetItemSO(slot.itemName);
-                if (it is PermanentSO perm && perm.effects != null)
-                {
-                    foreach (var eff in perm.effects)
-                        if (eff is BaseDiceEffect diceEff)
-                            Debug.Log(" - " + perm.itemName + " (" + diceEff.GetType().Name + ")");
-                }
-            }
-        }
-
-        // Character effects
-        Debug.Log("Character dice effects:");
-        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
-            Debug.Log(" - " + eff.GetType().Name);
-
-        // Active dice effect
-        ItemSlot activeSlot = InventoryManager.Instance.ActiveDiceSlot;
-        if (activeSlot != null && activeSlot.quantity > 0)
-        {
-            BaseItemSO item = InventoryManager.Instance.GetItemSO(activeSlot.itemName);
-            if (item is DiceSO dice && dice.effects != null)
-            {
-                foreach (var eff in dice.effects)
-                    if (eff is BaseDiceEffect diceEff)
-                        Debug.Log("Active dice effect: " + diceEff.GetType().Name);
-            }
-            else
-                Debug.Log("Active dice effect: none");
-        }
-        else
-        {
-            Debug.Log("No active dice");
-        }
-
-        Debug.Log("========================================");
-    }
-
-    // -------------------------------------------------------------------------
     // DICE SPAWNING
     // -------------------------------------------------------------------------
 
     public GameObject SpawnDiceInWorld(DiceSO dice, ItemSlot slot)
     {
+        if (slot == null || dice == null || InventoryManager.Instance == null)
+            return null;
+
         if (worldDice.ContainsKey(slot))
             return worldDice[slot];
 
@@ -112,14 +66,21 @@ public class DiceRollManager : MonoBehaviour
             return null;
 
         GameObject prefab = prefabList[0];
+        if (prefab == null)
+            return null;
 
         int index = InventoryManager.Instance.GetActiveDiceSlotIndex(slot);
         if (index < 0 || index >= activeDiceSpawnPoints.Length)
             return null;
 
         Transform spawnPoint = activeDiceSpawnPoints[index];
+        if (spawnPoint == null)
+            return null;
 
         GameObject instance = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
+        if (instance == null)
+            return null;
+
         instance.transform.localScale = prefab.transform.localScale;
 
         DiceRoller roller = instance.GetComponent<DiceRoller>();
@@ -153,6 +114,8 @@ public class DiceRollManager : MonoBehaviour
 
         Destroy(worldDice[slot]);
         worldDice.Remove(slot);
+
+        rollHistory.Remove(slot);
     }
 
     public void RollDiceInSlot(ItemSlot slot)
@@ -187,6 +150,9 @@ public class DiceRollManager : MonoBehaviour
     {
         List<int> allowed = new List<int>();
 
+        if (slot == null || InventoryManager.Instance == null || string.IsNullOrEmpty(slot.itemName))
+            return allowed;
+
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.itemName);
         if (!(item is DiceSO dice))
             return allowed;
@@ -201,7 +167,6 @@ public class DiceRollManager : MonoBehaviour
             slot = slot
         };
 
-        // Dice effects
         if (dice.effects != null)
         {
             foreach (var eff in dice.effects)
@@ -209,7 +174,6 @@ public class DiceRollManager : MonoBehaviour
                     ApplyEffectToRange(diceEff, ref minAllowed, ref maxAllowed, ctx);
         }
 
-        // Permanent effects
         foreach (var s in InventoryManager.Instance.ItemSlots)
         {
             if (s.quantity > 0)
@@ -224,15 +188,12 @@ public class DiceRollManager : MonoBehaviour
             }
         }
 
-        // Character effects
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             ApplyEffectToRange(eff, ref minAllowed, ref maxAllowed, ctx);
 
-        // Consumable effects
         foreach (var effect in StatManager.Instance.ActiveConsumableEffects)
             ApplyEffectToRange(effect, ref minAllowed, ref maxAllowed, ctx);
 
-        // Build allowed list
         for (int face = 1; face <= dice.GetMaxFaceValue(); face++)
         {
             if (face >= minAllowed && face <= maxAllowed)
@@ -254,22 +215,19 @@ public class DiceRollManager : MonoBehaviour
 
         else if (effect is MaxValueDiceEffect maxEff)
             maxAllowed = Mathf.Min(maxAllowed, maxEff.MaxValue);
-
-        else if (effect is MultiplierDiceEffect)
-        {
-            // Multipliers do not restrict allowed faces.
-        }
     }
 
     // -------------------------------------------------------------------------
-    // INTELLIGENT TARGET FACE SELECTION
+    // TARGET FACE SELECTION
     // -------------------------------------------------------------------------
 
     public int? GetTargetFaceForRoll(ItemSlot slot, int physicalRoll, DiceContext ctx)
     {
-        List<int> allowed = GetAllowedFacesForSlot(slot);
+        if (slot == null || InventoryManager.Instance == null || string.IsNullOrEmpty(slot.itemName))
+            return null;
 
-        if (allowed.Count == 0)
+        List<int> allowed = GetAllowedFacesForSlot(slot);
+        if (allowed == null || allowed.Count == 0)
             return null;
 
         int preview = GetFinalRollPreview(physicalRoll, ctx, slot);
@@ -308,12 +266,6 @@ public class DiceRollManager : MonoBehaviour
 
         int finalRoll = baseRoll;
 
-        Debug.Log("========== ROLL PROCESSING ==========");
-        Debug.Log("Base roll (physics): " + baseRoll);
-
-        DebugActiveEffects();
-
-        // Dice effects
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.itemName);
         if (item is DiceSO dice && dice.effects != null)
         {
@@ -322,7 +274,6 @@ public class DiceRollManager : MonoBehaviour
                     finalRoll = diceEff.ModifyRoll(finalRoll, ctx);
         }
 
-        // Permanent effects
         foreach (var s in InventoryManager.Instance.ItemSlots)
         {
             if (s.quantity > 0)
@@ -337,16 +288,13 @@ public class DiceRollManager : MonoBehaviour
             }
         }
 
-        // Character effects
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             finalRoll = eff.ModifyRoll(finalRoll, ctx);
 
-        // Consumable effects
         foreach (var effect in StatManager.Instance.ActiveConsumableEffects)
             finalRoll = effect.ModifyRoll(finalRoll, ctx);
 
-        Debug.Log("Final roll after all effects: " + finalRoll);
-        Debug.Log("=====================================");
+        rollHistory[slot] = (baseRoll, finalRoll);
 
         StatManager.Instance.PreviousRoll = finalRoll;
         StatManager.Instance.OnDiceFinalResult(finalRoll);
@@ -360,7 +308,6 @@ public class DiceRollManager : MonoBehaviour
     {
         int result = rawRoll;
 
-        // Dice effects
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.itemName);
         if (item is DiceSO dice && dice.effects != null)
         {
@@ -369,7 +316,6 @@ public class DiceRollManager : MonoBehaviour
                     result = diceEff.ModifyRoll(result, ctx);
         }
 
-        // Permanent effects
         foreach (var s in InventoryManager.Instance.ItemSlots)
         {
             if (s.quantity > 0)
@@ -384,14 +330,24 @@ public class DiceRollManager : MonoBehaviour
             }
         }
 
-        // Character effects
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             result = eff.ModifyRoll(result, ctx);
 
-        // Consumable effects
         foreach (var effect in StatManager.Instance.ActiveConsumableEffects)
             result = effect.ModifyRoll(result, ctx);
 
         return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // PUBLIC ACCESS
+    // -------------------------------------------------------------------------
+
+    public (int baseRoll, int finalRoll)? GetRollInfo(ItemSlot slot)
+    {
+        if (rollHistory.TryGetValue(slot, out var info))
+            return info;
+
+        return null;
     }
 }

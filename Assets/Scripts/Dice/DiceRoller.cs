@@ -144,6 +144,8 @@ public class DiceRoller : MonoBehaviour
         isRolling = false;
 
         DiceRollManager.Instance.OnDiceResult(linkedSlot, finalFace);
+        InventoryManager.Instance.RefreshActiveDiceUI();
+
     }
 
     /*

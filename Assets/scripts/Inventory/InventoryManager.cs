@@ -73,14 +73,6 @@ public class InventoryManager : MonoBehaviour
 
     private void Start()
     {
-        // DEBUG: print all slots and their contents
-        Debug.Log("========== DEBUG INVENTARIO AL INICIAR ==========");
-        foreach (var slot in allSlots)
-        {
-            Debug.Log(slot.name + " -> item=" + slot.itemName + " qty=" + slot.quantity);
-        }
-        Debug.Log("=================================================");
-
         DiceSO d6Item = itemSOs.OfType<DiceSO>().FirstOrDefault(d => d.itemName == "D6");
         if (d6Item == null) return;
 
@@ -93,10 +85,6 @@ public class InventoryManager : MonoBehaviour
         SyncActiveDiceSlot(d6Slot);
     }
 
-
-    // -------------------------------------------------------------------------
-    // Active dice slot assignment
-    // -------------------------------------------------------------------------
     private ItemSlot AddDiceToActiveSlots(DiceSO dice)
     {
         foreach (var slot in activeDiceSlots)
@@ -129,36 +117,54 @@ public class InventoryManager : MonoBehaviour
             DiceRollManager.Instance.SpawnDiceInWorld(dice, slot);
     }
 
-    public void SetActiveDice(ItemSlot targetSlot, DiceSO dice)
+    public void SetActiveDice(ItemSlot sourceSlot, DiceSO dice)
     {
-        targetSlot.ClearSlot();
-        targetSlot.AddItem(dice.itemName, 1, dice.icon, dice.itemDescription);
-        SyncActiveDiceSlot(targetSlot);
+        ItemSlot targetSlot = activeDiceSlots.FirstOrDefault(s => s.thisItemSelected);
+        if (targetSlot == null) return;
+
+        bool sourceIsActive = activeDiceSlots.Contains(sourceSlot);
+
+        if (targetSlot.quantity > 0)
+        {
+            string oldName = targetSlot.itemName;
+            Sprite oldSprite = targetSlot.itemSprite;
+            string oldDesc = targetSlot.itemDescription;
+
+            targetSlot.ClearSlot();
+            targetSlot.AddItem(dice.itemName, 1, dice.icon, dice.itemDescription);
+
+            if (sourceSlot.quantity > 0)
+            {
+                sourceSlot.ClearSlot();
+                sourceSlot.AddItem(oldName, 1, oldSprite, oldDesc);
+            }
+        }
+        else
+        {
+            targetSlot.ClearSlot();
+            targetSlot.AddItem(dice.itemName, 1, dice.icon, dice.itemDescription);
+
+            if (sourceSlot.quantity > 0)
+                sourceSlot.ClearSlot();
+        }
+
+        foreach (var slot in activeDiceSlots)
+            SyncActiveDiceSlot(slot);
 
         activeDiceSlot = targetSlot;
         UpdateActiveDiceUI();
     }
 
-    // -------------------------------------------------------------------------
-    // Item lookup
-    // -------------------------------------------------------------------------
     public BaseItemSO GetItemSO(string itemName)
     {
         if (string.IsNullOrEmpty(itemName)) return null;
         return itemLookup.TryGetValue(itemName, out var result) ? result : null;
     }
 
-    // -------------------------------------------------------------------------
-    // Slot click handling
-    // -------------------------------------------------------------------------
     public void OnSlotClicked(ItemSlot slot)
     {
-        // Prevent shop items from triggering inventory actions
         if (slot.transform.root.GetComponent<ShopExitManager>() != null)
-        {
-            Debug.Log("[DEBUG] Click blocked: this object belongs to the shop");
             return;
-        }
 
         bool wasSelected = slot.thisItemSelected;
 
@@ -176,21 +182,18 @@ public class InventoryManager : MonoBehaviour
 
         BaseItemSO item = GetItemSO(slot.itemName);
 
-        // DICE LOGIC (inventory click DOES NOT roll)
         if (item is DiceSO)
         {
             slot.SelectSlot();
             return;
         }
 
-        // PERMANENT ITEMS
         if (item is PermanentSO)
         {
             slot.SelectSlot();
             return;
         }
 
-        // CONSUMABLE ITEMS
         if (item is ConsumableSO cons)
         {
             if (!wasSelected)
@@ -208,26 +211,17 @@ public class InventoryManager : MonoBehaviour
     {
         BaseItemSO item = GetItemSO(from.itemName);
 
-        // ---------------------------------------------------------
-        // BLOCK INVALID ITEMS FROM ENTERING ACTIVE DICE SLOTS
-        // ---------------------------------------------------------
         if (activeDiceSlots.Contains(to))
         {
-            // Slot is empty -> cannot be dropped into active dice slot
             if (string.IsNullOrEmpty(from.itemName) || from.quantity <= 0)
                 return;
 
-            // Item is not a dice -> cannot enter active dice slot
             if (!(item is DiceSO))
                 return;
         }
 
-        // ---------------------------------------------------------
-        // DICE LOGIC
-        // ---------------------------------------------------------
         if (item is DiceSO dice)
         {
-            // Move into active slot
             if (activeDiceSlots.Contains(to))
             {
                 to.ClearSlot();
@@ -243,7 +237,6 @@ public class InventoryManager : MonoBehaviour
                 return;
             }
 
-            // Move out of active slot into normal dice slot
             if (activeDiceSlots.Contains(from) && diceSlots.Contains(to))
             {
                 to.ClearSlot();
@@ -262,12 +255,8 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
-        // ---------------------------------------------------------
-        // DEFAULT: swap items normally
-        // ---------------------------------------------------------
         SwapSlots(from, to);
     }
-
 
     private void SwapSlots(ItemSlot a, ItemSlot b)
     {
@@ -290,9 +279,6 @@ public class InventoryManager : MonoBehaviour
         b.RefreshUI();
     }
 
-    // -------------------------------------------------------------------------
-    // Replace mode
-    // -------------------------------------------------------------------------
     public void PrepareReplace(BaseItemSO item, int quantity)
     {
         waitingForReplace = true;
@@ -321,9 +307,6 @@ public class InventoryManager : MonoBehaviour
         CloseInventory();
     }
 
-    // -------------------------------------------------------------------------
-    // Sell pedestal
-    // -------------------------------------------------------------------------
     public void SetActiveSellPedestal(SellPedestal pedestal)
     {
         activeSellPedestal = pedestal;
@@ -334,40 +317,28 @@ public class InventoryManager : MonoBehaviour
         activeSellPedestal = null;
     }
 
-    // Removes a dice from the active dice list if the sold item was an active dice
     public void TryRemoveActiveDice(ItemSlot slot)
     {
         if (slot == null)
             return;
 
-        // If this slot is one of the active dice slots
         if (activeDiceSlots.Contains(slot))
         {
-            // Remove the dice from the world
             DiceRollManager.Instance.RemoveDiceFromWorld(slot);
 
-            // If this was the currently selected active dice, clear it
             if (activeDiceSlot == slot)
                 activeDiceSlot = null;
 
-            // Update UI
             UpdateActiveDiceUI();
         }
     }
 
-
-    // -------------------------------------------------------------------------
-    // Slot utilities
-    // -------------------------------------------------------------------------
     public void DeselectAllSlots()
     {
         foreach (var slot in allSlots)
             slot?.DeselectSlot();
     }
 
-    // -------------------------------------------------------------------------
-    // Item management
-    // -------------------------------------------------------------------------
     public void RemoveItem(ItemSlot slot, int amount)
     {
         if (slot == null)
@@ -377,10 +348,8 @@ public class InventoryManager : MonoBehaviour
 
         if (slot.quantity <= 0)
         {
-            // Clear the slot completely
             slot.ClearSlot();
 
-            // If this was an active dice slot, clean up its state
             if (activeDiceSlots.Contains(slot))
             {
                 DiceRollManager.Instance.RemoveDiceFromWorld(slot);
@@ -393,7 +362,6 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            // Just refresh the UI if the slot still has items
             slot.RefreshUI();
         }
     }
@@ -436,12 +404,8 @@ public class InventoryManager : MonoBehaviour
         return quantity;
     }
 
-    // -------------------------------------------------------------------------
-    // Inventory UI
-    // -------------------------------------------------------------------------
     public void ToggleInventory()
     {
-        // Block inventory access during character selection or popup confirmation
         if (CharacterSelectManager.Instance != null &&
             CharacterSelectManager.Instance.IsAnySelectorUIOpen())
             return;
@@ -454,7 +418,6 @@ public class InventoryManager : MonoBehaviour
 
     public void OpenInventory(bool pauseGame = true)
     {
-        // Block inventory access during character selection or popup confirmation
         if (CharacterSelectManager.Instance != null &&
             CharacterSelectManager.Instance.IsAnySelectorUIOpen())
             return;
@@ -479,18 +442,14 @@ public class InventoryManager : MonoBehaviour
         inventoryMenu?.SetActive(false);
         DeselectAllSlots();
 
-
         Time.timeScale = 1f;
 
         activeSellPedestal = null;
     }
 
-    // -------------------------------------------------------------------------
-    // Active dice UI
-    // -------------------------------------------------------------------------
     private void UpdateActiveDiceUI()
     {
-        // Highlight all active dice slots that contain a die
+        // Visual selection of active slots
         foreach (var slot in activeDiceSlots)
         {
             if (slot.quantity > 0)
@@ -499,23 +458,40 @@ public class InventoryManager : MonoBehaviour
                 slot.DeselectSlot();
         }
 
-        // Build the text showing all active dice
-        List<string> activeNames = new List<string>();
+        List<string> activeInfo = new List<string>();
 
         foreach (var slot in activeDiceSlots)
         {
-            if (slot.quantity > 0)
-                activeNames.Add(slot.itemName);
+            if (slot.quantity <= 0)
+                continue;
+
+            // Get roll info from DiceRollManager
+            var rollInfo = DiceRollManager.Instance.GetRollInfo(slot);
+
+            if (rollInfo.HasValue)
+            {
+                int baseR = rollInfo.Value.baseRoll;
+                int finalR = rollInfo.Value.finalRoll;
+
+                // Example: "D6: 4 -> 6"
+                activeInfo.Add(slot.itemName + ": " + baseR + " -> " + finalR);
+            }
+            else
+            {
+                // Not rolled yet
+                activeInfo.Add(slot.itemName + ": sin tirar");
+            }
         }
 
-        if (activeNames.Count == 0)
-        {
+        if (activeInfo.Count == 0)
             activeDiceText.text = "Dados activos: ninguno";
-        }
         else
-        {
-            activeDiceText.text = "Dados activos: " + string.Join(", ", activeNames);
-        }
+            activeDiceText.text = "Dados activos: " + string.Join(" | ", activeInfo);
     }
+    public void RefreshActiveDiceUI()
+    {
+        UpdateActiveDiceUI();
+    }
+
 
 }
