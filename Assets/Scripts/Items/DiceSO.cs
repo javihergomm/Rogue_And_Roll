@@ -26,8 +26,6 @@ public class DiceSO : BaseItemSO
             case DiceType.D4: return 4;
             case DiceType.D6: return 6;
             case DiceType.D8: return 8;
-            case DiceType.D10: return 10;
-            case DiceType.D12: return 12;
             case DiceType.D20: return 20;
         }
 

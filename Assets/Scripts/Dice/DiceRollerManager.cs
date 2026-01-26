@@ -4,16 +4,18 @@ using System.Collections.Generic;
 /*
  * DiceRollManager
  * ----------------
- * Manages all physical dice in the world.
- * Each active inventory slot corresponds to one physical dice instance.
+ * Central system that manages all physical dice in the world.
+ *
  * Responsibilities:
- *   - Spawning dice in the scene
- *   - Removing dice when slots are cleared
- *   - Triggering dice rolls
- *   - Determining allowed faces based on effects
- *   - Selecting the best target face for correction
- *   - Applying effects to compute the final roll
- *   - Storing both the raw roll and the final modified roll
+ *  - Spawn dice prefabs in the scene based on active inventory slots
+ *  - Remove dice when slots are cleared
+ *  - Trigger physical dice rolls
+ *  - Determine allowed faces for each dice based on all active effects
+ *  - Apply synchronous and asynchronous dice effects
+ *  - Store raw and final roll values for UI or debugging
+ *
+ * This class does NOT handle movement, UI, or inventory logic.
+ * It only processes dice and produces the final roll result.
  */
 public class DiceRollManager : MonoBehaviour
 {
@@ -23,18 +25,13 @@ public class DiceRollManager : MonoBehaviour
     [SerializeField] private List<GameObject> d4Prefabs;
     [SerializeField] private List<GameObject> d6Prefabs;
     [SerializeField] private List<GameObject> d8Prefabs;
-    [SerializeField] private List<GameObject> d10Prefabs;
-    [SerializeField] private List<GameObject> d12Prefabs;
     [SerializeField] private List<GameObject> d20Prefabs;
 
     [Header("Spawn Settings")]
     [SerializeField] private Transform[] activeDiceSpawnPoints;
     [SerializeField] private float spawnLift = 0.05f;
 
-    // Physical dice instance per slot
     private Dictionary<ItemSlot, GameObject> worldDice = new Dictionary<ItemSlot, GameObject>();
-
-    // Stores raw roll and final roll per slot
     private Dictionary<ItemSlot, (int baseRoll, int finalRoll)> rollHistory
         = new Dictionary<ItemSlot, (int baseRoll, int finalRoll)>();
 
@@ -135,8 +132,6 @@ public class DiceRollManager : MonoBehaviour
             case DiceType.D4: return d4Prefabs;
             case DiceType.D6: return d6Prefabs;
             case DiceType.D8: return d8Prefabs;
-            case DiceType.D10: return d10Prefabs;
-            case DiceType.D12: return d12Prefabs;
             case DiceType.D20: return d20Prefabs;
         }
         return null;
@@ -167,13 +162,17 @@ public class DiceRollManager : MonoBehaviour
             slot = slot
         };
 
+        // Dice effects
         if (dice.effects != null)
         {
             foreach (var eff in dice.effects)
+            {
                 if (eff is BaseDiceEffect diceEff)
                     ApplyEffectToRange(diceEff, ref minAllowed, ref maxAllowed, ctx);
+            }
         }
 
+        // Permanent effects
         foreach (var s in InventoryManager.Instance.ItemSlots)
         {
             if (s.quantity > 0)
@@ -182,17 +181,27 @@ public class DiceRollManager : MonoBehaviour
                 if (it is PermanentSO perm && perm.effects != null)
                 {
                     foreach (var eff in perm.effects)
+                    {
                         if (eff is BaseDiceEffect diceEff)
                             ApplyEffectToRange(diceEff, ref minAllowed, ref maxAllowed, ctx);
+                    }
                 }
             }
         }
 
+        // Character effects
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
-            ApplyEffectToRange(eff, ref minAllowed, ref maxAllowed, ctx);
+        {
+            if (eff is BaseDiceEffect diceEff)
+                ApplyEffectToRange(diceEff, ref minAllowed, ref maxAllowed, ctx);
+        }
 
+        // Consumable effects
         foreach (var effect in StatManager.Instance.ActiveConsumableEffects)
-            ApplyEffectToRange(effect, ref minAllowed, ref maxAllowed, ctx);
+        {
+            if (effect is BaseDiceEffect diceEff)
+                ApplyEffectToRange(diceEff, ref minAllowed, ref maxAllowed, ctx);
+        }
 
         for (int face = 1; face <= dice.GetMaxFaceValue(); face++)
         {
@@ -252,7 +261,7 @@ public class DiceRollManager : MonoBehaviour
     }
 
     // -------------------------------------------------------------------------
-    // FINAL ROLL PROCESSING
+    // FINAL ROLL PROCESSING (ASYNC READY)
     // -------------------------------------------------------------------------
 
     public void OnDiceResult(ItemSlot slot, int baseRoll)
@@ -267,13 +276,23 @@ public class DiceRollManager : MonoBehaviour
         int finalRoll = baseRoll;
 
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.itemName);
-        if (item is DiceSO dice && dice.effects != null)
+        DiceSO dice = item as DiceSO;
+
+        // -------------------------------
+        // SYNCHRONOUS EFFECTS
+        // -------------------------------
+
+        // Dice effects
+        if (dice != null && dice.effects != null)
         {
             foreach (var eff in dice.effects)
-                if (eff is BaseDiceEffect diceEff)
+            {
+                if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
                     finalRoll = diceEff.ModifyRoll(finalRoll, ctx);
+            }
         }
 
+        // Permanent effects
         foreach (var s in InventoryManager.Instance.ItemSlots)
         {
             if (s.quantity > 0)
@@ -282,22 +301,108 @@ public class DiceRollManager : MonoBehaviour
                 if (it is PermanentSO perm && perm.effects != null)
                 {
                     foreach (var eff in perm.effects)
-                        if (eff is BaseDiceEffect diceEff)
+                    {
+                        if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
                             finalRoll = diceEff.ModifyRoll(finalRoll, ctx);
+                    }
                 }
             }
         }
 
+        // Character effects
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
-            finalRoll = eff.ModifyRoll(finalRoll, ctx);
+        {
+            if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
+                finalRoll = diceEff.ModifyRoll(finalRoll, ctx);
+        }
 
+        // Consumable effects
         foreach (var effect in StatManager.Instance.ActiveConsumableEffects)
-            finalRoll = effect.ModifyRoll(finalRoll, ctx);
+        {
+            if (effect is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
+                finalRoll = diceEff.ModifyRoll(finalRoll, ctx);
+        }
 
+        // -------------------------------
+        // ASYNCHRONOUS EFFECTS
+        // -------------------------------
+
+        // 1) Dice effects async
+        if (dice != null && dice.effects != null)
+        {
+            foreach (var eff in dice.effects)
+            {
+                if (eff is BaseDiceEffect diceEff && diceEff.RequiresAsyncResolution)
+                {
+                    diceEff.ModifyRollAsync(finalRoll, ctx, (resolvedValue) =>
+                    {
+                        rollHistory[slot] = (baseRoll, resolvedValue);
+                        FinalizeRoll(resolvedValue);
+                        InventoryManager.Instance.RefreshActiveDiceUI();
+                    });
+                    return;
+                }
+            }
+        }
+
+        // 2) Permanent effects async
+        foreach (var s in InventoryManager.Instance.ItemSlots)
+        {
+            if (s.quantity > 0)
+            {
+                BaseItemSO it = InventoryManager.Instance.GetItemSO(s.itemName);
+                if (it is PermanentSO perm && perm.effects != null)
+                {
+                    foreach (var eff in perm.effects)
+                    {
+                        if (eff is BaseDiceEffect diceEff && diceEff.RequiresAsyncResolution)
+                        {
+                            diceEff.ModifyRollAsync(finalRoll, ctx, (resolvedValue) =>
+                            {
+                                rollHistory[slot] = (baseRoll, resolvedValue);
+                                FinalizeRoll(resolvedValue);
+                                InventoryManager.Instance.RefreshActiveDiceUI();
+                            });
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3) Character effects async
+        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+        {
+            if (eff is BaseDiceEffect diceEff && diceEff.RequiresAsyncResolution)
+            {
+                diceEff.ModifyRollAsync(finalRoll, ctx, (resolvedValue) =>
+                {
+                    rollHistory[slot] = (baseRoll, resolvedValue);
+                    FinalizeRoll(resolvedValue);
+                    InventoryManager.Instance.RefreshActiveDiceUI();
+                });
+                return;
+            }
+        }
+
+        // 4) Consumable effects async
+        foreach (var effect in StatManager.Instance.ActiveConsumableEffects)
+        {
+            if (effect is BaseDiceEffect diceEff && diceEff.RequiresAsyncResolution)
+            {
+                diceEff.ModifyRollAsync(finalRoll, ctx, (resolvedValue) =>
+                {
+                    rollHistory[slot] = (baseRoll, resolvedValue);
+                    FinalizeRoll(resolvedValue);
+                    InventoryManager.Instance.RefreshActiveDiceUI();
+                });
+                return;
+            }
+        }
+
+        // No async effects -> finalize immediately
         rollHistory[slot] = (baseRoll, finalRoll);
-
-        StatManager.Instance.PreviousRoll = finalRoll;
-        StatManager.Instance.OnDiceFinalResult(finalRoll);
+        FinalizeRoll(finalRoll);
     }
 
     // -------------------------------------------------------------------------
@@ -312,8 +417,10 @@ public class DiceRollManager : MonoBehaviour
         if (item is DiceSO dice && dice.effects != null)
         {
             foreach (var eff in dice.effects)
-                if (eff is BaseDiceEffect diceEff)
+            {
+                if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
                     result = diceEff.ModifyRoll(result, ctx);
+            }
         }
 
         foreach (var s in InventoryManager.Instance.ItemSlots)
@@ -324,17 +431,25 @@ public class DiceRollManager : MonoBehaviour
                 if (it is PermanentSO perm && perm.effects != null)
                 {
                     foreach (var eff in perm.effects)
-                        if (eff is BaseDiceEffect diceEff)
+                    {
+                        if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
                             result = diceEff.ModifyRoll(result, ctx);
+                    }
                 }
             }
         }
 
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
-            result = eff.ModifyRoll(result, ctx);
+        {
+            if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
+                result = diceEff.ModifyRoll(result, ctx);
+        }
 
         foreach (var effect in StatManager.Instance.ActiveConsumableEffects)
-            result = effect.ModifyRoll(result, ctx);
+        {
+            if (effect is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
+                result = diceEff.ModifyRoll(result, ctx);
+        }
 
         return result;
     }
@@ -349,5 +464,13 @@ public class DiceRollManager : MonoBehaviour
             return info;
 
         return null;
+    }
+
+    private void FinalizeRoll(int finalRoll)
+    {
+        Debug.Log("Final roll after all effects: " + finalRoll);
+
+        StatManager.Instance.PreviousRoll = finalRoll;
+        StatManager.Instance.OnDiceFinalResult(finalRoll);
     }
 }

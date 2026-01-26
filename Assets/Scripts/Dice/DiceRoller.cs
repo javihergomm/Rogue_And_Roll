@@ -102,11 +102,9 @@ public class DiceRoller : MonoBehaviour
     {
         yield return new WaitForFixedUpdate();
 
-        // Wait until dice is spinning
         while (rb.angularVelocity.magnitude < 2f)
             yield return null;
 
-        // Wait until dice slows down again
         while (rb.angularVelocity.magnitude > 0.5f)
             yield return null;
 
@@ -121,17 +119,14 @@ public class DiceRoller : MonoBehaviour
 
         int? targetFace = DiceRollManager.Instance.GetTargetFaceForRoll(linkedSlot, physicalRoll, ctx);
 
-        // Mid-air correction
         if (targetFace.HasValue && targetFace.Value != physicalRoll)
             StartCoroutine(ApplyMidAirCorrection(targetFace.Value));
 
-        // Wait until dice fully stops
         while (!rb.IsSleeping())
             yield return null;
 
         int finalFace = GetFaceUp(false);
 
-        // Final snap correction if needed
         if (!DiceRollManager.Instance.IsFaceAllowed(linkedSlot, finalFace))
         {
             int? snapTarget = DiceRollManager.Instance.GetTargetFaceForRoll(linkedSlot, finalFace, ctx);
@@ -145,12 +140,10 @@ public class DiceRoller : MonoBehaviour
 
         DiceRollManager.Instance.OnDiceResult(linkedSlot, finalFace);
         InventoryManager.Instance.RefreshActiveDiceUI();
-
     }
 
     /*
      * Applies torque to rotate the dice toward a target face.
-     * The torque is soft and does not override physics.
      */
     private IEnumerator ApplyMidAirCorrection(int targetValue)
     {
@@ -190,7 +183,6 @@ public class DiceRoller : MonoBehaviour
      */
     private IEnumerator SnapToFace(int targetValue)
     {
-        // Find the local direction of the target face
         Vector3 targetLocalDir = Vector3.zero;
 
         foreach (var kvp in FaceMap)
@@ -202,19 +194,16 @@ public class DiceRoller : MonoBehaviour
             }
         }
 
-        // Compute the world direction that should point up
         Vector3 targetWorldUp = transform.TransformDirection(targetLocalDir);
 
-        // Compute the final rotation that aligns that direction with Vector3.up
         Quaternion startRot = transform.rotation;
         Quaternion endRot = Quaternion.FromToRotation(targetWorldUp, Vector3.up) * transform.rotation;
 
         float t = 0f;
-        float duration = 0.18f; // shorter, more natural
+        float duration = 0.18f;
 
         while (t < duration)
         {
-            // Smooth easing (ease in-out)
             float smooth = t / duration;
             smooth = smooth * smooth * (3f - 2f * smooth);
 
@@ -226,7 +215,6 @@ public class DiceRoller : MonoBehaviour
 
         transform.rotation = endRot;
     }
-
 
     /*
      * Returns the face whose direction is closest to world up.
@@ -283,24 +271,6 @@ public class DiceRoller : MonoBehaviour
                 FaceMap[Vector3.back] = 7;
                 FaceMap[Vector3.right] = 3;
                 FaceMap[Vector3.left] = 6;
-                break;
-
-            case DiceType.D10:
-                FaceMap[Vector3.up] = 1;
-                FaceMap[Vector3.down] = 10;
-                FaceMap[Vector3.forward] = 2;
-                FaceMap[Vector3.back] = 9;
-                FaceMap[Vector3.right] = 3;
-                FaceMap[Vector3.left] = 8;
-                break;
-
-            case DiceType.D12:
-                FaceMap[Vector3.up] = 1;
-                FaceMap[Vector3.down] = 12;
-                FaceMap[Vector3.forward] = 2;
-                FaceMap[Vector3.back] = 11;
-                FaceMap[Vector3.right] = 3;
-                FaceMap[Vector3.left] = 10;
                 break;
 
             case DiceType.D20:
