@@ -7,7 +7,13 @@
  */
 public class DiceContext
 {
-    public int turnNumber;      // Current turn number
-    public int previousRoll;    // Result of the previous dice roll
-    public ItemSlot slot;       // Slot that rolled the dice (NEW)
+    public int turnNumber;          // Current turn number
+    public int previousRoll;        // Result of the previous dice roll
+    public ItemSlot slot;           // Slot that rolled the dice
+
+    // HideRollEffect uses this to hide the roll in the UI
+    public bool hideRollResult = false;
+
+    // Optional: final roll after all effects (useful for chained effects)
+    public int finalRoll;
 }

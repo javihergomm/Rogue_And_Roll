@@ -4473,6 +4473,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
   - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
   - {fileID: 11400000, guid: 0cc5767b84b2dbf49b3228f8cf86e141, type: 2}
+  - {fileID: 11400000, guid: dd23d94583cb7a140abf8a4e0765936b, type: 2}
   displayPoint: {fileID: 691661218}
   displayYOffset: 0.1
   isAwaitingDecision: 0
@@ -7449,9 +7450,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   possibleItems:
   - {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
+  - {fileID: 11400000, guid: dd23d94583cb7a140abf8a4e0765936b, type: 2}
   - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
   - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
   - {fileID: 11400000, guid: 0cc5767b84b2dbf49b3228f8cf86e141, type: 2}
+  - {fileID: 11400000, guid: fe668fade2205ef48b745bfda22725ce, type: 2}
   displayPoint: {fileID: 1912633484}
   displayYOffset: 0.1
   isAwaitingDecision: 0
@@ -8878,10 +8881,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DiceRollManager
   d4Prefabs:
-  - {fileID: 7982418613138095591, guid: 87766ee552e338447858d84b4264e351, type: 3}
+  - {fileID: 3367068850983838572, guid: e00fd89f2aeb3fb45b8c34ffa983071b, type: 3}
   d6Prefabs:
   - {fileID: 7982418613138095591, guid: 87766ee552e338447858d84b4264e351, type: 3}
-  d8Prefabs: []
+  d8Prefabs:
+  - {fileID: 3245075456472946614, guid: 16b3b5c4daf96ed4a9a4b4c63589fc88, type: 3}
   d20Prefabs: []
   activeDiceSpawnPoints:
   - {fileID: 371584076}
@@ -8925,7 +8929,7 @@ MonoBehaviour:
   boardTransform: {fileID: 0}
   exitRotationZ: 0
   shopRotationZ: 180
-  inShop: 0
+  inShop: 1
 --- !u!114 &1548563264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9017,6 +9021,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
   - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
   - {fileID: 11400000, guid: 0cc5767b84b2dbf49b3228f8cf86e141, type: 2}
+  - {fileID: 11400000, guid: fe668fade2205ef48b745bfda22725ce, type: 2}
+  - {fileID: 11400000, guid: dd23d94583cb7a140abf8a4e0765936b, type: 2}
 --- !u!114 &1548563266
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9032,10 +9038,6 @@ MonoBehaviour:
   activeCharacter: {fileID: 0}
   ActiveDiceEffects: []
   ActivePassiveEffects: []
-  isBasicCup: 0
-  hasRandomBonus: 0
-  avoidsBadTileEvery3: 0
-  isMetalCup: 0
 --- !u!1 &1561261657
 GameObject:
   m_ObjectHideFlags: 0

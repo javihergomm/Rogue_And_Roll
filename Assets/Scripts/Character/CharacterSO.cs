@@ -3,12 +3,8 @@ using UnityEngine;
 /*
  * CharacterSO (Cup Character)
  * ---------------------------
- * Represents a playable cup-character.
- * Each cup defines:
- * - Visual identity (name, icon, color)
- * - Spawn point
- * - Effects (dice, passive, or any other BaseEffect)
- * - Special flags for unique cup behaviors
+ * Characters apply their own effects when activated.
+ * CharacterEffectManager only stores the effects; it does not apply them.
  */
 [CreateAssetMenu(fileName = "NewCupCharacter", menuName = "Game/Cup Character")]
 public class CharacterSO : ScriptableObject
@@ -30,8 +26,52 @@ public class CharacterSO : ScriptableObject
     public BaseEffect[] effects;
 
     [Header("Special Cup Behaviors")]
-    public bool isBasicCup;            // Basic Cup
-    public bool hasRandomBonus;        // Random Bonus Cup (10% extra effect)
-    public bool avoidsBadTileEvery3;   // Enchanted Cup (avoids bad tile every 3 turns)
-    public bool isMetalCup;            // Metal Cup (+1 to d4/d6)
+    public bool isBasicCup;
+    public bool hasRandomBonus;
+    public bool avoidsBadTileEvery3;
+    public bool isMetalCup;
+
+    /*
+     * Called when this character becomes active.
+     * Registers all dice and passive effects in CharacterEffectManager.
+     */
+    public void ApplyCharacterEffects()
+    {
+        if (effects == null)
+            return;
+
+        foreach (var eff in effects)
+        {
+            if (eff == null)
+                continue;
+
+            if (eff is BaseDiceEffect diceEff)
+                CharacterEffectManager.Instance.AddDiceEffect(diceEff);
+
+            else if (eff is BasePassiveEffect passiveEff)
+                CharacterEffectManager.Instance.AddPassiveEffect(passiveEff);
+        }
+    }
+
+    /*
+     * Called when switching characters.
+     * Removes all previously applied effects.
+     */
+    public void RemoveCharacterEffects()
+    {
+        if (effects == null)
+            return;
+
+        foreach (var eff in effects)
+        {
+            if (eff == null)
+                continue;
+
+            if (eff is BaseDiceEffect diceEff)
+                CharacterEffectManager.Instance.RemoveDiceEffect(diceEff);
+
+            else if (eff is BasePassiveEffect passiveEff)
+                CharacterEffectManager.Instance.RemovePassiveEffect(passiveEff);
+        }
+    }
 }

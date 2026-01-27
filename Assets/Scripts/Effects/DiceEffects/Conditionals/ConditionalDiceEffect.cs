@@ -3,8 +3,12 @@ using UnityEngine;
 /*
  * ConditionalDiceEffect
  * ---------------------
- * Base class for effects that only apply when a condition is met.
- * Subclasses define the condition and the effect logic.
+ * Base class for dice effects that only apply when a condition is met.
+ * Subclasses define:
+ *  - Condition(roll, ctx)
+ *  - ApplyEffect(roll, ctx)
+ *
+ * If the condition is false, the roll is returned unchanged.
  */
 public abstract class ConditionalDiceEffect : BaseDiceEffect
 {

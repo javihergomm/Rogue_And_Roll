@@ -51,11 +51,11 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 598d103613c93c44dbc7b739384d3425, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 6f8d5e4d9a9cf234e8beb0be727f4414, type: 2}
+      objectReference: {fileID: 2100000, guid: 1eaeccc8fd5578544866623e735c5901, type: 2}
     - target: {fileID: -7511558181221131132, guid: 598d103613c93c44dbc7b739384d3425, type: 3}
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
-      objectReference: {fileID: 2100000, guid: 6f8d5e4d9a9cf234e8beb0be727f4414, type: 2}
+      objectReference: {fileID: 2100000, guid: 1eaeccc8fd5578544866623e735c5901, type: 2}
     - target: {fileID: 919132149155446097, guid: 598d103613c93c44dbc7b739384d3425, type: 3}
       propertyPath: m_Name
       value: DadoGrande
@@ -141,3 +141,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DiceRoller
   diceType: 1
+  faceMapSO: {fileID: 11400000, guid: c92b7137058ebdb46be2c11e19058565, type: 2}

@@ -9,14 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bd3dc40917a57e40920014beee12295, type: 3}
-  m_Name: NewConsumable
-  m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
-  itemName: Consumable
+  m_Script: {fileID: 11500000, guid: c0e0478710a59644598f369f2732eff1, type: 3}
+  m_Name: D8
+  m_EditorClassIdentifier: Assembly-CSharp::DiceSO
+  itemName: D8
   icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
   itemDescription: 
-  prefab3D: {fileID: 919132149155446097, guid: 252b51f08c456d646898f8cb366c83a4, type: 3}
-  buyPrice: 4
-  sellPrice: 2
-  polarity: 1
+  prefab3D: {fileID: 3245075456472946614, guid: 16b3b5c4daf96ed4a9a4b4c63589fc88, type: 3}
+  buyPrice: 1
+  sellPrice: 0
+  polarity: 0
+  diceType: 2
   effects: []

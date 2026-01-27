@@ -470,4 +470,24 @@ public class DiceRollManager : MonoBehaviour
         StatManager.Instance.PreviousRoll = finalRoll;
         StatManager.Instance.OnDiceFinalResult(finalRoll);
     }
+    // -------------------------------------------------------------------------
+    // HIDE ROLL SUPPORT
+    // -------------------------------------------------------------------------
+
+    public bool IsRollHidden()
+    {
+        // Check active dice effects
+        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+            if (eff is HideRollEffect)
+                return true;
+
+        // Check active consumable effects
+        foreach (var eff in StatManager.Instance.ActiveConsumableEffects)
+            if (eff is HideRollEffect)
+                return true;
+
+        return false;
+    }
+
+
 }
