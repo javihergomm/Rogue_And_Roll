@@ -219,12 +219,9 @@ public class DiceRollManager : MonoBehaviour
 
     private void ApplyEffectToRange(BaseDiceEffect effect, ref int minAllowed, ref int maxAllowed, DiceContext ctx)
     {
-        if (effect is MinValueDiceEffect minEff)
-            minAllowed = Mathf.Max(minAllowed, minEff.MinValue);
-
-        else if (effect is MaxValueDiceEffect maxEff)
-            maxAllowed = Mathf.Min(maxAllowed, maxEff.MaxValue);
+        effect.ApplyToRange(ref minAllowed, ref maxAllowed, ctx);
     }
+
 
     // -------------------------------------------------------------------------
     // TARGET FACE SELECTION
