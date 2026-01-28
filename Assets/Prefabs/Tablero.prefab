@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &7143602454087044344
+--- !u!1001 &5709060325870819275
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -51,10 +51,10 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: c6cb3a931eda0eb4aa96215092fc79bb, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 27bb89c8abaf75b4c8d65ed7b95aa1b8, type: 2}
+      objectReference: {fileID: 2100000, guid: a36ea9ac5e325a54d92c4cc78de4fa02, type: 2}
     - target: {fileID: 919132149155446097, guid: c6cb3a931eda0eb4aa96215092fc79bb, type: 3}
       propertyPath: m_Name
-      value: Tablero
+      value: Tablero (1)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

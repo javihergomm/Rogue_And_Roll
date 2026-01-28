@@ -35,6 +35,7 @@ public class DiceRollManager : MonoBehaviour
     private Dictionary<ItemSlot, (int baseRoll, int finalRoll)> rollHistory
         = new Dictionary<ItemSlot, (int baseRoll, int finalRoll)>();
 
+    [SerializeField] private Movement playerMovement;
 
     private void Awake()
     {
@@ -469,6 +470,9 @@ public class DiceRollManager : MonoBehaviour
 
         StatManager.Instance.PreviousRoll = finalRoll;
         StatManager.Instance.OnDiceFinalResult(finalRoll);
+        playerMovement.StartMoving();
+
+
     }
     // -------------------------------------------------------------------------
     // HIDE ROLL SUPPORT

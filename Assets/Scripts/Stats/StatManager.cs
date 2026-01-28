@@ -120,8 +120,6 @@ public class StatManager : MonoBehaviour
     {
         PreviousRoll = finalRoll;
         ActiveConsumableEffects.Clear();
-
-        FindObjectOfType<Movement>().StartMoving();
     }
 
     // -------------------------------------------------------------------------

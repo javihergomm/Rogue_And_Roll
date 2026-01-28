@@ -256,10 +256,10 @@ public class DiceRoller : MonoBehaviour
                 break;
 
             case DiceType.D6:
-                FaceMap[Vector3.up] = 6;
-                FaceMap[Vector3.down] = 1;
-                FaceMap[Vector3.forward] = 2;
-                FaceMap[Vector3.back] = 5;
+                FaceMap[Vector3.up] = 2;
+                FaceMap[Vector3.down] = 5; 
+                FaceMap[Vector3.forward] = 1; 
+                FaceMap[Vector3.back] = 6; 
                 FaceMap[Vector3.right] = 4;
                 FaceMap[Vector3.left] = 3;
                 break;
