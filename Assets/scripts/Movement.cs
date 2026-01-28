@@ -4,15 +4,30 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
     [SerializeField] Transform[] positions;
+    private Spot[] spots;
     [SerializeField] float speed;
     [SerializeField] int actualPos;
     [SerializeField] bool isPlayer;
-    
+    void Start()
+    {
+        spots = FindObjectsOfType<Spot>();
+    }
     public void StartMoving()
     {
         if (isPlayer)
         {
             StartCoroutine(Move(PlayerDice.ThrowDice()));
+            if(spots[actualPos + 1].getType() == Spot.SpotType.Bad)
+            {
+                Debug.Log("has caido en una casilla mala");
+            }else if (spots[actualPos + 1].getType() == Spot.SpotType.Good){
+                Debug.Log("has caido en una casilla buena");
+            }
+            else
+            {
+                Debug.Log("has caido en una casilla normal");
+            }
+            
         }
         else
         {
