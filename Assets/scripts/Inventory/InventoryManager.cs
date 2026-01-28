@@ -559,6 +559,19 @@ public class InventoryManager : MonoBehaviour
             activeDiceText.text = "Dados activos: " + string.Join(" | ", activeInfo);
     }
 
+    public int GetFinalDiceNumber()
+    {
+        var slot = InventoryManager.Instance.ActiveDiceSlot;
+        if (slot == null)
+            return 0;
+
+        var rollInfo = DiceRollManager.Instance.GetRollInfo(slot);
+        if (!rollInfo.HasValue)
+            return 0;
+
+        return rollInfo.Value.finalRoll;
+    }
+
 
     public void RefreshActiveDiceUI()
     {
