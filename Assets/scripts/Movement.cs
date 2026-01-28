@@ -7,31 +7,33 @@ public class Movement : MonoBehaviour
     [SerializeField] float speed;
     [SerializeField] int actualPos;
     [SerializeField] bool isPlayer;
-    
+
     public void StartMoving()
     {
+        
         if (isPlayer)
         {
-            StartCoroutine(Move(PlayerDice.ThrowDice()));
+            // El jugador usa el resultado final del sistema de dados
+            int finalRoll = InventoryManager.Instance.GetFinalDiceNumber();
+            StartCoroutine(Move(finalRoll));
         }
         else
         {
+            // El enemigo sigue usando su dado normal
             StartCoroutine(Move(EnemyDice.ThrowDice()));
         }
-
-            
-
     }
 
     IEnumerator Move(int steps)
     {
-        if(!isPlayer){
+        if (!isPlayer)
+        {
             yield return new WaitForSeconds(1f);
         }
         for (int i = 0; i < steps; i++)
         {
             if (actualPos + 1 >= positions.Length)
-                actualPos=-1;
+                actualPos = -1;
 
             actualPos++;
 
