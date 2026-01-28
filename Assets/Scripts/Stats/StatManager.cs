@@ -1,19 +1,19 @@
 using UnityEngine;
-using TMPro;
 using System.Collections.Generic;
 
 /*
  * StatManager
  * -----------
- * Manages player stats (gold, rolls, shop rerolls), turn count,
- * and temporary consumable dice effects.
- * Does NOT execute consumable effects. Consumables apply their own effects.
+ * Core stat logic:
+ * - Stores and updates stat values
+ * - Tracks turns and dice results
+ * - Registers temporary consumable dice effects
+ *
+ * Does NOT handle UI. StatsUI.cs is responsible for presentation.
  */
 public class StatManager : MonoBehaviour
 {
     public static StatManager Instance { get; private set; }
-
-    [SerializeField] private TextMeshProUGUI statsText;
 
     [Header("Gold Settings")]
     [SerializeField] private int startingGold = 0;
@@ -25,19 +25,18 @@ public class StatManager : MonoBehaviour
     [Header("Shop Reroll Settings")]
     [SerializeField] private int maxShopRerolls = 2;
 
-    private Dictionary<StatType, int> currentValues = new Dictionary<StatType, int>();
-    private Dictionary<StatType, int> maxValues = new Dictionary<StatType, int>();
+    private readonly Dictionary<StatType, int> currentValues = new();
+    private readonly Dictionary<StatType, int> maxValues = new();
 
-    // Last dice result
-    public int PreviousRoll { get; set; }
-
-    // Turn counter
+    public int PreviousRoll { get; private set; }
     public int CurrentTurn { get; private set; } = 1;
 
-    // Temporary dice effects from consumables
     public List<BaseDiceEffect> ActiveConsumableEffects { get; private set; }
         = new List<BaseDiceEffect>();
 
+    private ShopExitManager cachedExitManager;
+
+    public event System.Action OnStatsChanged;
 
     private void Awake()
     {
@@ -48,6 +47,23 @@ public class StatManager : MonoBehaviour
         }
         Instance = this;
 
+        cachedExitManager = FindFirstObjectByType<ShopExitManager>();
+
+        InitializeStats();
+        NotifyUI();
+    }
+
+    private void Start()
+    {
+        var exit = FindFirstObjectByType<ShopExitManager>();
+        if (exit != null)
+            exit.OnShopStateChanged += HandleShopStateChanged;
+
+        NotifyUI();
+    }
+
+    private void InitializeStats()
+    {
         currentValues[StatType.Gold] = startingGold;
         maxValues[StatType.Gold] = maxGold;
 
@@ -56,41 +72,21 @@ public class StatManager : MonoBehaviour
 
         currentValues[StatType.ShopRerolls] = maxShopRerolls;
         maxValues[StatType.ShopRerolls] = maxShopRerolls;
-
-        UpdateUI();
     }
 
-    // -------------------------------------------------------------------------
-    // CONSUMABLE EFFECT REGISTRATION
-    // -------------------------------------------------------------------------
-
-    /*
-     * Called by InventoryManager after a consumable is used.
-     * ConsumableSO.UseItem() already executed the effect.
-     * Here we only register temporary dice effects.
-     */
     public void RegisterConsumableEffects(ConsumableSO item)
     {
-        if (item == null || item.effects == null)
+        if (item?.Effects == null)
             return;
 
-        foreach (var eff in item.effects)
+        foreach (var eff in item.Effects)
         {
             if (eff is BaseDiceEffect diceEff)
                 ActiveConsumableEffects.Add(diceEff);
         }
     }
 
-    // -------------------------------------------------------------------------
-    // STATS
-    // -------------------------------------------------------------------------
-
     public void ChangeStat(StatType stat, int amount)
-    {
-        ApplyChange(stat, amount);
-    }
-
-    private void ApplyChange(StatType stat, int amount)
     {
         if (!currentValues.ContainsKey(stat))
             currentValues[stat] = 0;
@@ -100,80 +96,23 @@ public class StatManager : MonoBehaviour
         if (stat == StatType.Rolls && currentValues[stat] < 1)
             currentValues[stat] = 1;
 
-        if (!maxValues.ContainsKey(stat))
-            maxValues[stat] = int.MaxValue;
-
-        if (currentValues[stat] > maxValues[stat])
-            currentValues[stat] = maxValues[stat];
+        if (currentValues[stat] > GetMaxValue(stat))
+            currentValues[stat] = GetMaxValue(stat);
 
         if (currentValues[stat] < 0)
             currentValues[stat] = 0;
 
-        UpdateUI();
-    }
-
-    // -------------------------------------------------------------------------
-    // DICE RESULT
-    // -------------------------------------------------------------------------
-
-    public void OnDiceFinalResult(int finalRoll)
-    {
-        PreviousRoll = finalRoll;
-        ActiveConsumableEffects.Clear();
-    }
-
-    // -------------------------------------------------------------------------
-    // TURN MANAGEMENT
-    // -------------------------------------------------------------------------
-
-    public void NextTurn()
-    {
-        CurrentTurn++;
-    }
-
-    // -------------------------------------------------------------------------
-    // UI
-    // -------------------------------------------------------------------------
-
-    private void UpdateUI()
-    {
-        if (statsText == null)
-            return;
-
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
-        foreach (var kvp in currentValues)
-        {
-            StatType stat = kvp.Key;
-            int current = kvp.Value;
-            int max = GetMaxValue(stat);
-
-            if (stat == StatType.Rolls)
-            {
-                sb.AppendLine("Tiradas: " + current);
-            }
-            else if (stat == StatType.ShopRerolls)
-            {
-                if (IsPlayerInShop())
-                    sb.AppendLine("Rotaciones de tienda: " + current + "/" + max);
-            }
-            else if (stat == StatType.Gold)
-            {
-                sb.AppendLine("Oro: " + current + "/" + max);
-            }
-        }
-
-        statsText.text = sb.ToString();
+        NotifyUI();
     }
 
     public int GetCurrentValue(StatType stat)
     {
-        return currentValues.ContainsKey(stat) ? currentValues[stat] : 0;
+        return currentValues.TryGetValue(stat, out int value) ? value : 0;
     }
 
     public int GetMaxValue(StatType stat)
     {
-        return maxValues.ContainsKey(stat) ? maxValues[stat] : int.MaxValue;
+        return maxValues.TryGetValue(stat, out int value) ? value : int.MaxValue;
     }
 
     public void UseShopReroll()
@@ -181,9 +120,30 @@ public class StatManager : MonoBehaviour
         ChangeStat(StatType.ShopRerolls, -1);
     }
 
+    public void OnDiceFinalResult(int finalRoll)
+    {
+        PreviousRoll = finalRoll;
+        ActiveConsumableEffects.Clear();
+    }
+
+    public void NextTurn()
+    {
+        CurrentTurn++;
+        NotifyUI();
+    }
+
+    private void HandleShopStateChanged(bool inShop)
+    {
+        NotifyUI();
+    }
+
     public bool IsPlayerInShop()
     {
-        var exitManager = Object.FindFirstObjectByType<ShopExitManager>();
-        return exitManager != null && exitManager.IsInShop();
+        return cachedExitManager != null && cachedExitManager.IsInShop();
+    }
+
+    private void NotifyUI()
+    {
+        OnStatsChanged?.Invoke();
     }
 }

@@ -15,11 +15,9 @@ MonoBehaviour:
   itemName: LootBox
   icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
   itemDescription: 
-  prefab3D: {fileID: 919132149155446097, guid: c2361280fca8e0a4d939f013a0fe0cd2, type: 3}
+  prefab3D: {fileID: 5268606362059046244, guid: 1f164fd9655e6ac48a7e7fddf788f149, type: 3}
   buyPrice: 0
   sellPrice: 0
   polarity: 0
   lootType: 0
-  possibleItems:
-  - {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
-  - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
+  possibleItems: []

@@ -50,13 +50,13 @@ public class StressTestShop : MonoBehaviour
                     BaseItemSO item = p.GetChosenItem();
                     if (item == null) continue;
 
-                    if (names.Contains(item.itemName))
+                    if (names.Contains(item.ItemName))
                     {
-                        Debug.LogError("DUPLICATE FOUND in batch " + b + ": " + item.itemName);
+                        Debug.LogError("DUPLICATE FOUND in batch " + b + ": " + item.ItemName);
                         yield break;
                     }
 
-                    names.Add(item.itemName);
+                    names.Add(item.ItemName);
                 }
             }
 
