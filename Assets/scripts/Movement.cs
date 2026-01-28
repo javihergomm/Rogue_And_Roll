@@ -8,45 +8,56 @@ public class Movement : MonoBehaviour
     [SerializeField] float speed;
     [SerializeField] int actualPos;
     [SerializeField] bool isPlayer;
+
     void Start()
     {
         spots = FindObjectsOfType<Spot>();
     }
+
     public void StartMoving()
     {
+        int steps;
+
         if (isPlayer)
         {
-            StartCoroutine(Move(PlayerDice.ThrowDice()));
-            if(spots[actualPos + 1].getType() == Spot.SpotType.Bad)
+            // Sustituimos PlayerDice.ThrowDice() por el valor final del sistema real
+            steps = StatManager.Instance.PreviousRoll;
+
+            StartCoroutine(Move(steps));
+
+            // Asumimos que tu lógica funciona tal cual
+            if (spots[actualPos + 1].getType() == Spot.SpotType.Bad)
             {
                 Debug.Log("has caido en una casilla mala");
-            }else if (spots[actualPos + 1].getType() == Spot.SpotType.Good){
+            }
+            else if (spots[actualPos + 1].getType() == Spot.SpotType.Good)
+            {
                 Debug.Log("has caido en una casilla buena");
             }
             else
             {
                 Debug.Log("has caido en una casilla normal");
             }
-            
         }
         else
         {
-            StartCoroutine(Move(EnemyDice.ThrowDice()));
+            // Enemigo también usa el valor final del sistema
+            steps = StatManager.Instance.PreviousRoll;
+            StartCoroutine(Move(steps));
         }
-
-            
-
     }
 
     IEnumerator Move(int steps)
     {
-        if(!isPlayer){
+        if (!isPlayer)
+        {
             yield return new WaitForSeconds(1f);
         }
+
         for (int i = 0; i < steps; i++)
         {
             if (actualPos + 1 >= positions.Length)
-                actualPos=-1;
+                actualPos = -1;
 
             actualPos++;
 
@@ -54,11 +65,15 @@ public class Movement : MonoBehaviour
 
             while (Vector3.Distance(transform.position, destination) > 0.0000001f)
             {
-                transform.position = Vector3.MoveTowards
-                    (transform.position, destination, speed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(
+                    transform.position,
+                    destination,
+                    speed * Time.deltaTime
+                );
 
                 yield return null;
             }
+
             yield return new WaitForSeconds(0.1f);
         }
     }
