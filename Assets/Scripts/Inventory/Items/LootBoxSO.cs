@@ -4,34 +4,16 @@ using UnityEngine;
 /*
  * LootBoxSO
  * ---------
- * Contains a pool of possible rewards.
- * When used, emits an event with the reward.
+ * Loot box item that generates rewards dynamically at runtime.
+ * Uses a dedicated LootBoxItemPool instead of the global ItemDatabase.
+ * Only items with matching polarity are allowed.
+ * Loot boxes cannot contain other loot boxes.
  */
 [CreateAssetMenu(fileName = "LootBox", menuName = "Inventory/LootBox")]
 public class LootBoxSO : BaseItemSO
 {
-    public enum LootType
-    {
-        Positive,
-        Negative
-    }
-
-    [Header("Loot Box Type")]
-    [SerializeField] private LootType lootType;
-
-    [Header("Possible Rewards")]
-    [SerializeField] private BaseItemSO[] possibleItems;
-
-    public LootType Type => lootType;
-
-    public BaseItemSO Open()
-    {
-        if (possibleItems == null || possibleItems.Length == 0)
-            return null;
-
-        int index = Random.Range(0, possibleItems.Length);
-        return possibleItems[index];
-    }
+    [Header("Loot Box Item Pool")]
+    [SerializeField] private LootBoxItemPool lootPool;
 
     public override void UseItem()
     {
@@ -40,34 +22,38 @@ public class LootBoxSO : BaseItemSO
             LootBoxEvents.OnLootBoxOpened?.Invoke(this, reward);
     }
 
-    public void ToggleType()
+    public BaseItemSO Open()
     {
-        lootType = (lootType == LootType.Positive)
-            ? LootType.Negative
-            : LootType.Positive;
+        List<BaseItemSO> candidates = GetValidRewards();
+
+        if (candidates.Count == 0)
+            return null;
+
+        int index = Random.Range(0, candidates.Count);
+        return candidates[index];
     }
 
-#if UNITY_EDITOR
-    private void OnValidate()
+    private List<BaseItemSO> GetValidRewards()
     {
-        if (possibleItems == null)
-            return;
+        List<BaseItemSO> result = new List<BaseItemSO>();
 
-        List<BaseItemSO> valid = new List<BaseItemSO>();
+        if (lootPool == null || lootPool.items == null)
+            return result;
 
-        foreach (var item in possibleItems)
+        foreach (var item in lootPool.items)
         {
             if (item == null)
                 continue;
 
-            bool boxPositive = lootType == LootType.Positive;
-            bool itemPositive = item.Polarity == ItemPolarity.Positive;
+            // Do not allow loot boxes inside loot boxes
+            if (item is LootBoxSO)
+                continue;
 
-            if (boxPositive == itemPositive)
-                valid.Add(item);
+            // Only allow items with the same polarity as this loot box
+            if (item.Polarity == this.Polarity)
+                result.Add(item);
         }
 
-        possibleItems = valid.ToArray();
+        return result;
     }
-#endif
 }

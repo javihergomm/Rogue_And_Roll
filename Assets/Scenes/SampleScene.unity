@@ -2841,7 +2841,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &400455921
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3092,7 +3092,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &409411471
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6277,7 +6277,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &898091453
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6311,12 +6311,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69d59df935637cf4489397d319c40748, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
-  possibleItems:
-  - {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
-  - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
-  - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
-  - {fileID: 11400000, guid: 0cc5767b84b2dbf49b3228f8cf86e141, type: 2}
-  - {fileID: 11400000, guid: dd23d94583cb7a140abf8a4e0765936b, type: 2}
+  shopPool: {fileID: 11400000, guid: 17807989e85010f4588b91f40bc397ca, type: 2}
   displayPoint: {fileID: 691661218}
   displayYOffset: 0.1
   isAwaitingDecision: 0
@@ -8650,7 +8645,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &1225340513
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10020,7 +10015,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1317587675
 Transform:
   m_ObjectHideFlags: 0
@@ -10049,13 +10044,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69d59df935637cf4489397d319c40748, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
-  possibleItems:
-  - {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
-  - {fileID: 11400000, guid: dd23d94583cb7a140abf8a4e0765936b, type: 2}
-  - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
-  - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
-  - {fileID: 11400000, guid: 0cc5767b84b2dbf49b3228f8cf86e141, type: 2}
-  - {fileID: 11400000, guid: fe668fade2205ef48b745bfda22725ce, type: 2}
+  shopPool: {fileID: 11400000, guid: 17807989e85010f4588b91f40bc397ca, type: 2}
   displayPoint: {fileID: 1912633484}
   displayYOffset: 0.1
   isAwaitingDecision: 0
@@ -11738,7 +11727,7 @@ MonoBehaviour:
   boardTransform: {fileID: 0}
   exitRotationZ: 0
   shopRotationZ: 180
-  inShop: 0
+  inShop: 1
   tableroOuijaPuntero: {fileID: 652871806}
 --- !u!114 &1548563264
 MonoBehaviour:
@@ -11825,13 +11814,7 @@ MonoBehaviour:
     - {fileID: 232339451}
     - {fileID: 437691362}
     - {fileID: 1038898616}
-    itemSOs:
-    - {fileID: 11400000, guid: 0cc5767b84b2dbf49b3228f8cf86e141, type: 2}
-    - {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
-    - {fileID: 11400000, guid: fe668fade2205ef48b745bfda22725ce, type: 2}
-    - {fileID: 11400000, guid: dd23d94583cb7a140abf8a4e0765936b, type: 2}
-    - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
-    - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
+    itemDatabase: {fileID: 11400000, guid: afe046d3926608f459cb0bf08cd40f40, type: 2}
   inventoryMenu: {fileID: 1374634886}
   startingDice: {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
 --- !u!114 &1548563266
@@ -13709,7 +13692,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &1915413512
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14594,6 +14577,10 @@ PrefabInstance:
     - target: {fileID: 6623611296740254087, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
       propertyPath: m_Name
       value: TableroOuijaPuntero
+      objectReference: {fileID: 0}
+    - target: {fileID: 6623611296740254087, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

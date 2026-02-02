@@ -33,9 +33,13 @@ public class StressTestShop : MonoBehaviour
                 foreach (var p in pedestals)
                     p.ResetForNextVisit();
 
-                // Clear used items once per reroll
+                // Clear static sets
                 typeof(ShopPedestalRandomizer)
                     .GetField("usedItemsThisVisit", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+                    .SetValue(null, new HashSet<BaseItemSO>());
+
+                typeof(ShopPedestalRandomizer)
+                    .GetField("usedItemsThisReroll", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
                     .SetValue(null, new HashSet<BaseItemSO>());
 
                 // Generate items
@@ -62,7 +66,6 @@ public class StressTestShop : MonoBehaviour
 
             Debug.Log("Progress: " + (b * batchSize) + " iterations...");
 
-            // Let Unity breathe
             yield return null;
         }
 

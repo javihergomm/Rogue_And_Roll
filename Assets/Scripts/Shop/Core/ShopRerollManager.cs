@@ -11,15 +11,12 @@ using UnityEngine.InputSystem;
 public class ShopRerollManager : MonoBehaviour
 {
     [Header("Hotkey Settings")]
-    [Tooltip("Key used to trigger a reroll of all shop pedestals.")]
     [SerializeField] private Key rerollKey = Key.R;
 
     [Header("Reroll Settings")]
-    [Tooltip("Gold cost for rerolling all pedestals at once.")]
-    [SerializeField] private int globalRerollCost = 20;
+    [SerializeField] private int globalRerollCost = 2;
 
     [Header("Shop State")]
-    [Tooltip("Flag to indicate if the player is currently inside the shop.")]
     [SerializeField] private bool inShop = true;
 
     private void Update()
@@ -31,10 +28,6 @@ public class ShopRerollManager : MonoBehaviour
             TryRerollAllPedestals();
     }
 
-    /*
-     * Attempts to reroll all pedestals in the shop.
-     * Checks gold cost and available shop rerolls before executing.
-     */
     private void TryRerollAllPedestals()
     {
         int shopRerolls = StatManager.Instance.GetCurrentValue(StatType.ShopRerolls);
@@ -47,6 +40,9 @@ public class ShopRerollManager : MonoBehaviour
 
         StatManager.Instance.ChangeStat(StatType.Gold, -globalRerollCost);
         StatManager.Instance.UseShopReroll();
+
+        // Clear reroll memory
+        ShopPedestalRandomizer.PrepareForReroll();
 
         var pedestals = Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsSortMode.None);
         foreach (var pedestal in pedestals)

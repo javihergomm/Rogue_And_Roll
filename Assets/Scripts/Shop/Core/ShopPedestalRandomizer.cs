@@ -5,14 +5,14 @@ using System.Collections.Generic;
  * ShopPedestalRandomizer
  * ----------------------
  * Manages the item shown on a shop pedestal.
- * Selects an item from a list of possible items.
+ * Selects an item from a ShopItemPool.
  * Avoids showing items already purchased during the current visit.
  * Avoids repeating items between pedestals during the same reroll.
  */
 public class ShopPedestalRandomizer : MonoBehaviour
 {
-    [Header("Possible items for this pedestal")]
-    [SerializeField] private BaseItemSO[] possibleItems;
+    [Header("Shop Item Pool")]
+    [SerializeField] private ShopItemPool shopPool;
 
     [Header("Visuals")]
     [SerializeField] private Transform displayPoint;
@@ -56,7 +56,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
     public void RefreshItem()
     {
-        if (possibleItems == null || possibleItems.Length == 0)
+        if (shopPool == null || shopPool.items == null || shopPool.items.Length == 0)
             return;
 
         if (spawnedModel != null)
@@ -64,8 +64,11 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
         List<BaseItemSO> availableItems = new List<BaseItemSO>();
 
-        foreach (var item in possibleItems)
+        foreach (var item in shopPool.items)
         {
+            if (item == null)
+                continue;
+
             if (!usedItemsThisVisit.Contains(item) &&
                 !usedItemsThisReroll.Contains(item))
             {

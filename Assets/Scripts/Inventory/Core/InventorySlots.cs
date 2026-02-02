@@ -6,6 +6,7 @@ using System.Linq;
  * InventorySlots
  * --------------
  * Handles all inventory slot groups and item operations.
+ * Now uses ItemDatabase instead of a manual BaseItemSO array.
  */
 [System.Serializable]
 public class InventorySlots
@@ -17,22 +18,37 @@ public class InventorySlots
     [SerializeField] private List<ItemSlot> consumableSlots;
 
     [Header("Item Database")]
-    [SerializeField] private BaseItemSO[] itemSOs;
+    [SerializeField] private ItemDatabase itemDatabase;
 
     private Dictionary<string, BaseItemSO> lookup;
     private readonly List<ItemSlot> allSlots = new List<ItemSlot>();
 
     public IReadOnlyList<ItemSlot> AllSlots => allSlots;
 
-    // NEW: expose active dice slots so ActiveDiceSlots can use them
+    // Expose active dice slots for external systems
     public List<ItemSlot> ActiveDiceSlots => activeDiceSlots;
 
     public void Initialize()
     {
         lookup = new Dictionary<string, BaseItemSO>();
-        foreach (var item in itemSOs)
-            lookup[item.ItemName] = item;
 
+        if (itemDatabase == null || itemDatabase.AllItems == null)
+        {
+            Debug.LogError("ItemDatabase is missing or empty in InventorySlots.");
+            return;
+        }
+
+        // Build lookup dictionary from ItemDatabase
+        foreach (var item in itemDatabase.AllItems)
+        {
+            if (item == null)
+                continue;
+
+            if (!lookup.ContainsKey(item.ItemName))
+                lookup[item.ItemName] = item;
+        }
+
+        // Collect all slots into a single list
         allSlots.Clear();
         allSlots.AddRange(activeDiceSlots);
         allSlots.AddRange(diceSlots);
@@ -87,6 +103,8 @@ public class InventorySlots
         if (item is DiceSO) return diceSlots;
         if (item is PermanentSO) return permanentSlots;
         if (item is ConsumableSO || item is LootBoxSO) return consumableSlots;
+
+        // Default category
         return diceSlots;
     }
 
