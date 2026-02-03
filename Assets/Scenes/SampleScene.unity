@@ -2817,7 +2817,7 @@ Transform:
   m_GameObject: {fileID: 371584075}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: 0.42, z: 1}
+  m_LocalPosition: {x: 1, y: 0.586, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11694,7 +11694,8 @@ MonoBehaviour:
   - {fileID: 3941340506404730363, guid: caa77843c8f2f414889458cb1a5c6cd7, type: 3}
   d8Prefabs:
   - {fileID: 3245075456472946614, guid: 16b3b5c4daf96ed4a9a4b4c63589fc88, type: 3}
-  d20Prefabs: []
+  d20Prefabs:
+  - {fileID: 2272190440689176511, guid: 31742afae4788744689e2a5657122293, type: 3}
   activeDiceSpawnPoints:
   - {fileID: 371584076}
   - {fileID: 1901905708}
@@ -11833,7 +11834,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
     - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
   inventoryMenu: {fileID: 1374634886}
-  startingDice: {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
+  startingDice: {fileID: 11400000, guid: 8f0fa4378146c694bbbe51198f2098fe, type: 2}
 --- !u!114 &1548563266
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13610,7 +13611,7 @@ Transform:
   m_GameObject: {fileID: 1901905707}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.55, y: 0.42, z: 1}
+  m_LocalPosition: {x: 1.55, y: 0.477, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
