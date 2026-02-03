@@ -3,13 +3,22 @@ using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
 
+[System.Serializable]
+public class FaceEntry
+{
+    public Vector3 normal;
+    public int value;
+    public Vector3 center;
+    // Color visible en el inspector
+    public Color debugColor;
+}
+
 /*
  * DiceRoller
  * ----------
- * Handles the physical behavior of a dice.
- * Applies force when clicked.
- * Reads the upward face after the dice settles.
- * Applies mid-air correction and final snap correction if needed.
+ * Handles physical dice behavior.
+ * Uses a prefab-stored FaceMap (no hardcoded normals).
+ * Includes gizmos with unique colors per face.
  */
 public class DiceRoller : MonoBehaviour
 {
@@ -21,6 +30,9 @@ public class DiceRoller : MonoBehaviour
 
     [Header("Dice Settings")]
     [SerializeField] private DiceType diceType = DiceType.D6;
+
+    [Header("Face Map (Prefab Only)")]
+    [SerializeField] private List<FaceEntry> serializedFaceMap = new List<FaceEntry>();
 
     public Dictionary<Vector3, int> FaceMap { get; private set; }
 
@@ -52,6 +64,17 @@ public class DiceRoller : MonoBehaviour
         linkedSlot = slot;
         diceType = data.DiceType;
         InitFaceMap();
+    }
+
+    public void InitFaceMap()
+    {
+        FaceMap = new Dictionary<Vector3, int>();
+
+        foreach (var entry in serializedFaceMap)
+            FaceMap[entry.normal] = entry.value;
+
+        if (FaceMap.Count == 0)
+            Debug.LogWarning($"{name}: Prefab has no FaceMap assigned.");
     }
 
 
@@ -97,11 +120,9 @@ public class DiceRoller : MonoBehaviour
     {
         yield return new WaitForFixedUpdate();
 
-        // Wait until dice starts rotating
         while (rb.angularVelocity.magnitude < 2f)
             yield return null;
 
-        // Wait until dice slows down
         while (rb.angularVelocity.magnitude > 0.5f)
             yield return null;
 
@@ -119,13 +140,11 @@ public class DiceRoller : MonoBehaviour
         if (targetFace.HasValue && targetFace.Value != physicalRoll)
             StartCoroutine(ApplyMidAirCorrection(targetFace.Value));
 
-        // Wait until dice stops
         while (!rb.IsSleeping())
             yield return null;
 
         int finalFace = GetFaceUp();
 
-        // Snap correction if needed
         if (!DiceRollManager.Instance.IsFaceAllowed(linkedSlot, finalFace))
         {
             int? snapTarget = DiceRollManager.Instance.GetTargetFaceForRoll(linkedSlot, finalFace, ctx);
@@ -229,53 +248,38 @@ public class DiceRoller : MonoBehaviour
             if (kvp.Value == value)
                 return kvp.Key;
 
-        return Vector3.up; // fallback
+        return Vector3.up;
     }
 
 
     // -------------------------------------------------------------------------
-    // FACE MAP
+    // GIZMOS (COLORES POR CARA)
     // -------------------------------------------------------------------------
 
-    public void InitFaceMap()
+    private void OnDrawGizmosSelected()
     {
-        FaceMap = new Dictionary<Vector3, int>();
+        if (serializedFaceMap == null)
+            return;
 
-        switch (diceType)
+        for (int i = 0; i < serializedFaceMap.Count; i++)
         {
-            case DiceType.D4:
-                FaceMap[Vector3.up] = 1;
-                FaceMap[Vector3.forward] = 2;
-                FaceMap[Vector3.right] = 3;
-                FaceMap[Vector3.left] = 4;
-                break;
+            var entry = serializedFaceMap[i];
 
-            case DiceType.D6:
-                FaceMap[Vector3.up] = 2;
-                FaceMap[Vector3.down] = 5;
-                FaceMap[Vector3.forward] = 1;
-                FaceMap[Vector3.back] = 6;
-                FaceMap[Vector3.right] = 4;
-                FaceMap[Vector3.left] = 3;
-                break;
+            // Si no tiene color asignado, generarlo automáticamente
+            if (entry.debugColor == default)
+                entry.debugColor = Color.HSVToRGB((float)i / serializedFaceMap.Count, 1f, 1f);
 
-            case DiceType.D8:
-                FaceMap[Vector3.up] = 1;
-                FaceMap[Vector3.down] = 8;
-                FaceMap[Vector3.forward] = 2;
-                FaceMap[Vector3.back] = 7;
-                FaceMap[Vector3.right] = 3;
-                FaceMap[Vector3.left] = 6;
-                break;
+            Gizmos.color = entry.debugColor;
 
-            case DiceType.D20:
-                FaceMap[Vector3.up] = 1;
-                FaceMap[Vector3.down] = 20;
-                FaceMap[Vector3.forward] = 2;
-                FaceMap[Vector3.back] = 19;
-                FaceMap[Vector3.right] = 3;
-                FaceMap[Vector3.left] = 18;
-                break;
+            Vector3 world = transform.TransformDirection(entry.normal);
+            Vector3 start = transform.position;
+
+            Gizmos.DrawLine(start, start + world * 0.5f);
+
+#if UNITY_EDITOR
+            UnityEditor.Handles.color = entry.debugColor;
+            UnityEditor.Handles.Label(start + world * 0.55f, entry.value.ToString());
+#endif
         }
     }
 
