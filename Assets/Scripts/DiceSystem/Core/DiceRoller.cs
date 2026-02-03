@@ -6,19 +6,16 @@ using System.Collections.Generic;
 [System.Serializable]
 public class FaceEntry
 {
-    public Vector3 normal;
-    public int value;
-    public Vector3 center;
-    // Color visible en el inspector
-    public Color debugColor;
+    public Vector3 normal;   // Local-space outward normal of the face
+    public int value;        // Numeric value of the face
 }
 
 /*
  * DiceRoller
  * ----------
- * Handles physical dice behavior.
- * Uses a prefab-stored FaceMap (no hardcoded normals).
- * Includes gizmos with unique colors per face.
+ * Handles rolling, physics stabilization, face detection,
+ * optional mid-air correction, and optional snapping.
+ * Uses a prefab-defined face map to determine which face is up.
  */
 public class DiceRoller : MonoBehaviour
 {
@@ -37,11 +34,6 @@ public class DiceRoller : MonoBehaviour
     public Dictionary<Vector3, int> FaceMap { get; private set; }
 
     private bool isRolling = false;
-
-
-    // -------------------------------------------------------------------------
-    // INITIALIZATION
-    // -------------------------------------------------------------------------
 
     private void Awake()
     {
@@ -66,6 +58,7 @@ public class DiceRoller : MonoBehaviour
         InitFaceMap();
     }
 
+    // Converts the serialized face list into a lookup dictionary
     public void InitFaceMap()
     {
         FaceMap = new Dictionary<Vector3, int>();
@@ -76,11 +69,6 @@ public class DiceRoller : MonoBehaviour
         if (FaceMap.Count == 0)
             Debug.LogWarning($"{name}: Prefab has no FaceMap assigned.");
     }
-
-
-    // -------------------------------------------------------------------------
-    // INPUT
-    // -------------------------------------------------------------------------
 
     private void Update()
     {
@@ -98,11 +86,7 @@ public class DiceRoller : MonoBehaviour
         StartCoroutine(HandleRoll());
     }
 
-
-    // -------------------------------------------------------------------------
-    // ROLLING
-    // -------------------------------------------------------------------------
-
+    // Applies force and torque to start the roll
     public void RollDice()
     {
         if (isRolling)
@@ -116,6 +100,7 @@ public class DiceRoller : MonoBehaviour
         rb.AddTorque(Random.insideUnitSphere * 50f, ForceMode.Impulse);
     }
 
+    // Waits for the dice to spin, slow down, and settle
     private IEnumerator HandleRoll()
     {
         yield return new WaitForFixedUpdate();
@@ -160,11 +145,7 @@ public class DiceRoller : MonoBehaviour
         InventoryManager.Instance.RefreshActiveDiceUI();
     }
 
-
-    // -------------------------------------------------------------------------
-    // MID-AIR CORRECTION
-    // -------------------------------------------------------------------------
-
+    // Applies torque to rotate the dice toward a target face while airborne
     private IEnumerator ApplyMidAirCorrection(int targetValue)
     {
         Vector3 targetLocalDir = GetLocalDirectionForFace(targetValue);
@@ -187,11 +168,7 @@ public class DiceRoller : MonoBehaviour
         }
     }
 
-
-    // -------------------------------------------------------------------------
-    // SNAP CORRECTION
-    // -------------------------------------------------------------------------
-
+    // Smoothly rotates the dice to align a target face upward
     private IEnumerator SnapToFace(int targetValue)
     {
         Vector3 targetLocalDir = GetLocalDirectionForFace(targetValue);
@@ -217,11 +194,7 @@ public class DiceRoller : MonoBehaviour
         transform.rotation = endRot;
     }
 
-
-    // -------------------------------------------------------------------------
-    // FACE DETECTION
-    // -------------------------------------------------------------------------
-
+    // Determines which face normal is closest to world-up
     private int GetFaceUp()
     {
         float bestDot = -1f;
@@ -242,6 +215,7 @@ public class DiceRoller : MonoBehaviour
         return bestValue;
     }
 
+    // Returns the local-space normal for a given face value
     private Vector3 GetLocalDirectionForFace(int value)
     {
         foreach (var kvp in FaceMap)
@@ -251,43 +225,7 @@ public class DiceRoller : MonoBehaviour
         return Vector3.up;
     }
 
-
-    // -------------------------------------------------------------------------
-    // GIZMOS (COLORES POR CARA)
-    // -------------------------------------------------------------------------
-
-    private void OnDrawGizmosSelected()
-    {
-        if (serializedFaceMap == null)
-            return;
-
-        for (int i = 0; i < serializedFaceMap.Count; i++)
-        {
-            var entry = serializedFaceMap[i];
-
-            // Si no tiene color asignado, generarlo automáticamente
-            if (entry.debugColor == default)
-                entry.debugColor = Color.HSVToRGB((float)i / serializedFaceMap.Count, 1f, 1f);
-
-            Gizmos.color = entry.debugColor;
-
-            Vector3 world = transform.TransformDirection(entry.normal);
-            Vector3 start = transform.position;
-
-            Gizmos.DrawLine(start, start + world * 0.5f);
-
-#if UNITY_EDITOR
-            UnityEditor.Handles.color = entry.debugColor;
-            UnityEditor.Handles.Label(start + world * 0.55f, entry.value.ToString());
-#endif
-        }
-    }
-
-
-    // -------------------------------------------------------------------------
-    // UTILITIES
-    // -------------------------------------------------------------------------
-
+    // Stops all motion and resets the rigidbody
     private void ResetPhysics()
     {
         rb.linearVelocity = Vector3.zero;

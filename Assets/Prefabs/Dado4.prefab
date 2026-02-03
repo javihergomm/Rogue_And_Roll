@@ -62,23 +62,20 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a9a75abce3cbd89418fb3ea94fd8493f, type: 3}
       insertIndex: -1
-      addedObject: {fileID: -2541542657583190650}
+      addedObject: {fileID: -6367026130605228165}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a9a75abce3cbd89418fb3ea94fd8493f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1802449287692868096}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a9a75abce3cbd89418fb3ea94fd8493f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2441930860735160319}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a9a75abce3cbd89418fb3ea94fd8493f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: -6367026130605228165}
   m_SourcePrefab: {fileID: 100100000, guid: a9a75abce3cbd89418fb3ea94fd8493f, type: 3}
 --- !u!1 &3367068850983838572 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: a9a75abce3cbd89418fb3ea94fd8493f, type: 3}
   m_PrefabInstance: {fileID: 2484670424313601597}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &-2541542657583190650
+--- !u!114 &-6367026130605228165
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -91,7 +88,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DiceRoller
   diceType: 0
-  serializedFaceMap: []
+  serializedFaceMap:
+  - normal: {x: 0.43203998, y: 0.25827736, z: 0.86408}
+    value: 4
+    center: {x: 0, y: 0, z: 0}
+    debugColor: {r: 1, g: 0, b: 0, a: 1}
+  - normal: {x: 0.43203992, y: 0.2582774, z: -0.8640801}
+    value: 1
+    center: {x: 0, y: 0, z: 0}
+    debugColor: {r: 0.5, g: 1, b: 0, a: 1}
+  - normal: {x: -0.9244625, y: 0.38127312, z: 0}
+    value: 2
+    center: {x: 0, y: 0, z: 0}
+    debugColor: {r: 0, g: 1, b: 1, a: 1}
+  - normal: {x: 0, y: -1, z: 0}
+    value: 3
+    center: {x: 0, y: 0, z: 0}
+    debugColor: {r: 0.5, g: 0, b: 1, a: 1}
 --- !u!54 &1802449287692868096
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -141,29 +154,3 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -4846983869062747749, guid: a9a75abce3cbd89418fb3ea94fd8493f, type: 3}
---- !u!114 &-6367026130605228165
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3367068850983838572}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a20bddb740654446bc0d7ff8769ea01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DiceRoller
-  diceType: 0
-  serializedFaceMap:
-  - normal: {x: 0.43203998, y: 0.25827736, z: 0.86408}
-    value: 1
-    debugColor: {r: 1, g: 0, b: 0, a: 1}
-  - normal: {x: 0.43203992, y: 0.2582774, z: -0.8640801}
-    value: 4
-    debugColor: {r: 0.5, g: 1, b: 0, a: 1}
-  - normal: {x: -0.9244625, y: 0.38127312, z: 0}
-    value: 3
-    debugColor: {r: 0, g: 1, b: 1, a: 1}
-  - normal: {x: 0, y: -1, z: 0}
-    value: 2
-    debugColor: {r: 0.5, g: 0, b: 1, a: 1}
