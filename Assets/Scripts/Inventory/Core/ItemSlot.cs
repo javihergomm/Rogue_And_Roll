@@ -11,15 +11,11 @@ using UnityEngine.UI;
  *  - Allows selecting items
  *  - Allows dragging dice inside the inventory
  *  - Allows dragging consumables out of the inventory panel to place them on board Spots
- *  - Allows receiving dropped items from other slots
+ *  - Receives dropped items from other slots
  */
 public class ItemSlot : MonoBehaviour,
     IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
 {
-    // -------------------------------------------------------------------------
-    // DATA
-    // -------------------------------------------------------------------------
-
     [SerializeField] private string itemName = "";
     [SerializeField] private int quantity = 0;
     [SerializeField] private Sprite itemSprite;
@@ -31,36 +27,23 @@ public class ItemSlot : MonoBehaviour,
     public Sprite ItemSprite => itemSprite;
     public string ItemDescription => itemDescription;
 
-    // -------------------------------------------------------------------------
-    // UI
-    // -------------------------------------------------------------------------
-
     [SerializeField] private TMP_Text quantityText;
     [SerializeField] private Image itemImage;
     [SerializeField] private GameObject selectedShader;
 
     public bool thisItemSelected { get; private set; }
 
-    // -------------------------------------------------------------------------
-    // DRAG & DROP
-    // -------------------------------------------------------------------------
-
     private CanvasGroup canvasGroup;
     private GameObject dragIcon;
-    private Canvas rootCanvas;
+    private Canvas dragCanvas;
 
     [SerializeField] private RectTransform inventoryPanel;
 
     private void Awake()
     {
         canvasGroup = gameObject.AddComponent<CanvasGroup>();
-        rootCanvas = GetComponentInParent<Canvas>().rootCanvas;
         RefreshUI();
     }
-
-    // -------------------------------------------------------------------------
-    // ITEM MANAGEMENT
-    // -------------------------------------------------------------------------
 
     public int AddItem(string name, int qty, Sprite sprite, string description)
     {
@@ -96,10 +79,6 @@ public class ItemSlot : MonoBehaviour,
             selectedShader.SetActive(thisItemSelected);
     }
 
-    // -------------------------------------------------------------------------
-    // SELECTION
-    // -------------------------------------------------------------------------
-
     public void SelectSlot()
     {
         InventoryManager.Instance?.DeselectAllSlots();
@@ -114,18 +93,10 @@ public class ItemSlot : MonoBehaviour,
         selectedShader?.SetActive(false);
     }
 
-    // -------------------------------------------------------------------------
-    // CLICK HANDLING
-    // -------------------------------------------------------------------------
-
     public void OnPointerClick(PointerEventData eventData)
     {
         InventoryManager.Instance.HandleSlotClick(this);
     }
-
-    // -------------------------------------------------------------------------
-    // DRAG & DROP
-    // -------------------------------------------------------------------------
 
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -137,18 +108,23 @@ public class ItemSlot : MonoBehaviour,
         if (item is PermanentSO)
             return;
 
+        // Ocultar icono del slot
+        itemImage.enabled = false;
+
         if (item is DiceSO)
         {
             if (!InventoryManager.Instance.IsOpen)
                 return;
 
             CreateDragIcon();
+            eventData.pointerDrag = gameObject;
             return;
         }
 
         if (item is ConsumableSO)
         {
             CreateDragIcon();
+            eventData.pointerDrag = gameObject;
             return;
         }
     }
@@ -166,7 +142,7 @@ public class ItemSlot : MonoBehaviour,
         if (!RectTransformUtility.RectangleContainsScreenPoint(inventoryPanel, eventData.position))
         {
             if (InventoryManager.Instance.IsOpen)
-                InventoryManager.Instance.CloseInventory();
+                InventoryManager.Instance.HideInventorySoft();
         }
     }
 
@@ -175,8 +151,11 @@ public class ItemSlot : MonoBehaviour,
         canvasGroup.blocksRaycasts = true;
         canvasGroup.alpha = 1f;
 
+        // Volver a mostrar icono del slot
+        itemImage.enabled = true;
+
         if (dragIcon != null)
-            DestroyImmediate(dragIcon);
+            Destroy(dragIcon);
 
         BaseItemSO item = InventoryManager.Instance.GetItemSO(itemName);
 
@@ -200,14 +179,27 @@ public class ItemSlot : MonoBehaviour,
         InventoryManager.Instance.HandleSlotDrop(from, this);
     }
 
-    // -------------------------------------------------------------------------
-    // DRAG ICON CREATION
-    // -------------------------------------------------------------------------
-
     private void CreateDragIcon()
     {
+        if (dragCanvas == null)
+        {
+            Canvas[] canvases = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+
+            foreach (var c in canvases)
+            {
+                if (c.name == "GameCanvas")
+                {
+                    dragCanvas = c;
+                    break;
+                }
+            }
+        }
+
+        if (dragCanvas == null)
+            return;
+
         dragIcon = new GameObject("DragIcon");
-        dragIcon.transform.SetParent(rootCanvas.transform, false);
+        dragIcon.transform.SetParent(dragCanvas.transform, false);
 
         Image iconImage = dragIcon.AddComponent<Image>();
         iconImage.sprite = itemSprite;
@@ -216,17 +208,13 @@ public class ItemSlot : MonoBehaviour,
         RectTransform rt = dragIcon.GetComponent<RectTransform>();
         rt.sizeDelta = new Vector2(64, 64);
 
-        canvasGroup.blocksRaycasts = false;
+        canvasGroup.blocksRaycasts = true;
         canvasGroup.alpha = 0.6f;
     }
 
-    // -------------------------------------------------------------------------
-    // SPOT DETECTION
-    // -------------------------------------------------------------------------
-
     private Spot GetClosestSpotToMouse(PointerEventData eventData)
     {
-        SpotController controller = FindFirstObjectByType<SpotController>();
+        SpotController controller = Object.FindFirstObjectByType<SpotController>();
         if (controller == null)
             return null;
 

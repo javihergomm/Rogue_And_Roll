@@ -9,7 +9,8 @@ using UnityEngine;
  *  - Manages item slots and active dice slots
  *  - Handles adding, removing, swapping and selecting items
  *  - Controls inventory UI visibility
- *  - Places consumables on board Spots
+ *  - Supports soft-hide mode for drag operations
+ *  - Places consumables on board spots
  */
 public class InventoryManager : MonoBehaviour
 {
@@ -43,6 +44,8 @@ public class InventoryManager : MonoBehaviour
     private bool menuOpen = false;
     public bool IsOpen => menuOpen;
 
+    private CanvasGroup canvasGroup;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -55,6 +58,10 @@ public class InventoryManager : MonoBehaviour
 
         slots.Initialize();
         activeDice.Initialize(slots.ActiveDiceSlots);
+
+        canvasGroup = inventoryMenu.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+            canvasGroup = inventoryMenu.AddComponent<CanvasGroup>();
     }
 
     private void Start()
@@ -128,7 +135,6 @@ public class InventoryManager : MonoBehaviour
 
     /*
      * Handles drag-and-drop between two slots.
-     * Allows dice to move between inventory and active dice slots.
      */
     public void HandleSlotDrop(ItemSlot from, ItemSlot to)
     {
@@ -137,14 +143,11 @@ public class InventoryManager : MonoBehaviour
 
         BaseItemSO item = GetItemSO(from.ItemName);
 
-        // Only dice can enter active dice slots
         if (activeDice.Contains(to) && !(item is DiceSO))
             return;
 
-        // Swap items
         slots.SwapSlots(from, to);
 
-        // Sync dice in world
         activeDice.SyncSlot(from);
         activeDice.SyncSlot(to);
 
@@ -201,29 +204,32 @@ public class InventoryManager : MonoBehaviour
         OpenInventory();
     }
 
+    /*
+     * Toggles the inventory using real open/close.
+     */
     public void ToggleInventory()
     {
-        if (CharacterSelectManager.Instance != null &&
-            CharacterSelectManager.Instance.IsSelectorOpen())
-            return;
-
         if (menuOpen)
             CloseInventory();
         else
             OpenInventory();
     }
 
+    /*
+     * Opens the inventory using real activation.
+     */
     public void OpenInventory()
     {
-        if (CharacterSelectManager.Instance != null &&
-            CharacterSelectManager.Instance.IsSelectorOpen())
-            return;
-
         if (menuOpen)
             return;
 
         menuOpen = true;
-        inventoryMenu?.SetActive(true);
+
+        inventoryMenu.SetActive(true);
+
+        canvasGroup.alpha = 1f;
+        canvasGroup.blocksRaycasts = true;
+        canvasGroup.interactable = true;
 
         foreach (var slot in slots.AllSlots)
             slot.RefreshUI();
@@ -231,19 +237,17 @@ public class InventoryManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    public void OpenInventory(bool pauseGame)
-    {
-        OpenInventory();
-        Time.timeScale = pauseGame ? 0f : 1f;
-    }
-
+    /*
+     * Closes the inventory using real deactivation.
+     */
     public void CloseInventory()
     {
         if (!menuOpen)
             return;
 
         menuOpen = false;
-        inventoryMenu?.SetActive(false);
+
+        inventoryMenu.SetActive(false);
 
         slots.DeselectAll();
         sellMode.Disable();
@@ -252,7 +256,18 @@ public class InventoryManager : MonoBehaviour
     }
 
     /*
-     * Places a consumable on a board Spot and removes it from inventory.
+     * Soft-hides the inventory during drag operations.
+     * The menu becomes invisible but stays active.
+     */
+    public void HideInventorySoft()
+    {
+        canvasGroup.alpha = 0f;
+        canvasGroup.blocksRaycasts = false;
+        canvasGroup.interactable = false;
+    }
+
+    /*
+     * Places a consumable on a board spot.
      */
     public void PlaceConsumableOnSpot(ItemSlot slot, Spot spot)
     {
@@ -264,6 +279,5 @@ public class InventoryManager : MonoBehaviour
             Instantiate(item.Prefab3D, spot.transform.position, Quaternion.identity);
 
         RemoveItem(slot, 1);
-        OpenInventory();
     }
 }

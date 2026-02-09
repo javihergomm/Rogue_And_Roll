@@ -14,18 +14,10 @@ public class InventorySlotUI : MonoBehaviour
     [SerializeField] private Image itemImage;
     [SerializeField] private Sprite emptySprite;
 
-    private ItemSlotDragHandler dragHandler;
-
-    private void Awake()
-    {
-        dragHandler = GetComponent<ItemSlotDragHandler>();
-    }
-
     // Connects this UI element to its corresponding ItemSlot
     public void Initialize(ItemSlot slot)
     {
-        if (dragHandler != null)
-            dragHandler.Initialize(slot);
+        // No drag handler needed in the current system
     }
 
     public void UpdateUI(Sprite sprite, int quantity)
