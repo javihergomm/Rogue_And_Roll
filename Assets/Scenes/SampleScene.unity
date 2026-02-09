@@ -6297,7 +6297,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 1.2, y: 1.2, z: 1.2}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &898091454
 MonoBehaviour:
@@ -10078,7 +10078,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 1.2, y: 1.2, z: 1.2}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &1317587678
 Rigidbody:
@@ -11621,6 +11621,7 @@ GameObject:
   - component: {fileID: 1548563264}
   - component: {fileID: 1548563265}
   - component: {fileID: 1548563266}
+  - component: {fileID: 1548563267}
   m_Layer: 0
   m_Name: GameManagers
   m_TagString: Untagged
@@ -11736,7 +11737,7 @@ MonoBehaviour:
   - {fileID: 1915413510}
   - {fileID: 1225340512}
   - {fileID: 409411470}
-  boardTransform: {fileID: 0}
+  boardTransform: {fileID: 1555743862}
   exitRotationZ: 0
   shopRotationZ: 180
   inShop: 0
@@ -11790,7 +11791,7 @@ MonoBehaviour:
   - {fileID: 2058236799}
   - {fileID: 1186758403}
   - {fileID: 543579336}
-  cupPrefab: {fileID: 5031794116577546221, guid: fc992c4306d8e1a4eb8b3fc41c568a22, type: 3}
+  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
 --- !u!114 &1548563265
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11833,8 +11834,9 @@ MonoBehaviour:
     - {fileID: 11400000, guid: dd23d94583cb7a140abf8a4e0765936b, type: 2}
     - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
     - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
+    - {fileID: 11400000, guid: 52a0e4dbd2fc5bc449c7a6c7e7e9fe76, type: 2}
   inventoryMenu: {fileID: 1374634886}
-  startingDice: {fileID: 11400000, guid: 8f0fa4378146c694bbbe51198f2098fe, type: 2}
+  startingDice: {fileID: 11400000, guid: 52a0e4dbd2fc5bc449c7a6c7e7e9fe76, type: 2}
 --- !u!114 &1548563266
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11848,6 +11850,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEffectManager
   activeCharacter: {fileID: 0}
+--- !u!114 &1548563267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548563255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b033e2a1e01a9f5468e9fff147555b4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterSpawner
 --- !u!1 &1555743855 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4898722117463534234, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
@@ -11875,6 +11889,11 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 5296129568566095445, guid: c6cb3a931eda0eb4aa96215092fc79bb, type: 3}
+--- !u!4 &1555743862 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
+  m_PrefabInstance: {fileID: 7169438612123576422}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1561261657
 GameObject:
   m_ObjectHideFlags: 0
@@ -14627,7 +14646,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.x
@@ -14635,7 +14654,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.z
@@ -14647,7 +14666,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 180
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z

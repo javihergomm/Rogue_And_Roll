@@ -10,7 +10,9 @@ using UnityEngine.UI;
  * --------
  * Represents a single inventory slot.
  * Handles UI, selection, and drag interactions.
- * Delegates inventory logic to InventoryManager.
+ * Dice can only be dragged inside the inventory.
+ * Consumables can only be dragged when the inventory is CLOSED
+ * and dropped onto the board (Spot).
  */
 public class ItemSlot : MonoBehaviour,
     IPointerClickHandler,
@@ -19,7 +21,7 @@ public class ItemSlot : MonoBehaviour,
     IEndDragHandler
 {
     // -------------------------------------------------------------------------
-    // DATA (private, but accessible through methods)
+    // DATA
     // -------------------------------------------------------------------------
 
     [SerializeField] private string itemName = "";
@@ -31,7 +33,6 @@ public class ItemSlot : MonoBehaviour,
 
     [SerializeField] private int maxNumberOfItems = 10;
 
-    // Public read-only accessors
     public string ItemName => itemName;
     public int Quantity => quantity;
     public bool IsFull => isFull;
@@ -224,9 +225,22 @@ public class ItemSlot : MonoBehaviour,
             return;
 
         BaseItemSO item = InventoryManager.Instance.GetItemSO(itemName);
-        if (!(item is DiceSO))
-            return;
 
+        // Consumables can ONLY be dragged when inventory is closed
+        if (item is ConsumableSO)
+        {
+            if (InventoryManager.Instance.IsOpen)
+                return;
+
+            // Close inventory when dragging a consumable
+            InventoryManager.Instance.CloseInventory();
+        }
+        else
+        {
+            return;
+        }
+
+        // Create drag icon
         dragCanvas = FindFirstObjectByType<Canvas>();
 
         dragIcon = new GameObject("DragIcon");
@@ -258,20 +272,48 @@ public class ItemSlot : MonoBehaviour,
             Destroy(dragIcon);
 
         BaseItemSO item = InventoryManager.Instance.GetItemSO(itemName);
-        if (!(item is DiceSO))
+        if (!(item is ConsumableSO))
             return;
 
-        var results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
-
-        foreach (var hit in results)
+        Spot spot = GetClosestSpotToMouse(eventData);
+        if (spot != null)
         {
-            ItemSlot targetSlot = hit.gameObject.GetComponent<ItemSlot>();
-            if (targetSlot != null)
+            InventoryManager.Instance.PlaceConsumableOnSpot(this, spot);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // SPOT DETECTION WITHOUT COLLIDERS
+    // -------------------------------------------------------------------------
+
+    private Spot GetClosestSpotToMouse(PointerEventData eventData)
+    {
+        SpotController controller = FindFirstObjectByType<SpotController>();
+        if (controller == null)
+            return null;
+
+        Spot[] allSpots = controller.GetAllSpots();
+        if (allSpots == null || allSpots.Length == 0)
+            return null;
+
+        Ray ray = Camera.main.ScreenPointToRay(eventData.position);
+
+        Spot closest = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (Spot s in allSpots)
+        {
+            Vector3 spotPos = s.transform.position;
+
+            float distance = Vector3.Cross(ray.direction, spotPos - ray.origin).magnitude;
+
+            if (distance < closestDistance)
             {
-                InventoryManager.Instance.HandleSlotDrop(this, targetSlot);
-                return;
+                closestDistance = distance;
+                closest = s;
             }
         }
+
+        return closest;
     }
 }

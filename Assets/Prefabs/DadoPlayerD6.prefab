@@ -69,10 +69,10 @@ PrefabInstance:
       addedObject: {fileID: 807744302016026930}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f46a7b136cc93ee44a2b43817e562a06, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8809405656073876930}
+      addedObject: {fileID: -7232085038472809509}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f46a7b136cc93ee44a2b43817e562a06, type: 3}
       insertIndex: -1
-      addedObject: {fileID: -7232085038472809509}
+      addedObject: {fileID: 1677734583523650191}
   m_SourcePrefab: {fileID: 100100000, guid: f46a7b136cc93ee44a2b43817e562a06, type: 3}
 --- !u!1 &3941340506404730363 stripped
 GameObject:
@@ -105,29 +105,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!64 &8809405656073876930
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3941340506404730363}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -7562279525654168682, guid: f46a7b136cc93ee44a2b43817e562a06, type: 3}
+  m_CollisionDetection: 1
 --- !u!114 &-7232085038472809509
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,25 +122,34 @@ MonoBehaviour:
   serializedFaceMap:
   - normal: {x: 1, y: -0.000000071767744, z: -0.000000011961291}
     value: 4
-    center: {x: -0.68665975, y: -0.69, z: -1.0198932}
-    debugColor: {r: 1, g: 0, b: 0, a: 1}
   - normal: {x: -1, y: -0.00000007176774, z: -0.00000001196129}
     value: 3
-    center: {x: -0.83962876, y: -0.69, z: -1.0198932}
-    debugColor: {r: 1, g: 1, b: 0, a: 1}
   - normal: {x: 0, y: 1, z: 0}
     value: 2
-    center: {x: -0.76314425, y: -0.606, z: -1.0198932}
-    debugColor: {r: 0, g: 1, b: 0, a: 1}
   - normal: {x: 0, y: -1, z: 0}
     value: 5
-    center: {x: -0.76314425, y: -0.774, z: -1.0198932}
-    debugColor: {r: 0, g: 1, b: 1, a: 1}
   - normal: {x: 0, y: -0.00000007406714, z: 1}
     value: 1
-    center: {x: -0.76314425, y: -0.69, z: -0.941154}
-    debugColor: {r: 0, g: 0, b: 1, a: 1}
   - normal: {x: 0, y: -0.00000007406714, z: -1}
     value: 6
-    center: {x: -0.76314425, y: -0.69, z: -1.0986323}
-    debugColor: {r: 1, g: 0, b: 1, a: 1}
+--- !u!65 &1677734583523650191
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941340506404730363}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.16799998, y: 0.16799998, z: 0.16799998}
+  m_Center: {x: 0, y: 0.000000011175871, z: 0}

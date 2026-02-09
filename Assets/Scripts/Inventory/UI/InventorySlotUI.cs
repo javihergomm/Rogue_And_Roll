@@ -5,14 +5,28 @@ using UnityEngine.UI;
 /*
  * InventorySlotUI
  * ----------------
- * Pure UI component for a slot.
- * ItemSlot calls this to update visuals.
+ * Displays the item icon and quantity for an inventory slot.
+ * Updates the visuals whenever the slot's data changes.
  */
 public class InventorySlotUI : MonoBehaviour
 {
     [SerializeField] private TMP_Text quantityText;
     [SerializeField] private Image itemImage;
     [SerializeField] private Sprite emptySprite;
+
+    private ItemSlotDragHandler dragHandler;
+
+    private void Awake()
+    {
+        dragHandler = GetComponent<ItemSlotDragHandler>();
+    }
+
+    // Connects this UI element to its corresponding ItemSlot
+    public void Initialize(ItemSlot slot)
+    {
+        if (dragHandler != null)
+            dragHandler.Initialize(slot);
+    }
 
     public void UpdateUI(Sprite sprite, int quantity)
     {
@@ -33,4 +47,3 @@ public class InventorySlotUI : MonoBehaviour
         }
     }
 }
-
