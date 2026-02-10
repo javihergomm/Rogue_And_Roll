@@ -3,7 +3,7 @@ using UnityEngine;
 /*
  * ExtraLifeEffect
  * ---------------
- * Grants the player one extra life.
+ * Grants the playerObject one extra life.
  */
 [CreateAssetMenu(fileName = "ExtraLifeEffect", menuName = "Effects/Passive/ExtraLife")]
 public class ExtraLifeEffect : BasePassiveEffect

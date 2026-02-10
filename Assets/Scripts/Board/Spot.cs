@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Spot : MonoBehaviour
 {
+    public int index;
+
     public SpotType type;
 
     public enum SpotType

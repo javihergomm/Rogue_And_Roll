@@ -4,7 +4,7 @@ using UnityEngine;
  * StrategyTotemEffect
  * -------------------
  * Rolls a d4 at the start of each turn.
- * If the result meets the threshold, the player ignores
+ * If the result meets the threshold, the playerObject ignores
  * one negative effect this turn.
  */
 [CreateAssetMenu(fileName = "StrategyTotemEffect", menuName = "Effects/Passive/StrategyTotem")]

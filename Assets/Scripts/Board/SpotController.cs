@@ -1,10 +1,10 @@
 using UnityEngine;
+using System.Linq;
 
 public class SpotController : MonoBehaviour
 {
     private Spot[] spots;
     private Spot spot;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         spot = GetComponent<Spot>();
@@ -24,8 +24,30 @@ public class SpotController : MonoBehaviour
     {
         int valor = Random.Range(0, System.Enum.GetValues(typeof(Spot.SpotType)).Length);
         return (Spot.SpotType)valor;
-        
     }
+
     public Spot GetSpot() { return spot; }
     public Spot[] GetAllSpots() { return spots; }
+
+    // -------------------------
+    // AÑADIDO NUEVO (SIN MODIFICAR LO EXISTENTE)
+    // -------------------------
+
+    // Devuelve los spots ordenados por índice
+    public Spot[] GetSpotsOrdered()
+    {
+        return spots.OrderBy(s => s.index).ToArray();
+    }
+
+    // Devuelve un spot por índice
+    public Spot GetSpotByIndex(int index)
+    {
+        return spots.FirstOrDefault(s => s.index == index);
+    }
+
+    // Devuelve el número total de spots
+    public int GetSpotCount()
+    {
+        return spots.Length;
+    }
 }

@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
  * -----------------
  * Handles global reroll input for the shop.
  * Uses StatManager.ShopRerolls to track available rerolls.
- * Allows the player to reroll all pedestals at once using a customizable hotkey.
+ * Allows the playerObject to reroll all pedestals at once using a customizable hotkey.
  */
 public class ShopRerollManager : MonoBehaviour
 {
@@ -19,7 +19,7 @@ public class ShopRerollManager : MonoBehaviour
     [SerializeField] private int globalRerollCost = 20;
 
     [Header("Shop State")]
-    [Tooltip("Flag to indicate if the player is currently inside the shop.")]
+    [Tooltip("Flag to indicate if the playerObject is currently inside the shop.")]
     [SerializeField] private bool inShop = true;
 
     private void Update()

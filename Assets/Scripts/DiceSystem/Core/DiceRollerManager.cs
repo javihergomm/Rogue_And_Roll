@@ -1,3 +1,6 @@
+using UnityEngine;
+using System.Collections.Generic;
+
 /*
  * DiceRollManager
  * ----------------
@@ -10,10 +13,6 @@
  *  - Apply all dice effects (sync and async) to compute the final roll
  *  - Store base and final roll values for UI or debugging
  */
-
-using UnityEngine;
-using System.Collections.Generic;
-
 public class DiceRollManager : MonoBehaviour
 {
     public static DiceRollManager Instance { get; private set; }
@@ -46,6 +45,23 @@ public class DiceRollManager : MonoBehaviour
 
         Instance = this;
         Debug.Log("[DiceRollManager] Instance set");
+    }
+
+    private void Start()
+    {
+        // Subscribe to playerObject movement finished to trigger enemy turns
+        if (playerMovement != null)
+            playerMovement.OnMovementFinished += OnPlayerFinishedMovement;
+    }
+
+    /*
+     * Called when the playerObject finishes movement.
+     * Starts enemy turns through EnemyManager.
+     */
+    private void OnPlayerFinishedMovement()
+    {
+        if (EnemyManager.Instance != null)
+            EnemyManager.Instance.StartEnemyTurns();
     }
 
     // -------------------------------------------------------------------------
@@ -153,7 +169,6 @@ public class DiceRollManager : MonoBehaviour
 
         Debug.Log("[RemoveDiceFromWorld] Dice removed successfully");
     }
-
 
     private void AdjustSpawnHeight(GameObject instance)
     {

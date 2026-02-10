@@ -6,9 +6,9 @@ using UnityEngine;
  * Handles the selling flow using Ouija confirmation.
  *
  * Flow:
- * 1) When the player enters this pedestal, the inventory opens in selling mode (game does not pause).
- * 2) When the player clicks an item, the inventory closes immediately and a message-only popup appears.
- * 3) The player walks to the YES/NO Ouija zones, which call HandleOuijaAnswer.
+ * 1) When the playerObject enters this pedestal, the inventory opens in selling mode (game does not pause).
+ * 2) When the playerObject clicks an item, the inventory closes immediately and a message-only popup appears.
+ * 3) The playerObject walks to the YES/NO Ouija zones, which call HandleOuijaAnswer.
  */
 public class SellPedestal : MonoBehaviour
 {
@@ -21,7 +21,7 @@ public class SellPedestal : MonoBehaviour
     // Static reference so Ouija zones know which pedestal to notify
     public static SellPedestal currentSellPedestal;
 
-    // True while waiting for the player's YES/NO decision
+    // True while waiting for the playerObject's YES/NO decision
     public bool isAwaitingDecision = false;
 
     private void OnTriggerEnter(Collider other)
@@ -59,7 +59,7 @@ public class SellPedestal : MonoBehaviour
         currentSellPedestal = this;
         isAwaitingDecision = true;
 
-        // Close inventory so the player can walk to YES/NO
+        // Close inventory so the playerObject can walk to YES/NO
         InventoryManager.Instance.CloseInventory();
 
         // Show message-only popup
@@ -75,7 +75,7 @@ public class SellPedestal : MonoBehaviour
     }
 
     /*
-     * Called by OuijaAnswerZone when the player steps into YES or NO.
+     * Called by OuijaAnswerZone when the playerObject steps into YES or NO.
      * Completes or cancels the sale based on the answer.
      */
     public void HandleOuijaAnswer(OuijaAnswerZone.AnswerType answer)
@@ -137,7 +137,7 @@ public class SellPedestal : MonoBehaviour
     }
 
     /*
-     * Clears the pedestal when the player exits the trigger,
+     * Clears the pedestal when the playerObject exits the trigger,
      * but only if no Ouija decision is pending.
      */
     private void OnTriggerExit(Collider other)
