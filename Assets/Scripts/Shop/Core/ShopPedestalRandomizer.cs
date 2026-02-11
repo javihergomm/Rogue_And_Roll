@@ -4,39 +4,56 @@ using System.Collections.Generic;
 /*
  * ShopPedestalRandomizer
  * ----------------------
- * Manages the item shown on a shop pedestal.
- * Selects an item from a list of possible items.
- * Avoids showing items already purchased during the current visit.
- * Avoids repeating items between pedestals during the same reroll.
+ * Selects a random item for the pedestal, prevents repeats,
+ * scales and positions the 3D model, and handles purchase logic.
  */
 public class ShopPedestalRandomizer : MonoBehaviour
 {
     [Header("Possible items for this pedestal")]
     [SerializeField] private BaseItemSO[] possibleItems;
 
-    [Header("Visuals")]
-    [SerializeField] private Transform displayPoint;
-    [SerializeField] private float displayYOffset = 0.1f;
+    [Header("Visual Settings")]
+    [SerializeField] private float targetItemSize = 0.2f;
+    [SerializeField] private float floatOffset = 0.05f;
 
     private BaseItemSO chosenItem;
     private GameObject spawnedModel;
+    private Transform itemContainer;
+
     private bool hasGeneratedThisVisit = false;
 
     public static ShopPedestalRandomizer currentPedestal;
     public bool isAwaitingDecision = false;
 
-    private static HashSet<BaseItemSO> usedItemsThisVisit = new HashSet<BaseItemSO>();
-    private static HashSet<BaseItemSO> usedItemsThisReroll = new HashSet<BaseItemSO>();
+    // Global memory for preventing repeats
+    public static HashSet<BaseItemSO> UsedItemsThisVisit { get; private set; } = new HashSet<BaseItemSO>();
+    public static HashSet<BaseItemSO> UsedItemsThisReroll { get; private set; } = new HashSet<BaseItemSO>();
+
 
     private void Start()
     {
+        CreateContainer();
         RefreshItem();
         hasGeneratedThisVisit = true;
     }
 
+    private void CreateContainer()
+    {
+        itemContainer = new GameObject("ItemContainer").transform;
+        itemContainer.SetParent(transform);
+        itemContainer.localPosition = Vector3.zero;
+        itemContainer.localRotation = Quaternion.identity;
+        itemContainer.localScale = Vector3.one;
+    }
+
     public static void PrepareForReroll()
     {
-        usedItemsThisReroll.Clear();
+        UsedItemsThisReroll.Clear();
+    }
+
+    public static void ClearVisitMemory()
+    {
+        UsedItemsThisVisit.Clear();
     }
 
     public void GenerateIfNeeded()
@@ -66,8 +83,8 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
         foreach (var item in possibleItems)
         {
-            if (!usedItemsThisVisit.Contains(item) &&
-                !usedItemsThisReroll.Contains(item))
+            if (!UsedItemsThisVisit.Contains(item) &&
+                !UsedItemsThisReroll.Contains(item))
             {
                 availableItems.Add(item);
             }
@@ -82,41 +99,108 @@ public class ShopPedestalRandomizer : MonoBehaviour
         int index = Random.Range(0, availableItems.Count);
         chosenItem = availableItems[index];
 
-        usedItemsThisReroll.Add(chosenItem);
+        UsedItemsThisReroll.Add(chosenItem);
 
         SpawnModel();
     }
 
+    private bool IsFlatObject(Bounds b)
+    {
+        float min = Mathf.Min(b.size.x, b.size.y, b.size.z);
+        float max = Mathf.Max(b.size.x, b.size.y, b.size.z);
+        return min < max * 0.2f;
+    }
+
+    private Bounds GetLocalBounds(GameObject obj)
+    {
+        var renderers = obj.GetComponentsInChildren<MeshRenderer>();
+        if (renderers.Length == 0)
+            return new Bounds(Vector3.zero, Vector3.one);
+
+        Bounds combined = new Bounds(
+            obj.transform.InverseTransformPoint(renderers[0].bounds.center),
+            renderers[0].bounds.size
+        );
+
+        foreach (var r in renderers)
+        {
+            Vector3 localCenter = obj.transform.InverseTransformPoint(r.bounds.center);
+            Bounds lb = new Bounds(localCenter, r.bounds.size);
+            combined.Encapsulate(lb);
+        }
+
+        return combined;
+    }
+
     private void SpawnModel()
     {
-        if (chosenItem == null || chosenItem.Prefab3D == null || displayPoint == null)
+        if (chosenItem == null || chosenItem.Prefab3D == null)
             return;
 
-        Collider pedestalCollider = GetComponentInChildren<Collider>();
-        Vector3 worldSpawnPos;
+        itemContainer.localPosition = Vector3.zero;
 
-        if (pedestalCollider != null)
-        {
-            Bounds bounds = pedestalCollider.bounds;
-            worldSpawnPos = new Vector3(bounds.center.x, bounds.max.y + displayYOffset, bounds.center.z);
-        }
-        else
-        {
-            worldSpawnPos = transform.position + Vector3.up * (1f + displayYOffset);
-        }
-
-        Vector3 localSpawnPos = displayPoint.InverseTransformPoint(worldSpawnPos);
-
-        spawnedModel = Instantiate(chosenItem.Prefab3D, displayPoint);
-        spawnedModel.transform.localPosition = localSpawnPos;
+        spawnedModel = Instantiate(chosenItem.Prefab3D, itemContainer);
+        spawnedModel.transform.localPosition = Vector3.zero;
         spawnedModel.transform.localRotation = Quaternion.identity;
-        spawnedModel.transform.localScale = chosenItem.Prefab3D.transform.localScale;
+        spawnedModel.transform.localScale = Vector3.one;
 
         foreach (var rb in spawnedModel.GetComponentsInChildren<Rigidbody>())
             Destroy(rb);
-
         foreach (var col in spawnedModel.GetComponentsInChildren<Collider>())
             Destroy(col);
+
+        Bounds localBounds = GetLocalBounds(spawnedModel);
+
+        bool isFlat = IsFlatObject(localBounds);
+
+        // Local copies to avoid modifying serialized values
+        float finalSize = targetItemSize;
+        float finalOffset = floatOffset;
+
+        if (isFlat)
+        {
+            spawnedModel.transform.localRotation = Quaternion.identity;
+
+            if (localBounds.size.y < localBounds.size.z)
+                spawnedModel.transform.localRotation = Quaternion.Euler(90, 0, 0);
+
+            finalSize *= 1.4f;
+            finalOffset *= 1.5f;
+
+            localBounds = GetLocalBounds(spawnedModel);
+        }
+
+        float largest = Mathf.Max(localBounds.size.x, localBounds.size.y, localBounds.size.z);
+        if (largest <= 0.0001f) largest = 1f;
+
+        float scaleFactor = finalSize / largest;
+        spawnedModel.transform.localScale = Vector3.one * scaleFactor;
+
+        localBounds = GetLocalBounds(spawnedModel);
+
+        float bottomY = localBounds.min.y;
+        Vector3 lp = spawnedModel.transform.localPosition;
+        lp.y -= bottomY;
+        spawnedModel.transform.localPosition = lp;
+
+        lp = spawnedModel.transform.localPosition;
+        lp.y += finalOffset;
+        spawnedModel.transform.localPosition = lp;
+
+        MeshRenderer pedestalRenderer = GetComponentInChildren<MeshRenderer>();
+        Vector3 topCenter = transform.position;
+
+        if (pedestalRenderer != null)
+        {
+            Bounds pb = pedestalRenderer.bounds;
+            topCenter = new Vector3(pb.center.x, pb.max.y, pb.center.z);
+        }
+        else
+        {
+            topCenter = transform.position + Vector3.up * 0.1f;
+        }
+
+        itemContainer.position = topCenter + Vector3.up * finalOffset;
     }
 
     public BaseItemSO GetChosenItem()
@@ -126,7 +210,9 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
     public void HandleOuijaAnswer(OuijaAnswerZone.AnswerType answer)
     {
-        if (!isAwaitingDecision) return;
+        if (!isAwaitingDecision)
+            return;
+
         if (chosenItem == null)
         {
             isAwaitingDecision = false;
@@ -142,7 +228,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
                 StatManager.Instance.ChangeStat(StatType.Gold, -chosenItem.BuyPrice);
                 InventoryManager.Instance.AddItem(chosenItem, 1);
 
-                usedItemsThisVisit.Add(chosenItem);
+                UsedItemsThisVisit.Add(chosenItem);
 
                 if (spawnedModel != null)
                     Destroy(spawnedModel);
@@ -154,13 +240,15 @@ public class ShopPedestalRandomizer : MonoBehaviour
         OptionPopupManager.Instance.HidePopup();
 
         isAwaitingDecision = false;
+
         if (currentPedestal == this)
             currentPedestal = null;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         if (currentPedestal != null && currentPedestal.isAwaitingDecision)
             return;
@@ -180,7 +268,8 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         if (!isAwaitingDecision && currentPedestal == this)
             currentPedestal = null;

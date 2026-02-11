@@ -11,6 +11,7 @@ public class CharacterSO : ScriptableObject
 
     [Header("Visuals")]
     public Color characterColor = Color.white;
+    public bool applyColor = true;  
 
     [Header("Spawn")]
     public string spawnPointName;
@@ -18,9 +19,4 @@ public class CharacterSO : ScriptableObject
     [Header("Effects")]
     public BaseEffect[] effects;
 
-    [Header("Special Cup Behaviors")]
-    public bool isBasicCup;
-    public bool hasRandomBonus;
-    public bool avoidsBadTileEvery3;
-    public bool isMetalCup;
 }

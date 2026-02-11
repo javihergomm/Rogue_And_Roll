@@ -13,9 +13,10 @@ public class FaceEntry
 /*
  * DiceRoller
  * ----------
- * Handles rolling, physics stabilization, face detection,
- * optional mid-air correction, and optional snapping.
- * Uses a prefab-defined face map to determine which face is up.
+ * Handles rolling physics, stabilization, face detection,
+ * optional mid-air correction, and snapping.
+ * Automatically disables itself when no Rigidbody is present
+ * (e.g., when the dice is displayed in the shop).
  */
 public class DiceRoller : MonoBehaviour
 {
@@ -44,8 +45,11 @@ public class DiceRoller : MonoBehaviour
 
     private void OnEnable()
     {
+        rb = GetComponent<Rigidbody>();
+
+        // If the dice has no Rigidbody (e.g., shop display), disable all physics logic
         if (rb == null)
-            rb = GetComponent<Rigidbody>();
+            return;
 
         ResetPhysics();
     }
@@ -72,6 +76,10 @@ public class DiceRoller : MonoBehaviour
 
     private void Update()
     {
+        // Ignore input if no Rigidbody (shop mode)
+        if (rb == null)
+            return;
+
         if (!Mouse.current.leftButton.wasPressedThisFrame)
             return;
 
@@ -89,6 +97,9 @@ public class DiceRoller : MonoBehaviour
     // Applies force and torque to start the roll
     public void RollDice()
     {
+        if (rb == null)
+            return;
+
         if (isRolling)
             return;
 
@@ -103,6 +114,9 @@ public class DiceRoller : MonoBehaviour
     // Waits for the dice to spin, slow down, and settle
     private IEnumerator HandleRoll()
     {
+        if (rb == null)
+            yield break;
+
         yield return new WaitForFixedUpdate();
 
         while (rb.angularVelocity.magnitude < 2f)
@@ -148,6 +162,9 @@ public class DiceRoller : MonoBehaviour
     // Applies torque to rotate the dice toward a target face while airborne
     private IEnumerator ApplyMidAirCorrection(int targetValue)
     {
+        if (rb == null)
+            yield break;
+
         Vector3 targetLocalDir = GetLocalDirectionForFace(targetValue);
         float timer = 0f;
         const float maxTime = 1.2f;
@@ -171,6 +188,9 @@ public class DiceRoller : MonoBehaviour
     // Smoothly rotates the dice to align a target face upward
     private IEnumerator SnapToFace(int targetValue)
     {
+        if (rb == null)
+            yield break;
+
         Vector3 targetLocalDir = GetLocalDirectionForFace(targetValue);
         Vector3 targetWorldUp = transform.TransformDirection(targetLocalDir);
 
@@ -228,6 +248,9 @@ public class DiceRoller : MonoBehaviour
     // Stops all motion and resets the rigidbody
     private void ResetPhysics()
     {
+        if (rb == null)
+            return;
+
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         rb.Sleep();

@@ -5,15 +5,11 @@ using System.Collections.Generic;
 /*
  * CharacterSelectManager
  * ----------------------
- * Coordinates the character selection system.
+ * Manages the character selection UI and logic.
  * - Assigns CharacterSO data to CharacterSlot objects
- * - Controls the selector panel visibility
+ * - Shows and hides the selector panel
  * - Confirms the selected character
- * - Spawns the character prefab
- * - Activates character effects
- *
- * UI details, slot highlight logic, and click flow
- * are handled by other components.
+ * - Spawns the selected character in the world
  */
 public class CharacterSelectManager : MonoBehaviour
 {
@@ -36,7 +32,9 @@ public class CharacterSelectManager : MonoBehaviour
     private CharacterSO selectedCharacter;
     private GameObject spawnedCup;
 
-    // Prevents reopening the selector after a character is chosen
+    // Exposes the selected character so other systems can read its data
+    public CharacterSO SelectedCharacter => selectedCharacter;
+
     private bool selectorDisabledForever = false;
 
 
@@ -56,6 +54,12 @@ public class CharacterSelectManager : MonoBehaviour
 
         selectorPanel.SetActive(false);
         AssignCharactersToSlots();
+    }
+
+    private void Start()
+    {
+        // Opens the selector when the game starts
+        ShowSelector();
     }
 
 
@@ -115,8 +119,6 @@ public class CharacterSelectManager : MonoBehaviour
             slot.highlight.Deselect();
             slot.GetComponent<CharacterSelectionFlow>().ResetClick();
         }
-            
-
     }
 
 
@@ -128,20 +130,17 @@ public class CharacterSelectManager : MonoBehaviour
     {
         selectedCharacter = character;
 
-        // Save selection
         PlayerPrefs.SetString("SelectedCharacterID", character.characterID);
         PlayerPrefs.SetInt("HasSelectedCharacter", 1);
 
-        // Close UI and resume game
         selectorPanel.SetActive(false);
         Time.timeScale = 1f;
 
-        // Spawn the cup in the world
         CharacterSpawner.Instance.Spawn(selectedCharacter, cupPrefab);
 
-        // Activate all character effects
         CharacterEffectManager.Instance.ActivateCharacter(selectedCharacter);
     }
+
 
     // -------------------------------------------------------------------------
     // UI STATE CHECKS

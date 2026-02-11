@@ -49,19 +49,19 @@ public class PlayerMovementBehaviour : MonoBehaviour
 
         // Forward movement (W by default)
         if (Keyboard.current[forwardKey].isPressed)
-            moveVector.z -= 1;
+            moveVector.z += 1;
 
         // Backward movement (S by default)
         if (Keyboard.current[backwardKey].isPressed)
-            moveVector.z += 1;
+            moveVector.z -= 1;
 
         // Left movement (A by default)
         if (Keyboard.current[leftKey].isPressed)
-            moveVector.x += 1;
+            moveVector.x -= 1;
 
         // Right movement (D by default)
         if (Keyboard.current[rightKey].isPressed)
-            moveVector.x -= 1;
+            moveVector.x += 1;
 
         // Normalize to prevent faster diagonal movement
         return moveVector.normalized;

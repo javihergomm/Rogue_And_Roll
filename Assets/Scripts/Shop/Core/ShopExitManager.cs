@@ -2,6 +2,15 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
+/*
+ * ShopExitManager
+ * ----------------
+ * Controls entering and exiting the shop.
+ * Activates and deactivates shop pedestals, decision zones, and UI elements.
+ * Adjusts the board rotation depending on shop state.
+ * Restores available shop rerolls when entering the shop.
+ * Resets pedestal state and global item memory so each shop visit generates new items.
+ */
 public class ShopExitManager : MonoBehaviour
 {
     [Header("References (assign in Inspector)")]
@@ -14,37 +23,50 @@ public class ShopExitManager : MonoBehaviour
     [SerializeField] private float shopRotationZ = 180f;
 
     [Header("Shop State")]
-    [SerializeField] private bool inShop = true;
-
-    // SOLO NECESARIO MIENTRAS EL JUEGO EMPIEZA EN LA TIENDA
-    // Cuando el juego empiece directamente en el tablero, puedes BORRAR esta variable.
-    private bool firstTimeExit = true;
+    [SerializeField] private bool inShop = false;
 
     [Header("Ouija Pointer")]
     [SerializeField] private GameObject tableroOuijaPuntero;
 
     public event Action<bool> OnShopStateChanged;
 
-    // Enter shop mode: enable pedestals, restore rerolls, rotate board
+    private void Start()
+    {
+        if (!inShop)
+        {
+            foreach (var pedestal in shopPedestals)
+                if (pedestal != null) pedestal.SetActive(false);
+
+            foreach (var empty in decisionEmpties)
+                if (empty != null) empty.SetActive(false);
+
+            if (tableroOuijaPuntero != null)
+                tableroOuijaPuntero.SetActive(false);
+
+            if (boardTransform != null)
+            {
+                Vector3 euler = boardTransform.eulerAngles;
+                euler.z = exitRotationZ;
+                boardTransform.eulerAngles = euler;
+            }
+        }
+    }
+
     public void EnterShop()
     {
-        if (inShop) return;
+        if (inShop)
+            return;
+
         inShop = true;
 
         if (tableroOuijaPuntero != null)
             tableroOuijaPuntero.SetActive(true);
 
         foreach (var pedestal in shopPedestals)
-        {
-            if (pedestal != null)
-                pedestal.SetActive(true);
-        }
+            if (pedestal != null) pedestal.SetActive(true);
 
         foreach (var empty in decisionEmpties)
-        {
-            if (empty != null)
-                empty.SetActive(true);
-        }
+            if (empty != null) empty.SetActive(true);
 
         if (StatManager.Instance != null)
         {
@@ -59,13 +81,29 @@ public class ShopExitManager : MonoBehaviour
             boardTransform.eulerAngles = euler;
         }
 
+        // Resets global item memory and pedestal state so each shop visit generates new items
+        ShopPedestalRandomizer.PrepareForReroll();
+        ShopPedestalRandomizer.ClearVisitMemory();
+
+        foreach (var pedestalObj in shopPedestals)
+        {
+            if (pedestalObj == null) continue;
+
+            var pedestal = pedestalObj.GetComponent<ShopPedestalRandomizer>();
+            if (pedestal != null)
+            {
+                pedestal.ResetForNextVisit();
+                pedestal.GenerateIfNeeded();
+            }
+        }
+
         OnShopStateChanged?.Invoke(true);
     }
 
-    // Called when the playerObject chooses to exit the shop
     public void TriggerGoodbye()
     {
-        if (!inShop) return;
+        if (!inShop)
+            return;
 
         PopupHelpers.ShowExitShopPopup(
             () => ConfirmExit(),
@@ -73,26 +111,21 @@ public class ShopExitManager : MonoBehaviour
         );
     }
 
-    // Confirm exit: disable pedestals, clear rerolls, rotate board back
     public void ConfirmExit()
     {
-        if (!inShop) return;
+        if (!inShop)
+            return;
+
         inShop = false;
 
         if (tableroOuijaPuntero != null)
             tableroOuijaPuntero.SetActive(false);
 
         foreach (var pedestal in shopPedestals)
-        {
-            if (pedestal != null)
-                pedestal.SetActive(false);
-        }
+            if (pedestal != null) pedestal.SetActive(false);
 
         foreach (var empty in decisionEmpties)
-        {
-            if (empty != null)
-                empty.SetActive(false);
-        }
+            if (empty != null) empty.SetActive(false);
 
         if (StatManager.Instance != null)
         {
@@ -108,17 +141,9 @@ public class ShopExitManager : MonoBehaviour
             boardTransform.eulerAngles = euler;
         }
 
-        // SOLO NECESARIO MIENTRAS EL JUEGO EMPIEZA EN LA TIENDA
-        if (firstTimeExit)
-        {
-            firstTimeExit = false;
-            CharacterSelectManager.Instance.ShowSelector();
-        }
-
         OnShopStateChanged?.Invoke(false);
     }
 
-    // Cancel exit and stay inside the shop
     public void CancelExit()
     {
         inShop = true;
@@ -127,16 +152,10 @@ public class ShopExitManager : MonoBehaviour
             tableroOuijaPuntero.SetActive(true);
 
         foreach (var pedestal in shopPedestals)
-        {
-            if (pedestal != null)
-                pedestal.SetActive(true);
-        }
+            if (pedestal != null) pedestal.SetActive(true);
 
         foreach (var empty in decisionEmpties)
-        {
-            if (empty != null)
-                empty.SetActive(true);
-        }
+            if (empty != null) empty.SetActive(true);
 
         if (boardTransform != null)
         {

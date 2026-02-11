@@ -11,6 +11,7 @@ using UnityEngine;
  *  - Controls inventory UI visibility
  *  - Supports soft-hide mode for drag operations
  *  - Places consumables on board spots
+ *  - Prevents opening while character selector or popups are open
  */
 public class InventoryManager : MonoBehaviour
 {
@@ -133,9 +134,6 @@ public class InventoryManager : MonoBehaviour
         slots.HandleSlotClick(slot);
     }
 
-    /*
-     * Handles drag-and-drop between two slots.
-     */
     public void HandleSlotDrop(ItemSlot from, ItemSlot to)
     {
         if (from == null || to == null)
@@ -206,9 +204,14 @@ public class InventoryManager : MonoBehaviour
 
     /*
      * Toggles the inventory using real open/close.
+     * BLOCKS opening if character selector or popups are open.
      */
     public void ToggleInventory()
     {
+        if (CharacterSelectManager.Instance != null &&
+            CharacterSelectManager.Instance.IsAnySelectorUIOpen())
+            return;
+
         if (menuOpen)
             CloseInventory();
         else
@@ -217,9 +220,14 @@ public class InventoryManager : MonoBehaviour
 
     /*
      * Opens the inventory using real activation.
+     * BLOCKS opening if character selector or popups are open.
      */
     public void OpenInventory()
     {
+        if (CharacterSelectManager.Instance != null &&
+            CharacterSelectManager.Instance.IsAnySelectorUIOpen())
+            return;
+
         if (menuOpen)
             return;
 
@@ -255,10 +263,6 @@ public class InventoryManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    /*
-     * Soft-hides the inventory during drag operations.
-     * The menu becomes invisible but stays active.
-     */
     public void HideInventorySoft()
     {
         canvasGroup.alpha = 0f;
@@ -266,9 +270,6 @@ public class InventoryManager : MonoBehaviour
         canvasGroup.interactable = false;
     }
 
-    /*
-     * Places a consumable on a board spot.
-     */
     public void PlaceConsumableOnSpot(ItemSlot slot, Spot spot)
     {
         BaseItemSO item = GetItemSO(slot.ItemName);

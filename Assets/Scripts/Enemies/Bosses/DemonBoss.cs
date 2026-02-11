@@ -1,18 +1,20 @@
 using UnityEngine;
 
-// Controls the demon boss enemy: activation, spawning, token creation and movement.
+/*
+ * DemonBoss
+ * ---------
+ * Enemy behavior for the Demon Boss.
+ * - Activates after a number of player laps
+ * - Spawns its cup using EnemyBase logic
+ * - Spawns its token on a fixed Spot
+ * - Moves using dice rolls
+ * - Kills the player on collision or triple six
+ */
 public class DemonBoss : EnemyBase
 {
-    [Header("Spawn Areas")]
-    public Transform[] demonSpawnAreas;
-    public Spot fixedSpawnSpot;
+    public Spot fixedSpawnSpot;   // Fixed Spot where the demon token appears
 
-    [Header("Demon Token")]
-    public GameObject demonTokenPrefab;
     private GameObject demonTokenInstance;
-
-    [Header("Activation Settings")]
-    public int lapsToSpawn = 1;
     private int playerLaps = 0;
 
     void Update()
@@ -26,35 +28,34 @@ public class DemonBoss : EnemyBase
             KillPlayer();
     }
 
-    int GetValidSpawnArea()
-    {
-        return Random.Range(0, demonSpawnAreas.Length);
-    }
-
     public void OnPlayerCompletedLap()
     {
+        if (!data.requiresPlayerLap)
+            return;
+
         playerLaps++;
 
-        if (!isActive && playerLaps >= lapsToSpawn)
+        if (!isActive && playerLaps >= data.lapsToActivate)
             ActivateDemon();
     }
 
     void ActivateDemon()
     {
-        int spawnIndex = GetValidSpawnArea();
+        // Spawn the cup using EnemyBase logic (opposite to the player)
+        SpawnEnemy();
 
-        SpawnEnemy(demonSpawnAreas[spawnIndex]);
-
-        demonTokenInstance = Instantiate(demonTokenPrefab);
+        // Spawn the demon token on the fixed Spot
+        demonTokenInstance = Instantiate(data.tilePrefab);
 
         movement = demonTokenInstance.GetComponent<Movement>();
 
-        // USE THE SAME POSITIONS AS THE PLAYER
         Movement playerMovement = player.GetComponent<Movement>();
         movement.SetPositions(playerMovement.Positions);
 
         movement.ActualPos = fixedSpawnSpot.index;
         movement.transform.position = movement.Positions[fixedSpawnSpot.index].position;
+
+        isActive = true;
     }
 
     public override void StartTurn()
@@ -72,9 +73,7 @@ public class DemonBoss : EnemyBase
             return;
         }
 
-        int total = d1 + d2 + d3;
-
-        movement.StartMovingFixed(total);
+        movement.StartMovingFixed(d1 + d2 + d3);
     }
 
     void KillPlayer()
