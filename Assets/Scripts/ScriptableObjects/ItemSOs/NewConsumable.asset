@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Consumable
   icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
   itemDescription: 
-  prefab3D: {fileID: 919132149155446097, guid: 252b51f08c456d646898f8cb366c83a4, type: 3}
+  prefab3D: {fileID: 5774364267047174808, guid: d313e14225492c543b48fe5f9a319218, type: 3}
   buyPrice: 4
   sellPrice: 2
   polarity: 1

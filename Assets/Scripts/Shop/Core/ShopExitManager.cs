@@ -62,7 +62,7 @@ public class ShopExitManager : MonoBehaviour
         OnShopStateChanged?.Invoke(true);
     }
 
-    // Called when the player chooses to exit the shop
+    // Called when the playerObject chooses to exit the shop
     public void TriggerGoodbye()
     {
         if (!inShop) return;

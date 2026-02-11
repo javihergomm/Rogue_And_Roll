@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -14,6 +15,12 @@ public class Movement : MonoBehaviour
     int Eturn = 1;
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip moveSound;
+    [SerializeField] public Transform[] positions;
+    [SerializeField] private float speed;
+    [SerializeField] private int actualPos;
+    [SerializeField] private bool isPlayer;
+
+    public Action OnMovementFinished;
 
 
     private void Start()
@@ -25,8 +32,8 @@ public class Movement : MonoBehaviour
         Pturn = 1;
         Eturn = 1;
         if (isPlayer && PcanMove)
+        if (isPlayer)
         {
-            // El jugador usa el resultado final del sistema de dados
             int finalRoll = InventoryManager.Instance.GetFinalDiceNumber();
             StartCoroutine(Move(finalRoll));
             if (spots[actualPos].getType() == Spot.SpotType.Good)
@@ -48,7 +55,6 @@ public class Movement : MonoBehaviour
         }
         else if(EcanMove)
         {
-            // El enemigo sigue usando su dado normal
             StartCoroutine(Move(EnemyDice.ThrowDice()));
         }
 
@@ -63,12 +69,17 @@ public class Movement : MonoBehaviour
         }
     }
 
-    IEnumerator Move(int steps)
+    // Used by DemonBoss to move with a fixed number of steps
+    public void StartMovingFixed(int steps)
+    {
+        StartCoroutine(Move(steps));
+    }
+
+    private IEnumerator Move(int steps)
     {
         if (!isPlayer)
-        {
             yield return new WaitForSeconds(1f);
-        }
+
         for (int i = 0; i < steps; i++)
         {
             if (actualPos + 1 >= positions.Length)
@@ -87,8 +98,23 @@ public class Movement : MonoBehaviour
                 yield return null;
             }
             
+
+            while (Vector3.Distance(transform.position, destination) > 0.0001f)
+            {
+                transform.position = Vector3.MoveTowards(
+                    transform.position,
+                    destination,
+                    speed * Time.deltaTime
+                );
+
+                yield return null;
+            }
+
             yield return new WaitForSeconds(0.1f);
         }
+
+        if (OnMovementFinished != null)
+            OnMovementFinished.Invoke();
     }
 
     void GoodSpotEffect()
@@ -137,4 +163,10 @@ public class Movement : MonoBehaviour
     {
         audioSource.PlayOneShot(moveSound);
     }
+    public int ActualPos
+    {
+        get => actualPos;
+        set => actualPos = value;
+    }
+
 }

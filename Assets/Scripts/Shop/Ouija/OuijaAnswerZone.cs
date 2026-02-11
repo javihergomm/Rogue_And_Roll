@@ -3,7 +3,7 @@ using UnityEngine;
 /*
  * OuijaAnswerZone
  * ---------------
- * Detects when the player enters a specific zone on the ouija board.
+ * Detects when the playerObject enters a specific zone on the ouija board.
  * Zones can represent Yes, No, or Goodbye.
  * Responsibilities:
  * - Handle buy/sell pedestal decisions (Yes/No)

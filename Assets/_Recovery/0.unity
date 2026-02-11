@@ -253,7 +253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 10
+  index: 0
   type: 0
 --- !u!1001 &22832072
 PrefabInstance:
@@ -428,7 +428,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 22
+  index: 0
   type: 0
 --- !u!1 &29100707
 GameObject:
@@ -474,7 +474,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 52
+  index: 0
   type: 0
 --- !u!1 &35588412
 GameObject:
@@ -683,7 +683,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 7
+  index: 0
   type: 0
 --- !u!1 &64256178
 GameObject:
@@ -729,7 +729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 9
+  index: 0
   type: 0
 --- !u!1 &66501092
 GameObject:
@@ -1115,7 +1115,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 29
+  index: 0
   type: 0
 --- !u!1 &100485576
 GameObject:
@@ -1161,7 +1161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 38
+  index: 0
   type: 0
 --- !u!1 &114692257
 GameObject:
@@ -1207,7 +1207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 64
+  index: 0
   type: 0
 --- !u!1 &128708199
 GameObject:
@@ -1219,7 +1219,7 @@ GameObject:
   m_Component:
   - component: {fileID: 128708203}
   m_Layer: 0
-  m_Name: Spawn_Yellow
+  m_Name: Spawn_Red
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1284,7 +1284,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 58
+  index: 0
   type: 0
 --- !u!1 &137996079
 GameObject:
@@ -1330,7 +1330,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 16
+  index: 0
   type: 0
 --- !u!1 &169409951
 GameObject:
@@ -1867,7 +1867,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 21
+  index: 0
   type: 0
 --- !u!1001 &241821488
 PrefabInstance:
@@ -2030,7 +2030,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 46
+  index: 0
   type: 0
 --- !u!1 &261082693
 GameObject:
@@ -2178,7 +2178,7 @@ GameObject:
   m_Component:
   - component: {fileID: 276751737}
   m_Layer: 0
-  m_Name: Spawn_Blue
+  m_Name: Spawn_Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2243,7 +2243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 57
+  index: 0
   type: 0
 --- !u!1001 &305183836
 PrefabInstance:
@@ -2976,7 +2976,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 37
+  index: 0
   type: 0
 --- !u!1 &406575137
 GameObject:
@@ -3327,7 +3327,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 66
+  index: 0
   type: 0
 --- !u!1 &422130459
 GameObject:
@@ -3484,7 +3484,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 67
+  index: 0
   type: 0
 --- !u!1001 &437691360
 PrefabInstance:
@@ -3659,7 +3659,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 68
+  index: 0
   type: 0
 --- !u!1 &477423966
 GameObject:
@@ -3897,7 +3897,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 27
+  index: 0
   type: 0
 --- !u!1001 &485410031
 PrefabInstance:
@@ -4192,7 +4192,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 60
+  index: 0
   type: 0
 --- !u!1 &525031427
 GameObject:
@@ -4223,7 +4223,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 18
+  index: 0
   type: 0
 --- !u!4 &525031429
 Transform:
@@ -4623,7 +4623,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 44
+  index: 0
   type: 0
 --- !u!1 &607847000
 GameObject:
@@ -4654,7 +4654,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 65
+  index: 0
   type: 0
 --- !u!4 &607847002
 Transform:
@@ -4715,7 +4715,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 23
+  index: 0
   type: 0
 --- !u!1 &652871806 stripped
 GameObject:
@@ -4902,7 +4902,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 54
+  index: 0
   type: 0
 --- !u!1 &691661217
 GameObject:
@@ -4979,7 +4979,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 17
+  index: 0
   type: 0
 --- !u!1 &748917138
 GameObject:
@@ -5025,7 +5025,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 61
+  index: 0
   type: 0
 --- !u!1 &776644422
 GameObject:
@@ -5071,7 +5071,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 59
+  index: 0
   type: 0
 --- !u!1001 &778347057
 PrefabInstance:
@@ -5196,7 +5196,7 @@ GameObject:
   m_Component:
   - component: {fileID: 783547966}
   m_Layer: 0
-  m_Name: Spawn_Green
+  m_Name: Spawn_Blue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5469,7 +5469,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 24
+  index: 0
   type: 0
 --- !u!1001 &805832968
 PrefabInstance:
@@ -5628,7 +5628,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 5
+  index: 0
   type: 0
 --- !u!1 &832575517
 GameObject:
@@ -5723,7 +5723,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 41
+  index: 0
   type: 0
 --- !u!1 &836705752
 GameObject:
@@ -5881,7 +5881,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 2
+  index: 0
   type: 0
 --- !u!1 &847147487
 GameObject:
@@ -5927,7 +5927,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 6
+  index: 0
   type: 0
 --- !u!1 &855512952
 GameObject:
@@ -5944,7 +5944,7 @@ GameObject:
   - component: {fileID: 855512953}
   - component: {fileID: 855512958}
   m_Layer: 0
-  m_Name: FichaEnemigo
+  m_Name: FichaDemonio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6055,8 +6055,6 @@ MonoBehaviour:
   speed: 1
   actualPos: 66
   isPlayer: 0
-  audioSource: {fileID: 855512958}
-  moveSound: {fileID: 8300000, guid: e24d9931546236848b73fdebb3f1a7ec, type: 3}
 --- !u!23 &855512955
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6128,103 +6126,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!82 &855512958
-AudioSource:
+--- !u!114 &855512958
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 855512952}
   m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dd6528040224cd46b98e319172fe1d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DemonBoss
+  movement: {fileID: 855512954}
+  playerMovement: {fileID: 0}
+  demonSpawnAreas: []
+  playerSpawnAreaIndex: 0
+  fixedSpawnSpot: {fileID: 0}
+  isActive: 0
+  lapsToSpawn: 1
 --- !u!1 &856922461
 GameObject:
   m_ObjectHideFlags: 0
@@ -6269,7 +6189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 48
+  index: 0
   type: 0
 --- !u!1 &863259481
 GameObject:
@@ -6315,7 +6235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 15
+  index: 0
   type: 0
 --- !u!1 &894341587
 GameObject:
@@ -6558,7 +6478,6 @@ GameObject:
   - component: {fileID: 957168666}
   - component: {fileID: 957168665}
   - component: {fileID: 957168664}
-  - component: {fileID: 957168669}
   m_Layer: 0
   m_Name: FichaJugador
   m_TagString: Untagged
@@ -6671,8 +6590,6 @@ MonoBehaviour:
   speed: 1
   actualPos: 0
   isPlayer: 1
-  audioSource: {fileID: 957168669}
-  moveSound: {fileID: 8300000, guid: e24d9931546236848b73fdebb3f1a7ec, type: 3}
 --- !u!23 &957168666
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6744,103 +6661,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!82 &957168669
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 957168663}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1 &957882357
 GameObject:
   m_ObjectHideFlags: 0
@@ -6885,7 +6705,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 8
+  index: 0
   type: 0
 --- !u!1 &968606242
 GameObject:
@@ -6916,7 +6736,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 30
+  index: 0
   type: 0
 --- !u!4 &968606244
 Transform:
@@ -7332,7 +7152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 26
+  index: 0
   type: 0
 --- !u!1001 &1038898614
 PrefabInstance:
@@ -7507,7 +7327,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 12
+  index: 0
   type: 0
 --- !u!1001 &1080817447
 PrefabInstance:
@@ -7884,7 +7704,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 34
+  index: 0
   type: 0
 --- !u!1001 &1119993606
 PrefabInstance:
@@ -8156,7 +7976,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 56
+  index: 0
   type: 0
 --- !u!1 &1135432139
 GameObject:
@@ -8202,7 +8022,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 45
+  index: 0
   type: 0
 --- !u!1 &1170819841
 GameObject:
@@ -8248,7 +8068,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 28
+  index: 0
   type: 0
 --- !u!1 &1171833004
 GameObject:
@@ -8294,7 +8114,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 4
+  index: 0
   type: 0
 --- !u!1 &1176426362
 GameObject:
@@ -8340,7 +8160,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 3
+  index: 0
   type: 0
 --- !u!1001 &1186758401
 PrefabInstance:
@@ -8499,7 +8319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 33
+  index: 0
   type: 0
 --- !u!1 &1200025550
 GameObject:
@@ -8545,7 +8365,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 62
+  index: 0
   type: 0
 --- !u!1 &1200613876
 GameObject:
@@ -8591,7 +8411,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 50
+  index: 0
   type: 0
 --- !u!1001 &1202407590
 PrefabInstance:
@@ -8879,7 +8699,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 25
+  index: 0
   type: 0
 --- !u!1 &1225340512
 GameObject:
@@ -10077,7 +9897,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 13
+  index: 0
   type: 0
 --- !u!4 &1307462795
 Transform:
@@ -10250,7 +10070,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 51
+  index: 0
   type: 0
 --- !u!1 &1317587674
 GameObject:
@@ -10367,7 +10187,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1339274114}
   m_Layer: 0
-  m_Name: Spawn_Red
+  m_Name: Spawn_Yellow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10545,7 +10365,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 36
+  index: 0
   type: 0
 --- !u!1001 &1366167398
 PrefabInstance:
@@ -11354,7 +11174,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 35
+  index: 0
   type: 0
 --- !u!1 &1471185506
 GameObject:
@@ -11588,7 +11408,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 11
+  index: 0
   type: 0
 --- !u!1 &1512080383
 GameObject:
@@ -11869,7 +11689,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 49
+  index: 0
   type: 0
 --- !u!1 &1548563255
 GameObject:
@@ -12103,7 +11923,6 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
     - {fileID: 11400000, guid: 52a0e4dbd2fc5bc449c7a6c7e7e9fe76, type: 2}
   inventoryMenu: {fileID: 1374634886}
-  startingDice: {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
   startingDice: {fileID: 11400000, guid: 52a0e4dbd2fc5bc449c7a6c7e7e9fe76, type: 2}
 --- !u!114 &1548563266
 MonoBehaviour:
@@ -12530,7 +12349,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 40
+  index: 0
   type: 0
 --- !u!114 &1581272881
 MonoBehaviour:
@@ -12544,7 +12363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 40
+  index: 0
   type: 0
 --- !u!4 &1581272882
 Transform:
@@ -12697,61 +12516,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1583408784}
   m_CullTransparentMesh: 1
---- !u!1 &1584179046
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1584179048}
-  - component: {fileID: 1584179047}
-  m_Layer: 0
-  m_Name: DemonBoss
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1584179047
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584179046}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5dd6528040224cd46b98e319172fe1d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DemonBoss
-  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
-  player: {fileID: 957168668}
-  movement: {fileID: 0}
-  demonSpawnAreas:
-  - {fileID: 128708203}
-  - {fileID: 783547966}
-  - {fileID: 1339274114}
-  - {fileID: 276751737}
-  fixedSpawnSpot: {fileID: 416567786}
-  demonTokenPrefab: {fileID: 9126656830565562572, guid: 4725713aefe17a141a811387680fdc66, type: 3}
-  lapsToSpawn: 1
---- !u!4 &1584179048
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584179046}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: -0, z: 1}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1590622863
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13013,7 +12777,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 63
+  index: 0
   type: 0
 --- !u!1 &1635594428
 GameObject:
@@ -13170,7 +12934,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 39
+  index: 0
   type: 0
 --- !u!4 &1643498910
 Transform:
@@ -13231,7 +12995,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 1
+  index: 0
   type: 0
 --- !u!1001 &1753155051
 PrefabInstance:
@@ -13526,7 +13290,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 55
+  index: 0
   type: 0
 --- !u!1 &1769354254
 GameObject:
@@ -13572,7 +13336,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 43
+  index: 0
   type: 0
 --- !u!1 &1785326443
 GameObject:
@@ -13618,7 +13382,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 42
+  index: 0
   type: 0
 --- !u!1001 &1808369795
 PrefabInstance:
@@ -13777,7 +13541,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 14
+  index: 0
   type: 0
 --- !u!1001 &1813935722
 PrefabInstance:
@@ -13936,7 +13700,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 53
+  index: 0
   type: 0
 --- !u!1 &1901905707
 GameObject:
@@ -14013,7 +13777,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 20
+  index: 0
   type: 0
 --- !u!1 &1912633483
 GameObject:
@@ -14142,7 +13906,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 47
+  index: 0
   type: 0
 --- !u!4 &1921901081
 Transform:
@@ -14203,7 +13967,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 19
+  index: 0
   type: 0
 --- !u!1001 &1950719303
 PrefabInstance:
@@ -14475,7 +14239,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 32
+  index: 0
   type: 0
 --- !u!1001 &2114753793
 PrefabInstance:
@@ -14899,7 +14663,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 31
+  index: 0
   type: 0
 --- !u!1001 &1410132410058433552
 PrefabInstance:
@@ -14988,7 +14752,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.00000004371139
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.x
@@ -14996,7 +14760,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.z
@@ -15008,7 +14772,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 180
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -15047,6 +14811,6 @@ SceneRoots:
   - {fileID: 783547966}
   - {fileID: 1339274114}
   - {fileID: 276751737}
+  - {fileID: 855512957}
   - {fileID: 957168668}
   - {fileID: 177110184}
-  - {fileID: 1584179048}

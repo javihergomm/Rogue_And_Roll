@@ -24,7 +24,7 @@ public class PlayerMovementBehaviour : MonoBehaviour
     {
         Vector3 moveDirection = CalculateMoveDirection();
 
-        // Move the player in the chosen direction
+        // Move the playerObject in the chosen direction
         transform.position += moveDirection * movementSpeed * Time.deltaTime;
 
         // Rotate towards movement direction if moving
@@ -34,7 +34,7 @@ public class PlayerMovementBehaviour : MonoBehaviour
         }
     }
 
-    // Smoothly rotates the player to face the movement direction
+    // Smoothly rotates the playerObject to face the movement direction
     void LookAt(Vector3 lookDirection)
     {
         Quaternion targetRotation = Quaternion.LookRotation(lookDirection); // Desired rotation

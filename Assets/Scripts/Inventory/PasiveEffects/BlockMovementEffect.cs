@@ -3,7 +3,7 @@ using UnityEngine;
 /*
  * BlockMovementEffect
  * -------------------
- * Prevents the player from moving for a number of turns.
+ * Prevents the playerObject from moving for a number of turns.
  */
 [CreateAssetMenu(fileName = "BlockMovementEffect", menuName = "Effects/Passive/BlockMovement")]
 public class BlockMovementEffect : BasePassiveEffect

@@ -1219,7 +1219,7 @@ GameObject:
   m_Component:
   - component: {fileID: 128708203}
   m_Layer: 0
-  m_Name: Spawn_Yellow
+  m_Name: Spawn_Red
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2178,7 +2178,7 @@ GameObject:
   m_Component:
   - component: {fileID: 276751737}
   m_Layer: 0
-  m_Name: Spawn_Blue
+  m_Name: Spawn_Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5196,7 +5196,7 @@ GameObject:
   m_Component:
   - component: {fileID: 783547966}
   m_Layer: 0
-  m_Name: Spawn_Green
+  m_Name: Spawn_Blue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5944,7 +5944,7 @@ GameObject:
   - component: {fileID: 855512953}
   - component: {fileID: 855512958}
   m_Layer: 0
-  m_Name: FichaEnemigo
+  m_Name: FichaDemonio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6055,8 +6055,6 @@ MonoBehaviour:
   speed: 1
   actualPos: 66
   isPlayer: 0
-  audioSource: {fileID: 855512958}
-  moveSound: {fileID: 8300000, guid: e24d9931546236848b73fdebb3f1a7ec, type: 3}
 --- !u!23 &855512955
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6128,103 +6126,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!82 &855512958
-AudioSource:
+--- !u!114 &855512958
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 855512952}
   m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dd6528040224cd46b98e319172fe1d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DemonBoss
+  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
+  player: {fileID: 957168668}
+  movement: {fileID: 855512954}
+  demonSpawnAreas: []
+  playerSpawnAreaIndex: 0
+  fixedSpawnSpot: {fileID: 416567786}
+  lapsToSpawn: 1
 --- !u!1 &856922461
 GameObject:
   m_ObjectHideFlags: 0
@@ -6558,7 +6478,6 @@ GameObject:
   - component: {fileID: 957168666}
   - component: {fileID: 957168665}
   - component: {fileID: 957168664}
-  - component: {fileID: 957168669}
   m_Layer: 0
   m_Name: FichaJugador
   m_TagString: Untagged
@@ -6671,8 +6590,6 @@ MonoBehaviour:
   speed: 1
   actualPos: 0
   isPlayer: 1
-  audioSource: {fileID: 957168669}
-  moveSound: {fileID: 8300000, guid: e24d9931546236848b73fdebb3f1a7ec, type: 3}
 --- !u!23 &957168666
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6744,103 +6661,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!82 &957168669
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 957168663}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1 &957882357
 GameObject:
   m_ObjectHideFlags: 0
@@ -10367,7 +10187,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1339274114}
   m_Layer: 0
-  m_Name: Spawn_Red
+  m_Name: Spawn_Yellow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12103,7 +11923,6 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
     - {fileID: 11400000, guid: 52a0e4dbd2fc5bc449c7a6c7e7e9fe76, type: 2}
   inventoryMenu: {fileID: 1374634886}
-  startingDice: {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
   startingDice: {fileID: 11400000, guid: 52a0e4dbd2fc5bc449c7a6c7e7e9fe76, type: 2}
 --- !u!114 &1548563266
 MonoBehaviour:
@@ -12697,61 +12516,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1583408784}
   m_CullTransparentMesh: 1
---- !u!1 &1584179046
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1584179048}
-  - component: {fileID: 1584179047}
-  m_Layer: 0
-  m_Name: DemonBoss
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1584179047
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584179046}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5dd6528040224cd46b98e319172fe1d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DemonBoss
-  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
-  player: {fileID: 957168668}
-  movement: {fileID: 0}
-  demonSpawnAreas:
-  - {fileID: 128708203}
-  - {fileID: 783547966}
-  - {fileID: 1339274114}
-  - {fileID: 276751737}
-  fixedSpawnSpot: {fileID: 416567786}
-  demonTokenPrefab: {fileID: 9126656830565562572, guid: 4725713aefe17a141a811387680fdc66, type: 3}
-  lapsToSpawn: 1
---- !u!4 &1584179048
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584179046}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: -0, z: 1}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1590622863
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14988,7 +14752,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.00000004371139
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.x
@@ -15047,6 +14811,6 @@ SceneRoots:
   - {fileID: 783547966}
   - {fileID: 1339274114}
   - {fileID: 276751737}
+  - {fileID: 855512957}
   - {fileID: 957168668}
   - {fileID: 177110184}
-  - {fileID: 1584179048}

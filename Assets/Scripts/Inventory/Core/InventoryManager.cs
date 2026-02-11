@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 /*
  * InventoryManager
  * ----------------
- * Central controller for all inventory-related systems.
- * Coordinates item storage, active dice, permanent effects,
- * selling mode, and inventory UI.
+ * Controls the inventory system:
+ *  - Manages item slots and active dice slots
+ *  - Handles adding, removing, swapping and selecting items
+ *  - Controls inventory UI visibility
+ *  - Supports soft-hide mode for drag operations
+ *  - Places consumables on board spots
  */
 public class InventoryManager : MonoBehaviour
 {
@@ -40,6 +42,9 @@ public class InventoryManager : MonoBehaviour
     public event Action OnActiveDiceChanged;
 
     private bool menuOpen = false;
+    public bool IsOpen => menuOpen;
+
+    private CanvasGroup canvasGroup;
 
     private void Awake()
     {
@@ -53,6 +58,10 @@ public class InventoryManager : MonoBehaviour
 
         slots.Initialize();
         activeDice.Initialize(slots.ActiveDiceSlots);
+
+        canvasGroup = inventoryMenu.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+            canvasGroup = inventoryMenu.AddComponent<CanvasGroup>();
     }
 
     private void Start()
@@ -124,11 +133,24 @@ public class InventoryManager : MonoBehaviour
         slots.HandleSlotClick(slot);
     }
 
+    /*
+     * Handles drag-and-drop between two slots.
+     */
     public void HandleSlotDrop(ItemSlot from, ItemSlot to)
     {
+        if (from == null || to == null)
+            return;
+
+        BaseItemSO item = GetItemSO(from.ItemName);
+
+        if (activeDice.Contains(to) && !(item is DiceSO))
+            return;
+
         slots.SwapSlots(from, to);
+
         activeDice.SyncSlot(from);
         activeDice.SyncSlot(to);
+
         OnActiveDiceChanged?.Invoke();
     }
 
@@ -182,31 +204,32 @@ public class InventoryManager : MonoBehaviour
         OpenInventory();
     }
 
+    /*
+     * Toggles the inventory using real open/close.
+     */
     public void ToggleInventory()
     {
-        // Block if character selector is open
-        if (CharacterSelectManager.Instance != null &&
-            CharacterSelectManager.Instance.IsSelectorOpen())
-            return;
-
         if (menuOpen)
             CloseInventory();
         else
             OpenInventory();
     }
 
+    /*
+     * Opens the inventory using real activation.
+     */
     public void OpenInventory()
     {
-        // Block if character selector is open
-        if (CharacterSelectManager.Instance != null &&
-            CharacterSelectManager.Instance.IsSelectorOpen())
-            return;
-
         if (menuOpen)
             return;
 
         menuOpen = true;
-        inventoryMenu?.SetActive(true);
+
+        inventoryMenu.SetActive(true);
+
+        canvasGroup.alpha = 1f;
+        canvasGroup.blocksRaycasts = true;
+        canvasGroup.interactable = true;
 
         foreach (var slot in slots.AllSlots)
             slot.RefreshUI();
@@ -214,23 +237,47 @@ public class InventoryManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    public void OpenInventory(bool pauseGame)
-    {
-        OpenInventory();
-        Time.timeScale = pauseGame ? 0f : 1f;
-    }
-
+    /*
+     * Closes the inventory using real deactivation.
+     */
     public void CloseInventory()
     {
         if (!menuOpen)
             return;
 
         menuOpen = false;
-        inventoryMenu?.SetActive(false);
+
+        inventoryMenu.SetActive(false);
 
         slots.DeselectAll();
         sellMode.Disable();
 
         Time.timeScale = 1f;
+    }
+
+    /*
+     * Soft-hides the inventory during drag operations.
+     * The menu becomes invisible but stays active.
+     */
+    public void HideInventorySoft()
+    {
+        canvasGroup.alpha = 0f;
+        canvasGroup.blocksRaycasts = false;
+        canvasGroup.interactable = false;
+    }
+
+    /*
+     * Places a consumable on a board spot.
+     */
+    public void PlaceConsumableOnSpot(ItemSlot slot, Spot spot)
+    {
+        BaseItemSO item = GetItemSO(slot.ItemName);
+        if (!(item is ConsumableSO))
+            return;
+
+        if (item.Prefab3D != null)
+            Instantiate(item.Prefab3D, spot.transform.position, Quaternion.identity);
+
+        RemoveItem(slot, 1);
     }
 }
