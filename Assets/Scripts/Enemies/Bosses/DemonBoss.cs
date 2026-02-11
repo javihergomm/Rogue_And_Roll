@@ -51,10 +51,10 @@ public class DemonBoss : EnemyBase
 
         // USE THE SAME POSITIONS AS THE PLAYER
         Movement playerMovement = player.GetComponent<Movement>();
-        movement.positions = playerMovement.positions;
+        movement.SetPositions(playerMovement.Positions);
 
         movement.ActualPos = fixedSpawnSpot.index;
-        movement.transform.position = movement.positions[fixedSpawnSpot.index].position;
+        movement.transform.position = movement.Positions[fixedSpawnSpot.index].position;
     }
 
     public override void StartTurn()
