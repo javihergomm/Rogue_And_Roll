@@ -24,4 +24,18 @@ public class SpotController : MonoBehaviour
         return (Spot.SpotType)valor;
         
     }
+
+    public static int GoodSpot()
+    {
+        int number = Random.Range(1, 3);
+
+        return number;
+    }
+    public static int BadSpot()
+    {
+        int number = Random.Range(1, 3);
+
+        return number;
+    }
+    
 }
