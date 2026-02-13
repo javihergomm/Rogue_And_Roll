@@ -153,7 +153,7 @@ public class Movement : MonoBehaviour
 
         if (effectType == 1)
         {
-            Move(UnityEngine.Random.Range(3, 6));
+            StartCoroutine(Move(UnityEngine.Random.Range(3, 6)));
         }
         else if (effectType == 2)
         {
@@ -174,7 +174,7 @@ public class Movement : MonoBehaviour
 
         if (effectType == 1)
         {
-            Move(UnityEngine.Random.Range(-3, -6));
+            StartCoroutine(Move(UnityEngine.Random.Range(-3, -6)));
         }
         else if (effectType == 2)
         {
