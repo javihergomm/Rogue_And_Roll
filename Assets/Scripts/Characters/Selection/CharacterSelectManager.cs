@@ -136,10 +136,11 @@ public class CharacterSelectManager : MonoBehaviour
         selectorPanel.SetActive(false);
         Time.timeScale = 1f;
 
-        CharacterSpawner.Instance.Spawn(selectedCharacter, cupPrefab);
+        CharacterSpawner.Instance.Spawn(selectedCharacter);
 
         CharacterEffectManager.Instance.ActivateCharacter(selectedCharacter);
     }
+
 
 
     // -------------------------------------------------------------------------

@@ -16,7 +16,10 @@ MonoBehaviour:
   characterName: Cubilete rojo
   description: Cubilete rojo normal
   icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
-  spawnPointName: Spawn_Red
   characterColor: {r: 0.6754716, g: 0, b: 0, a: 1}
-  diceEffects: []
-  passiveEffects: []
+  applyColor: 1
+  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
+  tilePrefab: {fileID: 8009777192661271419, guid: 78b42d29a0826e949a8c4adbe29d8896, type: 3}
+  spawnPointName: Spawn_Red
+  tileSpotIndex: 38
+  effects: []

@@ -3,16 +3,18 @@ using UnityEngine;
 /*
  * CharacterSpawner
  * ----------------
- * Spawns the selected character cup at the correct spawn point.
- * If the character is basic (applyColor = true), it applies a palette
- * based on the spawn point name (red, blue, green, yellow).
- * Advanced characters keep their original materials.
+ * Handles spawning of the selected character's cup and tile.
+ * Applies color palettes when required.
+ * Registers the Movement component so the dice system can control movement.
+ * Sets the initial board index so the character starts on the correct tile.
  */
 public class CharacterSpawner : MonoBehaviour
 {
     public static CharacterSpawner Instance { get; private set; }
 
-    private GameObject currentCharacter;
+    private GameObject currentCup;
+    private GameObject currentTile;
+    private CharacterSO lastCharacter;
 
     private void Awake()
     {
@@ -26,12 +28,33 @@ public class CharacterSpawner : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public GameObject Spawn(CharacterSO character, GameObject prefab)
+    /*
+     * Spawns the selected character's cup and tile.
+     */
+    public void Spawn(CharacterSO character)
     {
-        if (character == null || prefab == null)
+        if (character == null)
         {
-            Debug.LogError("CharacterSpawner: Missing character or prefab.");
-            return null;
+            Debug.LogError("CharacterSpawner: Missing character.");
+            return;
+        }
+
+        lastCharacter = character;
+
+        SpawnCup(character);
+        SpawnTile(character);
+        RegisterMovementFromSpawnedObjects();
+    }
+
+    /*
+     * Spawns the character's cup at the assigned spawn point.
+     */
+    private void SpawnCup(CharacterSO character)
+    {
+        if (character.cupPrefab == null)
+        {
+            Debug.LogError("CharacterSpawner: Character has no cupPrefab assigned.");
+            return;
         }
 
         Transform spawnPoint = GameObject.Find(character.spawnPointName)?.transform;
@@ -39,33 +62,78 @@ public class CharacterSpawner : MonoBehaviour
         if (spawnPoint == null)
         {
             Debug.LogError("Spawn point not found: " + character.spawnPointName);
-            return null;
+            return;
         }
 
-        // Remove previous character
-        if (currentCharacter != null)
-            Destroy(currentCharacter);
+        currentCup = Instantiate(character.cupPrefab, spawnPoint.position, spawnPoint.rotation);
 
-        // Instantiate new character
-        currentCharacter = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
-
-        // Apply palette only to basic characters
         if (character.applyColor)
-            ApplyPalette(currentCharacter, character.spawnPointName);
-
-        return currentCharacter;
+            ApplyPalette(currentCup, character.spawnPointName);
     }
 
     /*
-     * ApplyPalette
-     * ------------
-     * Applies a two-tone palette (light/dark) depending on the spawn point name.
-     * Material index 0 = light tone
-     * Material index 1 = dark tone
+     * Spawns the character's tile at the indexed board spot.
+     */
+    private void SpawnTile(CharacterSO character)
+    {
+        if (character.tilePrefab == null)
+            return;
+
+        Spot[] spots = Object.FindObjectsByType<Spot>(FindObjectsSortMode.None);
+        System.Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
+
+        if (character.tileSpotIndex < 0 || character.tileSpotIndex >= spots.Length)
+        {
+            Debug.LogError("Invalid tileSpotIndex for character: " + character.characterName);
+            return;
+        }
+
+        Transform tilePoint = spots[character.tileSpotIndex].transform;
+        currentTile = Instantiate(character.tilePrefab, tilePoint.position, tilePoint.rotation);
+    }
+
+    /*
+     * Registers the Movement component and assigns the initial board index.
+     */
+    private void RegisterMovementFromSpawnedObjects()
+    {
+        Movement mov = null;
+
+        if (currentCup != null)
+            mov = currentCup.GetComponentInChildren<Movement>();
+
+        if (mov == null && currentTile != null)
+            mov = currentTile.GetComponentInChildren<Movement>();
+
+        if (mov != null)
+        {
+            DiceRollManager.Instance.RegisterPlayerMovement(mov);
+
+            // Assigns the initial board index after Movement has completed its Start() method.
+            StartCoroutine(AssignInitialPosition(mov));
+        }
+        else
+        {
+            Debug.LogError("CharacterSpawner: No Movement component found in cup or tile.");
+        }
+    }
+
+    /*
+     * Waits one frame to ensure Movement.Start() has finished,
+     * then sets the initial board index.
+     */
+    private System.Collections.IEnumerator AssignInitialPosition(Movement mov)
+    {
+        yield return null;
+
+        mov.ActualPos = lastCharacter.tileSpotIndex;
+    }
+
+    /*
+     * Applies a two-tone palette to the cup based on the spawn point name.
      */
     private void ApplyPalette(GameObject obj, string spawnName)
     {
-        // Determine palette based on spawn name
         Color light = Color.white;
         Color dark = Color.white;
 
@@ -91,35 +159,24 @@ public class CharacterSpawner : MonoBehaviour
             light = HexToColor("#FFE66A");
             dark = HexToColor("#F9A825");
         }
-        else
-        {
-            Debug.LogWarning("No palette matched for spawn: " + spawnName);
-            return;
-        }
 
-        // Apply palette to materials
         foreach (Renderer r in obj.GetComponentsInChildren<Renderer>())
         {
             Material[] mats = r.materials;
 
             for (int i = 0; i < mats.Length; i++)
             {
-                if (i == 0) // light tone
-                {
-                    if (mats[i].HasProperty("_BaseColor"))
-                        mats[i].SetColor("_BaseColor", light);
-                }
-                else if (i == 1) // dark tone
-                {
-                    if (mats[i].HasProperty("_BaseColor"))
-                        mats[i].SetColor("_BaseColor", dark);
-                }
+                if (mats[i].HasProperty("_BaseColor"))
+                    mats[i].SetColor("_BaseColor", i == 0 ? light : dark);
             }
 
             r.materials = mats;
         }
     }
 
+    /*
+     * Converts a hex color string into a Unity Color.
+     */
     private Color HexToColor(string hex)
     {
         Color c;

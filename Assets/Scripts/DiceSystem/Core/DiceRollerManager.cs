@@ -4,14 +4,18 @@ using System.Collections.Generic;
 /*
  * DiceRollManager
  * ----------------
- * Central system that handles all physical dice in the game.
+ * Central system that manages all dice-related logic in the game.
  *
- * Main responsibilities:
+ * Responsibilities:
  *  - Spawn dice prefabs in the world based on active inventory slots
  *  - Remove dice when a slot becomes inactive
  *  - Trigger physical dice rolls
- *  - Apply all dice effects (sync and async) to compute the final roll
- *  - Store base and final roll values for UI or debugging
+ *  - Apply synchronous and asynchronous dice effects
+ *  - Compute the final roll result
+ *  - Notify the movement system when the roll is resolved
+ *  - Store roll history for UI or debugging
+ *
+ * The player movement reference is assigned dynamically by CharacterSpawner.
  */
 public class DiceRollManager : MonoBehaviour
 {
@@ -35,28 +39,36 @@ public class DiceRollManager : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[DiceRollManager] Awake");
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("[DiceRollManager] Duplicate instance destroyed");
             Destroy(gameObject);
             return;
         }
 
         Instance = this;
-        Debug.Log("[DiceRollManager] Instance set");
     }
 
     private void Start()
     {
-        // Subscribe to playerObject movement finished to trigger enemy turns
         if (playerMovement != null)
             playerMovement.OnMovementFinished += OnPlayerFinishedMovement;
     }
 
     /*
-     * Called when the playerObject finishes movement.
-     * Starts enemy turns through EnemyManager.
+     * Registers the player's Movement component after the player is spawned.
+     * Allows the dice system to trigger player movement after a roll.
+     */
+    public void RegisterPlayerMovement(Movement movement)
+    {
+        playerMovement = movement;
+
+        if (playerMovement != null)
+            playerMovement.OnMovementFinished += OnPlayerFinishedMovement;
+    }
+
+    /*
+     * Called when the player finishes movement.
+     * Starts enemy turns through the enemy manager.
      */
     private void OnPlayerFinishedMovement()
     {
@@ -70,146 +82,76 @@ public class DiceRollManager : MonoBehaviour
 
     public GameObject SpawnDiceInWorld(DiceSO dice, ItemSlot slot)
     {
-        Debug.Log($"[SpawnDiceInWorld] Trying to spawn dice for slot: {slot?.ItemName}");
-
         if (slot == null || dice == null || InventoryManager.Instance == null)
-        {
-            Debug.LogError("[SpawnDiceInWorld] Null parameters");
             return null;
-        }
-
-        Debug.Log($"[SpawnDiceInWorld] DiceType = {dice.DiceType}");
 
         if (worldDice.ContainsKey(slot))
-        {
-            Debug.Log("[SpawnDiceInWorld] Dice already exists for this slot");
             return worldDice[slot];
-        }
 
         List<GameObject> prefabList = GetPrefabListForDice(dice.DiceType);
-        if (prefabList == null)
-        {
-            Debug.LogError("[SpawnDiceInWorld] prefabList is NULL");
+        if (prefabList == null || prefabList.Count == 0)
             return null;
-        }
-
-        if (prefabList.Count == 0)
-        {
-            Debug.LogError("[SpawnDiceInWorld] prefabList is EMPTY");
-            return null;
-        }
 
         GameObject prefab = prefabList[0];
         if (prefab == null)
-        {
-            Debug.LogError("[SpawnDiceInWorld] prefab is NULL");
             return null;
-        }
-
-        Debug.Log($"[SpawnDiceInWorld] Prefab found: {prefab.name}");
 
         int index = InventoryManager.Instance.GetActiveDiceSlotIndex(slot);
-        Debug.Log($"[SpawnDiceInWorld] Active slot index = {index}");
-
         if (index < 0 || index >= activeDiceSpawnPoints.Length)
-        {
-            Debug.LogError("[SpawnDiceInWorld] Slot index out of range");
             return null;
-        }
 
         Transform spawnPoint = activeDiceSpawnPoints[index];
         if (spawnPoint == null)
-        {
-            Debug.LogError("[SpawnDiceInWorld] spawnPoint is NULL");
             return null;
-        }
-
-        Debug.Log($"[SpawnDiceInWorld] SpawnPoint position = {spawnPoint.position}");
 
         GameObject instance = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
-        if (instance == null)
-        {
-            Debug.LogError("[SpawnDiceInWorld] Instantiate returned NULL");
-            return null;
-        }
-
-        Debug.Log($"[SpawnDiceInWorld] Instance created: {instance.name}");
-
         instance.transform.localScale = prefab.transform.localScale;
-        Debug.Log($"[SpawnDiceInWorld] Scale applied: {instance.transform.localScale}");
 
         DiceRoller roller = instance.GetComponent<DiceRoller>();
-        if (roller == null)
-            Debug.LogWarning("[SpawnDiceInWorld] Prefab has NO DiceRoller");
-        else
+        if (roller != null)
             roller.AssignDice(dice, slot);
 
         AdjustSpawnHeight(instance);
         ResetPhysics(instance);
 
         worldDice[slot] = instance;
-        Debug.Log("[SpawnDiceInWorld] Dice registered in worldDice");
-
         return instance;
     }
 
     public void RemoveDiceFromWorld(ItemSlot slot)
     {
-        Debug.Log($"[RemoveDiceFromWorld] Removing dice from slot: {slot?.ItemName}");
-
         if (!worldDice.ContainsKey(slot))
-        {
-            Debug.LogWarning("[RemoveDiceFromWorld] No dice found for this slot");
             return;
-        }
 
         Destroy(worldDice[slot]);
         worldDice.Remove(slot);
         rollHistory.Remove(slot);
-
-        Debug.Log("[RemoveDiceFromWorld] Dice removed successfully");
     }
 
     private void AdjustSpawnHeight(GameObject instance)
     {
-        Debug.Log("[AdjustSpawnHeight] Adjusting height");
-
         Collider col = instance.GetComponent<Collider>();
         if (col == null)
-        {
-            Debug.LogError("[AdjustSpawnHeight] Dice has NO collider");
             return;
-        }
 
         float halfHeight = col.bounds.extents.y;
         Vector3 p = instance.transform.position;
         instance.transform.position = new Vector3(p.x, p.y + halfHeight + spawnLift, p.z);
-
-        Debug.Log($"[AdjustSpawnHeight] New position: {instance.transform.position}");
     }
 
     private void ResetPhysics(GameObject instance)
     {
-        Debug.Log("[ResetPhysics] Resetting physics");
-
         Rigidbody rb = instance.GetComponent<Rigidbody>();
         if (rb == null)
-        {
-            Debug.LogError("[ResetPhysics] Dice has NO Rigidbody");
             return;
-        }
 
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         rb.Sleep();
-
-        Debug.Log("[ResetPhysics] Physics reset");
     }
 
     private List<GameObject> GetPrefabListForDice(DiceType type)
     {
-        Debug.Log($"[GetPrefabListForDice] Requested type: {type}");
-
         return type switch
         {
             DiceType.D4 => d4Prefabs,
@@ -251,10 +193,8 @@ public class DiceRollManager : MonoBehaviour
         ApplyConsumableEffectsToRange(ref minAllowed, ref maxAllowed, ctx);
 
         for (int face = 1; face <= dice.GetMaxFaceValue(); face++)
-        {
             if (face >= minAllowed && face <= maxAllowed)
                 allowed.Add(face);
-        }
 
         return allowed;
     }
@@ -493,13 +433,20 @@ public class DiceRollManager : MonoBehaviour
         return null;
     }
 
+    // -------------------------------------------------------------------------
+    // FINALIZATION
+    // -------------------------------------------------------------------------
+
     private void FinalizeRoll(int finalRoll)
     {
         Debug.Log("Final roll after all effects: " + finalRoll);
 
         StatManager.Instance.OnDiceFinalResult(finalRoll);
 
-        playerMovement.StartMoving();
+        if (playerMovement != null)
+            playerMovement.StartMoving();
+        else
+            Debug.LogError("DiceRollManager: playerMovement is NULL. CharacterSpawner must register it.");
     }
 
     // -------------------------------------------------------------------------

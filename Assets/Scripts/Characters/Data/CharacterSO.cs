@@ -11,12 +11,16 @@ public class CharacterSO : ScriptableObject
 
     [Header("Visuals")]
     public Color characterColor = Color.white;
-    public bool applyColor = true;  
+    public bool applyColor = true;
+
+    [Header("Prefabs")]
+    public GameObject cupPrefab;   // Visible player cup
+    public GameObject tilePrefab;  // Visible player tile
 
     [Header("Spawn")]
-    public string spawnPointName;
+    public string spawnPointName;  // Cup spawn point
+    public int tileSpotIndex;      // Tile spawn point
 
     [Header("Effects")]
     public BaseEffect[] effects;
-
 }
