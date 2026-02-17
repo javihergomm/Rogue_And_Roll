@@ -11791,6 +11791,9 @@ MonoBehaviour:
   maxGold: 50
   startingRolls: 1
   maxShopRerolls: 2
+  HideRollThisTurn: 0
+  HidePieceThisTurn: 0
+  HasPlayerRolledThisTurn: 0
 --- !u!114 &1548563261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11951,6 +11954,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
     - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
     - {fileID: 11400000, guid: 52a0e4dbd2fc5bc449c7a6c7e7e9fe76, type: 2}
+    - {fileID: 11400000, guid: f9914aad9a10ecc4e86193813341d837, type: 2}
+    - {fileID: 11400000, guid: de977bcbcdb91584093f07f9f25ef05c, type: 2}
   inventoryMenu: {fileID: 1374634886}
   startingDice: {fileID: 11400000, guid: 52a0e4dbd2fc5bc449c7a6c7e7e9fe76, type: 2}
 --- !u!114 &1548563266
@@ -13180,11 +13185,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   possibleItems:
-  - {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
-  - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
-  - {fileID: 11400000, guid: 79070e5029948df4eaf00a7827f09d31, type: 2}
-  - {fileID: 11400000, guid: 0cc5767b84b2dbf49b3228f8cf86e141, type: 2}
-  - {fileID: 11400000, guid: dd23d94583cb7a140abf8a4e0765936b, type: 2}
+  - {fileID: 11400000, guid: f9914aad9a10ecc4e86193813341d837, type: 2}
+  - {fileID: 11400000, guid: de977bcbcdb91584093f07f9f25ef05c, type: 2}
   targetItemSize: 0.2
   floatOffset: 0.1
   isAwaitingDecision: 0

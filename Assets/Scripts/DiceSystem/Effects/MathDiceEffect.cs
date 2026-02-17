@@ -1,20 +1,5 @@
 using UnityEngine;
 
-/*
- * MathDiceEffect
- * --------------
- * Unified dice effect for all mathematical roll/range modifications.
- * Covers:
- *  - Additive (+/-)
- *  - Multiplier
- *  - MinClamp
- *  - MaxClamp
- *  - HalfRange
- *  - ForceEven
- *  - RandomMultiplier (Potion of Chance)
- *
- * This replaces multiple separate effect classes.
- */
 public enum MathOperation
 {
     Add,
@@ -60,6 +45,10 @@ public class MathDiceEffect : BaseDiceEffect
 
     public override int ModifyRoll(int roll, DiceContext ctx)
     {
+        // Only modify the roll in the FINAL calculation
+        if (!ctx.IsFinal)
+            return roll;
+
         switch (operation)
         {
             case MathOperation.Add:

@@ -107,9 +107,14 @@ public class InventoryManager : MonoBehaviour
 
     public void AddItem(BaseItemSO item, int qty)
     {
-        Debug.Log("AddItem: " + item.ItemName + " x" + qty);
         slots.AddItem(item, qty);
         permanentEffects.TryActivate(item);
+
+        if (item is ConsumableSO consumable && consumable.AutoUseOnPickup)
+        {
+            consumable.UseItem(new ConsumableContext());
+        }
+
         OnInventoryChanged?.Invoke();
     }
 

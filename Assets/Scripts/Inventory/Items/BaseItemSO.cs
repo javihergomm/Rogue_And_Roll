@@ -41,6 +41,11 @@ public abstract class BaseItemSO : ScriptableObject
     public int BuyPrice => buyPrice;
     public int SellPrice => sellPrice;
 
+    public bool CanBeDiscarded = true;
+
+    // NEW: Controls whether the item is consumed immediately when used
+    public bool ConsumeOnUse = true;
+
     public ItemPolarity Polarity => polarity;
 
     /*

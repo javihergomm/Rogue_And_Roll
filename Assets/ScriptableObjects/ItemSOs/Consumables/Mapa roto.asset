@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bd3dc40917a57e40920014beee12295, type: 3}
+  m_Name: Mapa roto
+  m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
+  itemName: brokenMap
+  icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
+  itemDescription: 
+  prefab3D: {fileID: 4295172184554600023, guid: 68a77e41474ed714e94409c8cbed8e30, type: 3}
+  buyPrice: 0
+  sellPrice: 0
+  polarity: 1
+  CanBeDiscarded: 0
+  ConsumeOnUse: 1
+  AppearsIn3D: 0
+  AutoUseOnPickup: 1
+  canBeUsedOnSpot: 0
+  effects:
+  - {fileID: 11400000, guid: bc804a4fd375af745827d1cfb309332c, type: 2}

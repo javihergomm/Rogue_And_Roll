@@ -14,8 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PermanentSO
   itemName: "Amuleto de Precisi\xF3n"
   icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
-  prefab3D: {fileID: 0}
+  itemDescription: 
+  prefab3D: {fileID: 2482351552050127348, guid: 0c76393c675edb0428a8a0bd29465484, type: 3}
   buyPrice: 0
   sellPrice: 0
   polarity: 0
-  effects: []
+  CanBeDiscarded: 1
+  ConsumeOnUse: 1
+  effects:
+  - {fileID: 11400000, guid: f42bb937ebba091469073dde27bf5533, type: 2}

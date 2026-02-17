@@ -22,7 +22,9 @@ public class DiceContext
     // Optional: final roll after all effects (useful for chained effects)
     public int finalRoll;
 
-    // Optional constructor for convenience
+    // NEW: tells effects whether this is the final calculation
+    public bool IsFinal = false;
+
     public DiceContext() { }
 
     public DiceContext(int turn, int prevRoll, ItemSlot slot)

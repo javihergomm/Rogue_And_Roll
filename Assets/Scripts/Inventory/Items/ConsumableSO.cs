@@ -4,30 +4,33 @@ using UnityEngine;
  * ConsumableSO
  * ------------
  * ScriptableObject representing a consumable item.
- * Executes its effects using a ConsumableContext.
+ * A consumable executes one or more effects when used.
+ * Effects can modify dice, apply consumable logic, or trigger passive behaviors.
  */
 [CreateAssetMenu(fileName = "NewConsumable", menuName = "Inventory/Consumable")]
 public class ConsumableSO : BaseItemSO
 {
     public bool CanBeUsedOnSpot => canBeUsedOnSpot;
     public bool AppearsIn3D;
+    public bool AutoUseOnPickup = false;
 
     [SerializeField] private bool canBeUsedOnSpot = false;
 
     [SerializeField] private BaseEffect[] effects;
     public BaseEffect[] Effects => effects;
-    /*
-     * Required by BaseItemSO.
-     * Creates a default context and executes the effects.
-     */
+
     public override void UseItem()
     {
+        // Generic use (for example, from a button)
         UseItem(new ConsumableContext());
+        // Do NOT remove the item here. InventoryManager handles removal using the correct ItemSlot.
     }
 
     /*
      * Executes all effects assigned to this consumable.
-     * Uses the provided ConsumableContext.
+     * Handles dice effects correctly:
+     *  - Immediate effects if the player has not rolled yet
+     *  - Deferred effects (next turn) if ApplyOnNextAvailableRoll is true
      */
     public void UseItem(ConsumableContext ctx)
     {
@@ -39,21 +42,39 @@ public class ConsumableSO : BaseItemSO
             if (eff == null)
                 continue;
 
+            // Dice-related effects
             if (eff is BaseDiceEffect diceEff)
             {
-                StatManager.Instance.ActiveConsumableEffects.Add(diceEff);
+                diceEff.SourceItem = this;
+
+                // If the effect must wait for the next roll
+                if (diceEff.ApplyOnNextAvailableRoll &&
+                    StatManager.Instance.HasPlayerRolledThisTurn)
+                {
+                    StatManager.Instance.PendingDiceEffects.Add(diceEff);
+                }
+                else
+                {
+                    // Apply immediately
+                    StatManager.Instance.ActiveConsumableEffects.Add(diceEff);
+                }
+
+                ctx.WasUsed = true; // REQUIRED so InventoryManager removes the item
                 continue;
             }
 
+            // Consumable-specific effects
             if (eff is BaseConsumableEffect consEff)
             {
                 consEff.Activate(ctx);
                 continue;
             }
 
+            // Passive effects triggered immediately
             if (eff is BasePassiveEffect passiveEff)
             {
                 passiveEff.OnTurnStart(new PassiveContext());
+                ctx.WasUsed = true;
                 continue;
             }
         }
