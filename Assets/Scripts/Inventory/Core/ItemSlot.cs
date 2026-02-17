@@ -2,16 +2,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 /*
  * ItemSlot
  * --------
- * Manages a single inventory slot:
- *  - Stores item data and updates its UI
- *  - Allows selecting items
- *  - Allows dragging dice inside the inventory
- *  - Allows dragging consumables out of the inventory panel to place them on board Spots
- *  - Receives dropped items from other slots
+ * Represents a single inventory slot in the UI.
+ * Handles item display, selection, dragging, dropping,
+ * and placing consumables onto board Spots or ColorSpots.
  */
 public class ItemSlot : MonoBehaviour,
     IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
@@ -108,25 +106,43 @@ public class ItemSlot : MonoBehaviour,
         if (item is PermanentSO)
             return;
 
-        // Ocultar icono del slot
+        canvasGroup.blocksRaycasts = false;
+        canvasGroup.alpha = 0.6f;
         itemImage.enabled = false;
 
         if (item is DiceSO)
         {
             if (!InventoryManager.Instance.IsOpen)
+            {
+                canvasGroup.blocksRaycasts = true;
+                canvasGroup.alpha = 1f;
+                itemImage.enabled = true;
                 return;
+            }
 
             CreateDragIcon();
             eventData.pointerDrag = gameObject;
             return;
         }
 
-        if (item is ConsumableSO)
+        if (item is ConsumableSO consumable)
         {
+            if (!consumable.CanBeUsedOnSpot)
+            {
+                canvasGroup.blocksRaycasts = true;
+                canvasGroup.alpha = 1f;
+                itemImage.enabled = true;
+                return;
+            }
+
             CreateDragIcon();
             eventData.pointerDrag = gameObject;
             return;
         }
+
+        canvasGroup.blocksRaycasts = true;
+        canvasGroup.alpha = 1f;
+        itemImage.enabled = true;
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -136,7 +152,10 @@ public class ItemSlot : MonoBehaviour,
 
         BaseItemSO item = InventoryManager.Instance.GetItemSO(itemName);
 
-        if (!(item is ConsumableSO))
+        if (item is not ConsumableSO consumable)
+            return;
+
+        if (!consumable.CanBeUsedOnSpot)
             return;
 
         if (!RectTransformUtility.RectangleContainsScreenPoint(inventoryPanel, eventData.position))
@@ -150,8 +169,6 @@ public class ItemSlot : MonoBehaviour,
     {
         canvasGroup.blocksRaycasts = true;
         canvasGroup.alpha = 1f;
-
-        // Volver a mostrar icono del slot
         itemImage.enabled = true;
 
         if (dragIcon != null)
@@ -162,11 +179,33 @@ public class ItemSlot : MonoBehaviour,
         if (item is DiceSO)
             return;
 
-        if (item is ConsumableSO)
+        if (item is not ConsumableSO consumable)
+            return;
+
+        if (!consumable.CanBeUsedOnSpot)
+            return;
+
+        var target = GetClosestSpotToMouse(eventData);
+        if (target == null)
+            return;
+
+        // Normal Spot
+        if (target is Spot spot)
         {
-            Spot spot = GetClosestSpotToMouse(eventData);
-            if (spot != null)
-                InventoryManager.Instance.PlaceConsumableOnSpot(this, spot);
+            InventoryManager.Instance.PlaceConsumableOnSpot(this, spot);
+            InventoryManager.Instance.CloseInventory();   // FULL CLOSE
+            return;
+        }
+
+        // ColorSpot with 3D support
+        if (target is ColorSpot colorSpot)
+        {
+            if (consumable.AppearsIn3D)
+            {
+                InventoryManager.Instance.PlaceConsumableOnColorSpot(this, colorSpot);
+                InventoryManager.Instance.CloseInventory();   // FULL CLOSE
+            }
+            return;
         }
     }
 
@@ -207,28 +246,37 @@ public class ItemSlot : MonoBehaviour,
 
         RectTransform rt = dragIcon.GetComponent<RectTransform>();
         rt.sizeDelta = new Vector2(64, 64);
-
-        canvasGroup.blocksRaycasts = true;
-        canvasGroup.alpha = 0.6f;
     }
 
-    private Spot GetClosestSpotToMouse(PointerEventData eventData)
+    private MonoBehaviour GetClosestSpotToMouse(PointerEventData eventData)
     {
         SpotController controller = Object.FindFirstObjectByType<SpotController>();
-        if (controller == null)
-            return null;
+        List<MonoBehaviour> all = new List<MonoBehaviour>();
 
-        Spot[] allSpots = controller.GetAllSpots();
-        if (allSpots == null || allSpots.Length == 0)
+        if (controller != null)
+        {
+            Spot[] normalSpots = controller.GetAllSpots();
+            if (normalSpots != null && normalSpots.Length > 0)
+                all.AddRange(normalSpots);
+        }
+
+        ColorSpot[] colorSpots = FindObjectsByType<ColorSpot>(FindObjectsSortMode.None);
+        if (colorSpots != null && colorSpots.Length > 0)
+            all.AddRange(colorSpots);
+
+        if (all.Count == 0)
             return null;
 
         Ray ray = Camera.main.ScreenPointToRay(eventData.position);
 
-        Spot closest = null;
+        MonoBehaviour closest = null;
         float closestDistance = float.MaxValue;
 
-        foreach (Spot s in allSpots)
+        foreach (var s in all)
         {
+            if (s == null)
+                continue;
+
             float distance = Vector3.Cross(ray.direction, s.transform.position - ray.origin).magnitude;
 
             if (distance < closestDistance)

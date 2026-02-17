@@ -8,8 +8,8 @@ using System.Collections.Generic;
  * - Stores and updates stat values
  * - Tracks turns and dice results
  * - Registers temporary consumable dice effects
- *
- * Does NOT handle UI. StatsUI.cs is responsible for presentation.
+ * - Handles effects that apply immediately or on the next available roll
+ * - Provides turn-based flags for temporary effects
  */
 public class StatManager : MonoBehaviour
 {
@@ -31,12 +31,24 @@ public class StatManager : MonoBehaviour
     public int PreviousRoll { get; private set; }
     public int CurrentTurn { get; private set; } = 1;
 
+    // Active effects that apply to the current roll
     public List<BaseDiceEffect> ActiveConsumableEffects { get; private set; }
+        = new List<BaseDiceEffect>();
+
+    // Effects that should apply on the next available roll
+    public List<BaseDiceEffect> PendingDiceEffects { get; private set; }
         = new List<BaseDiceEffect>();
 
     private ShopExitManager cachedExitManager;
 
     public event System.Action OnStatsChanged;
+
+    /*
+     * Temporary turn-based flags used by consumable effects.
+     */
+    public bool HideRollThisTurn = false;
+    public bool HidePieceThisTurn = false;
+    public bool HasPlayerRolledThisTurn = false;
 
     private void Awake()
     {
@@ -74,6 +86,12 @@ public class StatManager : MonoBehaviour
         maxValues[StatType.ShopRerolls] = maxShopRerolls;
     }
 
+    /*
+     * Registers dice effects granted by a consumable item.
+     * If the player already rolled this turn and the effect
+     * is marked as ApplyOnNextAvailableRoll, it is stored
+     * for the next turn instead of applying immediately.
+     */
     public void RegisterConsumableEffects(ConsumableSO item)
     {
         if (item?.Effects == null)
@@ -82,7 +100,20 @@ public class StatManager : MonoBehaviour
         foreach (var eff in item.Effects)
         {
             if (eff is BaseDiceEffect diceEff)
-                ActiveConsumableEffects.Add(diceEff);
+            {
+                // Store reference to the consumable that created this effect
+                diceEff.SourceItem = item;
+
+                // If the effect must wait for the next roll
+                if (diceEff.ApplyOnNextAvailableRoll && HasPlayerRolledThisTurn)
+                {
+                    PendingDiceEffects.Add(diceEff);
+                }
+                else
+                {
+                    ActiveConsumableEffects.Add(diceEff);
+                }
+            }
         }
     }
 
@@ -120,16 +151,46 @@ public class StatManager : MonoBehaviour
         ChangeStat(StatType.ShopRerolls, -1);
     }
 
+    /*
+     * Called when the final dice result is known.
+     * Stores the roll and removes effects that last only one roll.
+     */
     public void OnDiceFinalResult(int finalRoll)
     {
         PreviousRoll = finalRoll;
-        ActiveConsumableEffects.Clear();
+        HasPlayerRolledThisTurn = true;
+
+        // Remove only effects that last a single roll
+        ActiveConsumableEffects.RemoveAll(e => e.RemoveAfterRoll);
     }
 
+    /*
+     * Advances the turn counter and activates pending effects.
+     */
     public void NextTurn()
     {
         CurrentTurn++;
+
+        ResetTurnFlags();
+
+        // Move pending effects into active effects
+        if (PendingDiceEffects.Count > 0)
+        {
+            ActiveConsumableEffects.AddRange(PendingDiceEffects);
+            PendingDiceEffects.Clear();
+        }
+
         NotifyUI();
+    }
+
+    /*
+     * Resets temporary flags used by consumable effects.
+     */
+    public void ResetTurnFlags()
+    {
+        HideRollThisTurn = false;
+        HidePieceThisTurn = false;
+        HasPlayerRolledThisTurn = false;
     }
 
     private void HandleShopStateChanged(bool inShop)

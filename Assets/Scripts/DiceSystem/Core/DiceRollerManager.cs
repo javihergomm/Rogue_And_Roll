@@ -1,27 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/*
- * DiceRollManager
- * ----------------
- * Central system that manages all dice-related logic in the game.
- *
- * Responsibilities:
- *  - Spawn dice prefabs in the world based on active inventory slots
- *  - Remove dice when a slot becomes inactive
- *  - Trigger physical dice rolls
- *  - Apply synchronous and asynchronous dice effects
- *  - Compute the final roll result
- *  - Notify the movement system when the roll is resolved
- *  - Store roll history for UI or debugging
- *
- * The player movement reference is assigned dynamically by CharacterSpawner.
- */
 public class DiceRollManager : MonoBehaviour
 {
     public static DiceRollManager Instance { get; private set; }
 
-    [Header("Dice Prefabs by Type")]
+    [Header("Dice Prefabs")]
     [SerializeField] private List<GameObject> d4Prefabs;
     [SerializeField] private List<GameObject> d6Prefabs;
     [SerializeField] private List<GameObject> d8Prefabs;
@@ -54,10 +38,6 @@ public class DiceRollManager : MonoBehaviour
             playerMovement.OnMovementFinished += OnPlayerFinishedMovement;
     }
 
-    /*
-     * Registers the player's Movement component after the player is spawned.
-     * Allows the dice system to trigger player movement after a roll.
-     */
     public void RegisterPlayerMovement(Movement movement)
     {
         playerMovement = movement;
@@ -66,10 +46,6 @@ public class DiceRollManager : MonoBehaviour
             playerMovement.OnMovementFinished += OnPlayerFinishedMovement;
     }
 
-    /*
-     * Called when the player finishes movement.
-     * Starts enemy turns through the enemy manager.
-     */
     private void OnPlayerFinishedMovement()
     {
         if (EnemyManager.Instance != null)
@@ -188,7 +164,6 @@ public class DiceRollManager : MonoBehaviour
         };
 
         ApplyEffectsToRange(dice.Effects, ref minAllowed, ref maxAllowed, ctx);
-        ApplyPermanentEffectsToRange(ref minAllowed, ref maxAllowed, ctx);
         ApplyCharacterEffectsToRange(ref minAllowed, ref maxAllowed, ctx);
         ApplyConsumableEffectsToRange(ref minAllowed, ref maxAllowed, ctx);
 
@@ -214,19 +189,6 @@ public class DiceRollManager : MonoBehaviour
                 diceEff.ApplyToRange(ref min, ref max, ctx);
     }
 
-    private void ApplyPermanentEffectsToRange(ref int min, ref int max, DiceContext ctx)
-    {
-        foreach (var s in InventoryManager.Instance.ItemSlots)
-        {
-            if (s.Quantity <= 0)
-                continue;
-
-            BaseItemSO it = InventoryManager.Instance.GetItemSO(s.ItemName);
-            if (it is PermanentSO perm && perm.Effects != null)
-                ApplyEffectsToRange(perm.Effects, ref min, ref max, ctx);
-        }
-    }
-
     private void ApplyCharacterEffectsToRange(ref int min, ref int max, DiceContext ctx)
     {
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
@@ -241,41 +203,7 @@ public class DiceRollManager : MonoBehaviour
     }
 
     // -------------------------------------------------------------------------
-    // TARGET FACE SELECTION
-    // -------------------------------------------------------------------------
-
-    public int? GetTargetFaceForRoll(ItemSlot slot, int physicalRoll, DiceContext ctx)
-    {
-        if (slot == null || InventoryManager.Instance == null || string.IsNullOrEmpty(slot.ItemName))
-            return null;
-
-        List<int> allowed = GetAllowedFacesForSlot(slot);
-        if (allowed == null || allowed.Count == 0)
-            return null;
-
-        int preview = GetFinalRollPreview(physicalRoll, ctx, slot);
-
-        if (allowed.Contains(preview))
-            return preview;
-
-        int closest = allowed[0];
-        int bestDist = Mathf.Abs(preview - closest);
-
-        for (int i = 1; i < allowed.Count; i++)
-        {
-            int dist = Mathf.Abs(preview - allowed[i]);
-            if (dist < bestDist)
-            {
-                bestDist = dist;
-                closest = allowed[i];
-            }
-        }
-
-        return closest;
-    }
-
-    // -------------------------------------------------------------------------
-    // FINAL ROLL PROCESSING
+    // ROLL PROCESSING
     // -------------------------------------------------------------------------
 
     public void OnDiceResult(ItemSlot slot, int baseRoll)
@@ -284,7 +212,8 @@ public class DiceRollManager : MonoBehaviour
         {
             turnNumber = StatManager.Instance.CurrentTurn,
             previousRoll = StatManager.Instance.PreviousRoll,
-            slot = slot
+            slot = slot,
+            IsFinal = true
         };
 
         int finalRoll = ApplySynchronousEffects(slot, baseRoll, ctx);
@@ -303,16 +232,6 @@ public class DiceRollManager : MonoBehaviour
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.ItemName);
         if (item is DiceSO dice && dice.Effects != null)
             result = ApplySyncList(dice.Effects, result, ctx);
-
-        foreach (var s in InventoryManager.Instance.ItemSlots)
-        {
-            if (s.Quantity <= 0)
-                continue;
-
-            BaseItemSO it = InventoryManager.Instance.GetItemSO(s.ItemName);
-            if (it is PermanentSO perm && perm.Effects != null)
-                result = ApplySyncList(perm.Effects, result, ctx);
-        }
 
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             if (!eff.RequiresAsyncResolution)
@@ -342,17 +261,6 @@ public class DiceRollManager : MonoBehaviour
         if (item is DiceSO dice && dice.Effects != null)
             if (TryAsyncList(dice.Effects, slot, baseRoll, finalRoll, ctx))
                 return true;
-
-        foreach (var s in InventoryManager.Instance.ItemSlots)
-        {
-            if (s.Quantity <= 0)
-                continue;
-
-            BaseItemSO it = InventoryManager.Instance.GetItemSO(s.ItemName);
-            if (it is PermanentSO perm && perm.Effects != null)
-                if (TryAsyncList(perm.Effects, slot, baseRoll, finalRoll, ctx))
-                    return true;
-        }
 
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             if (eff.RequiresAsyncResolution)
@@ -400,16 +308,6 @@ public class DiceRollManager : MonoBehaviour
         if (item is DiceSO dice && dice.Effects != null)
             result = ApplySyncList(dice.Effects, result, ctx);
 
-        foreach (var s in InventoryManager.Instance.ItemSlots)
-        {
-            if (s.Quantity <= 0)
-                continue;
-
-            BaseItemSO it = InventoryManager.Instance.GetItemSO(s.ItemName);
-            if (it is PermanentSO perm && perm.Effects != null)
-                result = ApplySyncList(perm.Effects, result, ctx);
-        }
-
         foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             if (!eff.RequiresAsyncResolution)
                 result = eff.ModifyRoll(result, ctx);
@@ -434,12 +332,46 @@ public class DiceRollManager : MonoBehaviour
     }
 
     // -------------------------------------------------------------------------
+    // TARGET FACE SELECTION
+    // -------------------------------------------------------------------------
+
+    public int? GetTargetFaceForRoll(ItemSlot slot, int physicalRoll, DiceContext ctx)
+    {
+        if (slot == null || InventoryManager.Instance == null || string.IsNullOrEmpty(slot.ItemName))
+            return null;
+
+        List<int> allowed = GetAllowedFacesForSlot(slot);
+        if (allowed == null || allowed.Count == 0)
+            return null;
+
+        int preview = GetFinalRollPreview(physicalRoll, ctx, slot);
+
+        if (allowed.Contains(preview))
+            return preview;
+
+        int closest = allowed[0];
+        int bestDist = Mathf.Abs(preview - closest);
+
+        for (int i = 1; i < allowed.Count; i++)
+        {
+            int dist = Mathf.Abs(preview - allowed[i]);
+            if (dist < bestDist)
+            {
+                bestDist = dist;
+                closest = allowed[i];
+            }
+        }
+
+        return closest;
+    }
+
+    // -------------------------------------------------------------------------
     // FINALIZATION
     // -------------------------------------------------------------------------
 
     private void FinalizeRoll(int finalRoll)
     {
-        Debug.Log("Final roll after all effects: " + finalRoll);
+        Debug.Log("Final roll result: " + finalRoll);
 
         StatManager.Instance.OnDiceFinalResult(finalRoll);
 
@@ -447,22 +379,5 @@ public class DiceRollManager : MonoBehaviour
             playerMovement.StartMoving();
         else
             Debug.LogError("DiceRollManager: playerMovement is NULL. CharacterSpawner must register it.");
-    }
-
-    // -------------------------------------------------------------------------
-    // HIDE ROLL SUPPORT
-    // -------------------------------------------------------------------------
-
-    public bool IsRollHidden()
-    {
-        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
-            if (eff is HideRollEffect)
-                return true;
-
-        foreach (var eff in StatManager.Instance.ActiveConsumableEffects)
-            if (eff is HideRollEffect)
-                return true;
-
-        return false;
     }
 }

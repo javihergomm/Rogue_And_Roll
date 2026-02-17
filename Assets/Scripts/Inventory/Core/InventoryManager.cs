@@ -5,13 +5,12 @@ using UnityEngine;
 /*
  * InventoryManager
  * ----------------
- * Controls the inventory system:
- *  - Manages item slots and active dice slots
- *  - Handles adding, removing, swapping and selecting items
- *  - Controls inventory UI visibility
- *  - Supports soft-hide mode for drag operations
- *  - Places consumables on board spots
- *  - Prevents opening while character selector or popups are open
+ * Manages the inventory system:
+ *  - Holds and manages item slots and active dice slots
+ *  - Adds, removes and swaps items
+ *  - Controls inventory UI visibility and soft-hide during drags
+ *  - Applies permanent effects when items are added/removed
+ *  - Places consumable items on Spots and ColorSpots (3D)
  */
 public class InventoryManager : MonoBehaviour
 {
@@ -49,8 +48,11 @@ public class InventoryManager : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("InventoryManager Awake");
+
         if (Instance != null && Instance != this)
         {
+            Debug.Log("Duplicate InventoryManager destroyed");
             Destroy(gameObject);
             return;
         }
@@ -60,39 +62,46 @@ public class InventoryManager : MonoBehaviour
         slots.Initialize();
         activeDice.Initialize(slots.ActiveDiceSlots);
 
-        canvasGroup = inventoryMenu.GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
-            canvasGroup = inventoryMenu.AddComponent<CanvasGroup>();
+        if (inventoryMenu != null)
+        {
+            canvasGroup = inventoryMenu.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+                canvasGroup = inventoryMenu.AddComponent<CanvasGroup>();
+        }
     }
 
     private void Start()
     {
+        Debug.Log("InventoryManager Start");
         GiveStartingDice();
         OnActiveDiceChanged?.Invoke();
     }
 
     private void GiveStartingDice()
     {
+        Debug.Log("GiveStartingDice");
+
         if (startingDice == null)
+        {
+            Debug.Log("No starting dice assigned");
             return;
+        }
 
         ItemSlot slot = activeDice.GetFirstEmptySlot();
         if (slot == null)
+        {
+            Debug.Log("No empty active dice slot");
             return;
+        }
 
-        slot.AddItem(
-            startingDice.ItemName,
-            1,
-            startingDice.Icon,
-            startingDice.Description
-        );
-
+        slot.AddItem(startingDice.ItemName, 1, startingDice.Icon, startingDice.Description);
         activeDice.SyncSlot(slot);
         OnActiveDiceChanged?.Invoke();
     }
 
     public BaseItemSO GetItemSO(string name)
     {
+        Debug.Log("GetItemSO: " + name);
         return slots.GetItemSO(name);
     }
 
@@ -100,11 +109,19 @@ public class InventoryManager : MonoBehaviour
     {
         slots.AddItem(item, qty);
         permanentEffects.TryActivate(item);
+
+        if (item is ConsumableSO consumable && consumable.AutoUseOnPickup)
+        {
+            consumable.UseItem(new ConsumableContext());
+        }
+
         OnInventoryChanged?.Invoke();
     }
 
     public void RemoveItem(ItemSlot slot, int qty)
     {
+        Debug.Log("RemoveItem: " + slot.ItemName + " x" + qty);
+
         BaseItemSO item = slots.GetItemSO(slot.ItemName);
 
         slots.RemoveItem(slot, qty);
@@ -118,6 +135,8 @@ public class InventoryManager : MonoBehaviour
 
     public void HandleSlotClick(ItemSlot slot)
     {
+        Debug.Log("HandleSlotClick: " + slot.ItemName);
+
         if (sellMode.IsActive)
         {
             sellMode.HandleClick(slot);
@@ -136,13 +155,18 @@ public class InventoryManager : MonoBehaviour
 
     public void HandleSlotDrop(ItemSlot from, ItemSlot to)
     {
+        Debug.Log("HandleSlotDrop: " + from.ItemName + " -> " + to.ItemName);
+
         if (from == null || to == null)
             return;
 
         BaseItemSO item = GetItemSO(from.ItemName);
 
         if (activeDice.Contains(to) && !(item is DiceSO))
+        {
+            Debug.Log("Cannot drop non-dice into active dice slot");
             return;
+        }
 
         slots.SwapSlots(from, to);
 
@@ -154,6 +178,8 @@ public class InventoryManager : MonoBehaviour
 
     public int GetFinalDiceNumber()
     {
+        Debug.Log("GetFinalDiceNumber");
+
         ItemSlot slot = activeDice.GetSelectedSlot();
         if (slot == null)
             return 0;
@@ -164,6 +190,7 @@ public class InventoryManager : MonoBehaviour
 
     public void DeselectAllSlots()
     {
+        Debug.Log("DeselectAllSlots");
         slots.DeselectAll();
     }
 
@@ -174,16 +201,20 @@ public class InventoryManager : MonoBehaviour
 
     public void SetActiveSellPedestal(SellPedestal pedestal)
     {
+        Debug.Log("SetActiveSellPedestal");
         sellMode.Enable(pedestal);
     }
 
     public void ClearActiveSellPedestal()
     {
+        Debug.Log("ClearActiveSellPedestal");
         sellMode.Disable();
     }
 
     public void TryRemoveActiveDice(ItemSlot slot)
     {
+        Debug.Log("TryRemoveActiveDice");
+
         if (activeDice.Contains(slot))
         {
             DiceRollManager.Instance.RemoveDiceFromWorld(slot);
@@ -193,21 +224,21 @@ public class InventoryManager : MonoBehaviour
 
     public void RefreshActiveDiceUI()
     {
+        Debug.Log("RefreshActiveDiceUI");
         OnActiveDiceChanged?.Invoke();
     }
 
     public void PrepareReplace(BaseItemSO item, int quantity)
     {
+        Debug.Log("PrepareReplace: " + item.ItemName);
         slots.PrepareReplace(item, quantity);
         OpenInventory();
     }
 
-    /*
-     * Toggles the inventory using real open/close.
-     * BLOCKS opening if character selector or popups are open.
-     */
     public void ToggleInventory()
     {
+        Debug.Log("ToggleInventory");
+
         if (CharacterSelectManager.Instance != null &&
             CharacterSelectManager.Instance.IsAnySelectorUIOpen())
             return;
@@ -218,12 +249,10 @@ public class InventoryManager : MonoBehaviour
             OpenInventory();
     }
 
-    /*
-     * Opens the inventory using real activation.
-     * BLOCKS opening if character selector or popups are open.
-     */
     public void OpenInventory()
     {
+        Debug.Log("OpenInventory");
+
         if (CharacterSelectManager.Instance != null &&
             CharacterSelectManager.Instance.IsAnySelectorUIOpen())
             return;
@@ -233,11 +262,15 @@ public class InventoryManager : MonoBehaviour
 
         menuOpen = true;
 
-        inventoryMenu.SetActive(true);
+        if (inventoryMenu != null)
+            inventoryMenu.SetActive(true);
 
-        canvasGroup.alpha = 1f;
-        canvasGroup.blocksRaycasts = true;
-        canvasGroup.interactable = true;
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 1f;
+            canvasGroup.blocksRaycasts = true;
+            canvasGroup.interactable = true;
+        }
 
         foreach (var slot in slots.AllSlots)
             slot.RefreshUI();
@@ -245,17 +278,17 @@ public class InventoryManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    /*
-     * Closes the inventory using real deactivation.
-     */
     public void CloseInventory()
     {
+        Debug.Log("CloseInventory");
+
         if (!menuOpen)
             return;
 
         menuOpen = false;
 
-        inventoryMenu.SetActive(false);
+        if (inventoryMenu != null)
+            inventoryMenu.SetActive(false);
 
         slots.DeselectAll();
         sellMode.Disable();
@@ -265,6 +298,11 @@ public class InventoryManager : MonoBehaviour
 
     public void HideInventorySoft()
     {
+        Debug.Log("HideInventorySoft");
+
+        if (canvasGroup == null)
+            return;
+
         canvasGroup.alpha = 0f;
         canvasGroup.blocksRaycasts = false;
         canvasGroup.interactable = false;
@@ -272,13 +310,66 @@ public class InventoryManager : MonoBehaviour
 
     public void PlaceConsumableOnSpot(ItemSlot slot, Spot spot)
     {
-        BaseItemSO item = GetItemSO(slot.ItemName);
-        if (!(item is ConsumableSO))
+        Debug.Log("PlaceConsumableOnSpot: " + slot.ItemName);
+        PlaceConsumableInternal(slot, spot);
+    }
+
+    public void PlaceConsumableOnColorSpot(ItemSlot slot, ColorSpot colorSpot)
+    {
+        Debug.Log("PlaceConsumableOnColorSpot: " + slot.ItemName);
+        PlaceConsumableInternal(slot, colorSpot);
+    }
+
+    private void PlaceConsumableInternal(ItemSlot slot, MonoBehaviour target)
+    {
+        Debug.Log("PlaceConsumableInternal target=" + target);
+
+        if (slot == null || target == null)
+        {
+            Debug.Log("Null slot or target");
             return;
+        }
 
-        if (item.Prefab3D != null)
-            Instantiate(item.Prefab3D, spot.transform.position, Quaternion.identity);
+        BaseItemSO item = GetItemSO(slot.ItemName);
+        if (!(item is ConsumableSO consumable))
+        {
+            Debug.Log("Item is not ConsumableSO");
+            return;
+        }
 
+        Debug.Log("Consumable detected: " + consumable.ItemName);
+
+        ConsumableContext ctx = new ConsumableContext();
+
+        if (target is ColorSpot colorSpot)
+        {
+            Debug.Log("Target is ColorSpot");
+            ctx.TargetColorSpot = colorSpot;
+        }
+        else if (target is Spot spot)
+        {
+            Debug.Log("Target is Spot");
+            ctx.TargetSpot = spot;
+        }
+        else
+        {
+            Debug.Log("Unsupported target type");
+            return;
+        }
+
+        Debug.Log("Calling UseItem...");
+        consumable.UseItem(ctx);
+        Debug.Log("UseItem finished. WasUsed=" + ctx.WasUsed);
+
+        if (!ctx.WasUsed)
+        {
+            Debug.Log("Consumable was NOT used. Aborting.");
+            return;
+        }
+
+        Debug.Log("ColorSpot target confirmed (no prefab instantiation)");
+
+        Debug.Log("Removing item from inventory");
         RemoveItem(slot, 1);
     }
 }

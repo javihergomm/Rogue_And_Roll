@@ -45,6 +45,13 @@ public class ActiveDiceUI : MonoBehaviour
 
             var rollInfo = DiceRollManager.Instance.GetRollInfo(slot);
 
+            // Si BrokenMapEffect ha ocultado la tirada
+            if (StatManager.Instance.HideRollThisTurn)
+            {
+                sb.AppendLine(slot.ItemName + ": ???");
+                continue;
+            }
+
             if (rollInfo.HasValue)
             {
                 sb.AppendLine(slot.ItemName + ": " +

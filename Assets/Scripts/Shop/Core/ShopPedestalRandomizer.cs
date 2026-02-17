@@ -144,6 +144,9 @@ public class ShopPedestalRandomizer : MonoBehaviour
         spawnedModel.transform.localRotation = Quaternion.identity;
         spawnedModel.transform.localScale = Vector3.one;
 
+        // Auto center the model so its pivot is correct
+        spawnedModel.AddComponent<AutoCenterModel>();
+
         foreach (var rb in spawnedModel.GetComponentsInChildren<Rigidbody>())
             Destroy(rb);
         foreach (var col in spawnedModel.GetComponentsInChildren<Collider>())
@@ -153,7 +156,6 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
         bool isFlat = IsFlatObject(localBounds);
 
-        // Local copies to avoid modifying serialized values
         float finalSize = targetItemSize;
         float finalOffset = floatOffset;
 

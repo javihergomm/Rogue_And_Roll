@@ -20,7 +20,7 @@ public abstract class BaseItemSO : ScriptableObject
     [Header("Basic Info")]
     [SerializeField] private string itemName;
     [SerializeField] private Sprite icon;
-    [SerializeField] private string itemDescription;
+    [SerializeField][TextArea] private string itemDescription;
     [SerializeField] private GameObject prefab3D;
 
     // Shop-related values
@@ -40,6 +40,11 @@ public abstract class BaseItemSO : ScriptableObject
 
     public int BuyPrice => buyPrice;
     public int SellPrice => sellPrice;
+
+    public bool CanBeDiscarded = true;
+
+    // NEW: Controls whether the item is consumed immediately when used
+    public bool ConsumeOnUse = true;
 
     public ItemPolarity Polarity => polarity;
 
