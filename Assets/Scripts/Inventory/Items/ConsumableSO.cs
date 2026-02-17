@@ -3,50 +3,54 @@ using UnityEngine;
 /*
  * ConsumableSO
  * ------------
- * ScriptableObject that represents a consumable item.
- * Stores the effects that the item applies when used.
- * When the item is consumed, all its effects are executed.
+ * ScriptableObject representing a consumable item.
+ * Executes its effects using a ConsumableContext.
  */
 [CreateAssetMenu(fileName = "NewConsumable", menuName = "Inventory/Consumable")]
 public class ConsumableSO : BaseItemSO
 {
-    // List of effects that this consumable applies
-    [Header("Effects")]
+    public bool CanBeUsedOnSpot => canBeUsedOnSpot;
+    public bool AppearsIn3D;
+
+    [SerializeField] private bool canBeUsedOnSpot = false;
+
     [SerializeField] private BaseEffect[] effects;
-
     public BaseEffect[] Effects => effects;
-
     /*
-     * Executes all effects assigned to this consumable.
-     * Each effect type handles its own behavior.
+     * Required by BaseItemSO.
+     * Creates a default context and executes the effects.
      */
     public override void UseItem()
     {
+        UseItem(new ConsumableContext());
+    }
+
+    /*
+     * Executes all effects assigned to this consumable.
+     * Uses the provided ConsumableContext.
+     */
+    public void UseItem(ConsumableContext ctx)
+    {
         if (effects == null || effects.Length == 0)
             return;
-
-        ConsumableContext ctx = new ConsumableContext();
 
         foreach (var eff in effects)
         {
             if (eff == null)
                 continue;
 
-            // Dice-related effects
             if (eff is BaseDiceEffect diceEff)
             {
                 StatManager.Instance.ActiveConsumableEffects.Add(diceEff);
                 continue;
             }
 
-            // Consumable effects that run immediately
             if (eff is BaseConsumableEffect consEff)
             {
                 consEff.Activate(ctx);
                 continue;
             }
 
-            // Passive effects that trigger automatically
             if (eff is BasePassiveEffect passiveEff)
             {
                 passiveEff.OnTurnStart(new PassiveContext());

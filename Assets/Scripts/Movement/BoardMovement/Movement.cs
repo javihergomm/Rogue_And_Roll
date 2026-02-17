@@ -6,9 +6,9 @@ using UnityEngine;
  * Movement
  * --------
  * Controla el movimiento del jugador o enemigo sobre el tablero.
- * Utiliza la lista de casillas (spots) como puntos de destino.
- * Se desplaza paso a paso según el número obtenido en el dado.
- * Aplica efectos especiales al caer en casillas buenas o malas.
+ * Avanza paso a paso, comprobando si hay un puente en cada casilla.
+ * Si pisa un puente, lo cruza inmediatamente y sigue moviéndose desde ahi.
+ * Los efectos de casilla (buena o mala) se aplican solo al final del movimiento.
  */
 public class Movement : MonoBehaviour
 {
@@ -22,36 +22,33 @@ public class Movement : MonoBehaviour
         positions = newPositions;
     }
 
-    [SerializeField] float speed;      // Velocidad de movimiento
-    [SerializeField] int actualPos = -1; // Índice actual en el tablero
-    [SerializeField] bool isPlayer;    // Indica si este movimiento pertenece al jugador
+    [SerializeField] float speed;
+    [SerializeField] int actualPos = -1;
+    [SerializeField] bool isPlayer;
 
-    bool EcanMove = true; // Control del turno del enemigo
-    bool PcanMove = true; // Control del turno del jugador
+    bool EcanMove = true;
+    bool PcanMove = true;
     int Pturn = 1;
     int Eturn = 1;
 
-    [SerializeField] AudioSource audioSource; // Sonido de movimiento
+    [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip moveSound;
 
-    public Action OnMovementFinished; // Evento al terminar el movimiento
+    public Action OnMovementFinished;
 
     private void Start()
     {
-        // Busca todas las casillas del tablero
         spots = FindObjectsOfType<Spot>();
-
-        // Ordena las casillas por su índice
         Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
-        // Construye la ruta de movimiento usando los transforms de cada casilla
         positions = new Transform[spots.Length];
         for (int i = 0; i < spots.Length; i++)
             positions[i] = spots[i].transform;
     }
 
     /*
-     * Inicia el movimiento usando el resultado del dado del jugador.
+     * Inicia el movimiento usando el resultado del dado.
+     * Los efectos de casilla ya no se aplican aqui.
      */
     public void StartMoving()
     {
@@ -62,19 +59,6 @@ public class Movement : MonoBehaviour
         {
             int finalRoll = InventoryManager.Instance.GetFinalDiceNumber();
             StartCoroutine(Move(finalRoll));
-
-            if (spots[actualPos].getType() == Spot.SpotType.Good)
-            {
-                GoodSpotEffect();
-                if (!EcanMove)
-                    Pturn = 0;
-            }
-            else if (spots[actualPos].getType() == Spot.SpotType.Bad)
-            {
-                BadSpotEffect();
-                if (!PcanMove)
-                    Pturn = 0;
-            }
         }
         else if (EcanMove)
         {
@@ -89,7 +73,7 @@ public class Movement : MonoBehaviour
     }
 
     /*
-     * Inicia el movimiento con un número fijo de pasos.
+     * Inicia el movimiento con un numero fijo de pasos.
      */
     public void StartMovingFixed(int steps)
     {
@@ -97,7 +81,9 @@ public class Movement : MonoBehaviour
     }
 
     /*
-     * Realiza el movimiento paso a paso sobre el tablero.
+     * Movimiento paso a paso.
+     * Comprueba puentes en cada casilla.
+     * Aplica efectos solo al final.
      */
     private IEnumerator Move(int steps)
     {
@@ -106,28 +92,15 @@ public class Movement : MonoBehaviour
 
         for (int i = 0; i < steps; i++)
         {
-            // Si se llega al final del tablero, vuelve al inicio
+            // Avanzar una casilla
             if (actualPos + 1 >= positions.Length)
                 actualPos = -1;
 
-            // Avanza a la siguiente casilla
             actualPos++;
 
             Vector3 destination = positions[actualPos].position;
             PlayMovementSound();
 
-            // Se mueve hacia la casilla objetivo
-            while (Vector3.Distance(transform.position, destination) > 0.0000001f)
-            {
-                transform.position = Vector3.MoveTowards(
-                    transform.position,
-                    destination,
-                    speed * Time.deltaTime
-                );
-                yield return null;
-            }
-
-            // Ajuste final de precisión
             while (Vector3.Distance(transform.position, destination) > 0.0001f)
             {
                 transform.position = Vector3.MoveTowards(
@@ -138,14 +111,55 @@ public class Movement : MonoBehaviour
                 yield return null;
             }
 
+            transform.position = destination;
+
+            // Comprobar puente en esta casilla
+            var connections = SpotConnectionManager.Instance.GetConnections(actualPos);
+            if (connections.Count > 0)
+            {
+                int target = connections[0];
+                actualPos = target;
+
+                Vector3 destBridge = positions[target].position;
+
+                while (Vector3.Distance(transform.position, destBridge) > 0.0001f)
+                {
+                    transform.position = Vector3.MoveTowards(
+                        transform.position,
+                        destBridge,
+                        speed * Time.deltaTime
+                    );
+                    yield return null;
+                }
+
+                transform.position = destBridge;
+            }
+
             yield return new WaitForSeconds(0.1f);
         }
+
+        /*
+         * Aplicar efectos de la casilla final.
+         */
+        if (spots[actualPos].getType() == Spot.SpotType.Good)
+        {
+            GoodSpotEffect();
+        }
+        else if (spots[actualPos].getType() == Spot.SpotType.Bad)
+        {
+            BadSpotEffect();
+        }
+
+        /*
+         * Notificar fin de turno para actualizar puentes.
+         */
+        SpotConnectionManager.Instance.OnRoundStepCompleted();
 
         OnMovementFinished?.Invoke();
     }
 
     /*
-     * Aplica efectos al caer en una casilla buena.
+     * Efectos de casilla buena.
      */
     void GoodSpotEffect()
     {
@@ -166,7 +180,7 @@ public class Movement : MonoBehaviour
     }
 
     /*
-     * Aplica efectos al caer en una casilla mala.
+     * Efectos de casilla mala.
      */
     void BadSpotEffect()
     {
@@ -195,7 +209,7 @@ public class Movement : MonoBehaviour
     }
 
     /*
-     * Propiedad para obtener o asignar la posición actual en el tablero.
+     * Propiedad para obtener o asignar la posicion actual.
      */
     public int ActualPos
     {

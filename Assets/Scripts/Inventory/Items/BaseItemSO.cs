@@ -20,7 +20,7 @@ public abstract class BaseItemSO : ScriptableObject
     [Header("Basic Info")]
     [SerializeField] private string itemName;
     [SerializeField] private Sprite icon;
-    [SerializeField] private string itemDescription;
+    [SerializeField][TextArea] private string itemDescription;
     [SerializeField] private GameObject prefab3D;
 
     // Shop-related values
