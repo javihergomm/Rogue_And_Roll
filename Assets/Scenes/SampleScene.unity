@@ -255,6 +255,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 10
   type: 0
+  checkpoint: 0
 --- !u!1001 &22832072
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -430,6 +431,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 22
   type: 0
+  checkpoint: 0
 --- !u!1 &29100707
 GameObject:
   m_ObjectHideFlags: 0
@@ -476,6 +478,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 52
   type: 0
+  checkpoint: 0
 --- !u!1 &35588412
 GameObject:
   m_ObjectHideFlags: 0
@@ -685,6 +688,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 7
   type: 0
+  checkpoint: 0
 --- !u!1 &64256178
 GameObject:
   m_ObjectHideFlags: 0
@@ -731,6 +735,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 9
   type: 0
+  checkpoint: 0
 --- !u!1 &66501092
 GameObject:
   m_ObjectHideFlags: 0
@@ -1163,6 +1168,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 29
   type: 0
+  checkpoint: 0
 --- !u!1 &100485576
 GameObject:
   m_ObjectHideFlags: 0
@@ -1209,6 +1215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 38
   type: 0
+  checkpoint: 0
 --- !u!1 &114692257
 GameObject:
   m_ObjectHideFlags: 0
@@ -1255,6 +1262,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 64
   type: 0
+  checkpoint: 0
 --- !u!1 &128708199
 GameObject:
   m_ObjectHideFlags: 0
@@ -1332,6 +1340,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 58
   type: 0
+  checkpoint: 0
 --- !u!1 &137996079
 GameObject:
   m_ObjectHideFlags: 0
@@ -1378,6 +1387,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 16
   type: 0
+  checkpoint: 0
 --- !u!1 &169409951
 GameObject:
   m_ObjectHideFlags: 0
@@ -1961,6 +1971,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 21
   type: 0
+  checkpoint: 0
 --- !u!1001 &241821488
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2124,6 +2135,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 46
   type: 0
+  checkpoint: 0
 --- !u!1 &261082693
 GameObject:
   m_ObjectHideFlags: 0
@@ -2337,6 +2349,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 57
   type: 0
+  checkpoint: 0
 --- !u!1001 &305183836
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3020,6 +3033,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 37
   type: 0
+  checkpoint: 0
 --- !u!1 &406575137
 GameObject:
   m_ObjectHideFlags: 0
@@ -3371,6 +3385,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 66
   type: 0
+  checkpoint: 0
 --- !u!1 &422176138
 GameObject:
   m_ObjectHideFlags: 0
@@ -3417,6 +3432,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 67
   type: 0
+  checkpoint: 0
 --- !u!1001 &437691360
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3730,6 +3746,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 68
   type: 0
+  checkpoint: 0
 --- !u!1 &477423966
 GameObject:
   m_ObjectHideFlags: 0
@@ -3968,6 +3985,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 27
   type: 0
+  checkpoint: 0
 --- !u!1001 &485410031
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4263,6 +4281,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 60
   type: 0
+  checkpoint: 0
 --- !u!1 &525031427
 GameObject:
   m_ObjectHideFlags: 0
@@ -4294,6 +4313,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 18
   type: 0
+  checkpoint: 0
 --- !u!4 &525031429
 Transform:
   m_ObjectHideFlags: 0
@@ -4694,6 +4714,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 44
   type: 0
+  checkpoint: 0
 --- !u!1 &607847000
 GameObject:
   m_ObjectHideFlags: 0
@@ -4725,6 +4746,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 65
   type: 0
+  checkpoint: 0
 --- !u!4 &607847002
 Transform:
   m_ObjectHideFlags: 0
@@ -4832,6 +4854,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 23
   type: 0
+  checkpoint: 0
 --- !u!1 &652871806 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6623611296740254087, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
@@ -5019,6 +5042,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 54
   type: 0
+  checkpoint: 0
 --- !u!1 &704636925
 GameObject:
   m_ObjectHideFlags: 0
@@ -5111,6 +5135,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 17
   type: 0
+  checkpoint: 0
 --- !u!1 &722429080
 GameObject:
   m_ObjectHideFlags: 0
@@ -5203,6 +5228,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 61
   type: 0
+  checkpoint: 0
 --- !u!1 &776644422
 GameObject:
   m_ObjectHideFlags: 0
@@ -5249,6 +5275,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 59
   type: 0
+  checkpoint: 0
 --- !u!1001 &778347057
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5647,6 +5674,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 24
   type: 0
+  checkpoint: 0
 --- !u!1001 &805832968
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5852,6 +5880,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 5
   type: 0
+  checkpoint: 0
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -5947,6 +5976,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 41
   type: 0
+  checkpoint: 0
 --- !u!1 &840914298
 GameObject:
   m_ObjectHideFlags: 0
@@ -6039,6 +6069,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 2
   type: 0
+  checkpoint: 0
 --- !u!1 &847147487
 GameObject:
   m_ObjectHideFlags: 0
@@ -6085,6 +6116,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 6
   type: 0
+  checkpoint: 0
 --- !u!1 &856922461
 GameObject:
   m_ObjectHideFlags: 0
@@ -6131,6 +6163,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 48
   type: 0
+  checkpoint: 0
 --- !u!1 &863259481
 GameObject:
   m_ObjectHideFlags: 0
@@ -6177,6 +6210,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 15
   type: 0
+  checkpoint: 0
 --- !u!1 &872142272
 GameObject:
   m_ObjectHideFlags: 0
@@ -6513,6 +6547,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 8
   type: 0
+  checkpoint: 0
 --- !u!1 &968606242
 GameObject:
   m_ObjectHideFlags: 0
@@ -6544,6 +6579,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 30
   type: 0
+  checkpoint: 0
 --- !u!4 &968606244
 Transform:
   m_ObjectHideFlags: 0
@@ -7006,6 +7042,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 26
   type: 0
+  checkpoint: 0
 --- !u!1001 &1038898614
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7181,6 +7218,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 12
   type: 0
+  checkpoint: 0
 --- !u!1001 &1080817447
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7558,6 +7596,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 34
   type: 0
+  checkpoint: 0
 --- !u!1001 &1119993606
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7830,6 +7869,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 56
   type: 0
+  checkpoint: 0
 --- !u!1 &1135432139
 GameObject:
   m_ObjectHideFlags: 0
@@ -7876,6 +7916,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 45
   type: 0
+  checkpoint: 0
 --- !u!1 &1170819841
 GameObject:
   m_ObjectHideFlags: 0
@@ -7922,6 +7963,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 28
   type: 0
+  checkpoint: 0
 --- !u!1 &1171833004
 GameObject:
   m_ObjectHideFlags: 0
@@ -7968,6 +8010,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 4
   type: 0
+  checkpoint: 0
 --- !u!1 &1176426362
 GameObject:
   m_ObjectHideFlags: 0
@@ -8014,6 +8057,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 3
   type: 0
+  checkpoint: 0
 --- !u!1001 &1186758401
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8321,6 +8365,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 33
   type: 0
+  checkpoint: 0
 --- !u!1 &1199381241
 GameObject:
   m_ObjectHideFlags: 0
@@ -8413,6 +8458,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 62
   type: 0
+  checkpoint: 0
 --- !u!1 &1200613876
 GameObject:
   m_ObjectHideFlags: 0
@@ -8459,6 +8505,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 50
   type: 0
+  checkpoint: 0
 --- !u!1001 &1202407590
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8747,6 +8794,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 25
   type: 0
+  checkpoint: 0
 --- !u!1 &1225340512
 GameObject:
   m_ObjectHideFlags: 0
@@ -9991,6 +10039,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 13
   type: 0
+  checkpoint: 0
 --- !u!4 &1307462795
 Transform:
   m_ObjectHideFlags: 0
@@ -10052,6 +10101,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 51
   type: 0
+  checkpoint: 0
 --- !u!1 &1339274110
 GameObject:
   m_ObjectHideFlags: 0
@@ -10242,6 +10292,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 36
   type: 0
+  checkpoint: 0
 --- !u!1001 &1366167398
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11051,6 +11102,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 35
   type: 0
+  checkpoint: 0
 --- !u!1 &1471185506
 GameObject:
   m_ObjectHideFlags: 0
@@ -11331,6 +11383,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 11
   type: 0
+  checkpoint: 0
 --- !u!1 &1512080383
 GameObject:
   m_ObjectHideFlags: 0
@@ -11658,6 +11711,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 49
   type: 0
+  checkpoint: 0
 --- !u!1 &1539924097
 GameObject:
   m_ObjectHideFlags: 0
@@ -12375,7 +12429,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1581272882}
   - component: {fileID: 1581272881}
-  - component: {fileID: 1581272880}
   m_Layer: 0
   m_Name: Posicion (40)
   m_TagString: Untagged
@@ -12383,20 +12436,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1581272880
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1581272879}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 40
-  type: 0
 --- !u!114 &1581272881
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12411,6 +12450,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 40
   type: 0
+  checkpoint: 0
 --- !u!4 &1581272882
 Transform:
   m_ObjectHideFlags: 0
@@ -12873,6 +12913,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 63
   type: 0
+  checkpoint: 0
 --- !u!1 &1635594428
 GameObject:
   m_ObjectHideFlags: 0
@@ -13030,6 +13071,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 39
   type: 0
+  checkpoint: 0
 --- !u!4 &1643498910
 Transform:
   m_ObjectHideFlags: 0
@@ -13374,6 +13416,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 1
   type: 0
+  checkpoint: 0
 --- !u!1 &1723014135
 GameObject:
   m_ObjectHideFlags: 0
@@ -13761,6 +13804,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 55
   type: 0
+  checkpoint: 0
 --- !u!1 &1769354254
 GameObject:
   m_ObjectHideFlags: 0
@@ -13807,6 +13851,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 43
   type: 0
+  checkpoint: 0
 --- !u!1 &1785326443
 GameObject:
   m_ObjectHideFlags: 0
@@ -13853,6 +13898,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 42
   type: 0
+  checkpoint: 0
 --- !u!1 &1797822479
 GameObject:
   m_ObjectHideFlags: 0
@@ -14058,6 +14104,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 14
   type: 0
+  checkpoint: 0
 --- !u!1001 &1813935722
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14217,6 +14264,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 53
   type: 0
+  checkpoint: 0
 --- !u!1 &1901905707
 GameObject:
   m_ObjectHideFlags: 0
@@ -14294,6 +14342,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 20
   type: 0
+  checkpoint: 0
 --- !u!1 &1902902943
 GameObject:
   m_ObjectHideFlags: 0
@@ -14438,6 +14487,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 47
   type: 0
+  checkpoint: 0
 --- !u!4 &1921901081
 Transform:
   m_ObjectHideFlags: 0
@@ -14499,6 +14549,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 19
   type: 0
+  checkpoint: 0
 --- !u!1 &1940571035
 GameObject:
   m_ObjectHideFlags: 0
@@ -15003,6 +15054,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 32
   type: 0
+  checkpoint: 0
 --- !u!1001 &2114753793
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15427,6 +15479,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spot
   index: 31
   type: 0
+  checkpoint: 0
 --- !u!1001 &1410132410058433552
 PrefabInstance:
   m_ObjectHideFlags: 0

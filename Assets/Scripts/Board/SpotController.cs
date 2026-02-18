@@ -1,5 +1,6 @@
-using UnityEngine;
+using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class SpotController : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class SpotController : MonoBehaviour
         spot = GetComponent<Spot>();
         spots = FindObjectsOfType<Spot>();
         AssingRandomType();
+        PlaceCheckpoint();
     }
 
     void AssingRandomType()
@@ -24,6 +26,20 @@ public class SpotController : MonoBehaviour
     {
         int valor = Random.Range(0, System.Enum.GetValues(typeof(Spot.SpotType)).Length);
         return (Spot.SpotType)valor;
+    }
+
+    void PlaceCheckpoint()
+    {
+        int[] checkpointIndexes = { 12, 22, 34, 44, 56, 68 };
+        HashSet<int> checkpointSet = new HashSet<int>(checkpointIndexes);
+
+        foreach (var spot in spots)
+        {
+            if (checkpointSet.Contains(spot.index))
+            {
+                spot.checkpoint = true;
+            }
+        }
     }
 
     public Spot GetSpot() { return spot; }

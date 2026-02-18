@@ -38,6 +38,7 @@ public class Movement : MonoBehaviour
 
     private Renderer cachedRenderer;
     private bool wasHiddenByEffect = false;
+    private ShopExitManager shopExitManager;
 
     private void Start()
     {
@@ -163,7 +164,11 @@ public class Movement : MonoBehaviour
         }
 
         // Aplica efectos de casilla
-        if (spots[actualPos].getType() == Spot.SpotType.Good)
+        if (spots[actualPos].checkpoint == true)
+        {
+            shopExitManager.EnterShop();
+        }
+        else if (spots[actualPos].getType() == Spot.SpotType.Good)
         {
             GoodSpotEffect();
         }
