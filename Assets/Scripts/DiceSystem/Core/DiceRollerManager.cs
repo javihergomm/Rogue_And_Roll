@@ -20,6 +20,8 @@ public class DiceRollManager : MonoBehaviour
 
     private readonly Dictionary<ItemSlot, GameObject> worldDice = new();
     private readonly Dictionary<ItemSlot, (int baseRoll, int finalRoll)> rollHistory = new();
+    private readonly HashSet<ItemSlot> rolledThisTurn = new HashSet<ItemSlot>();
+
 
     private void Awake()
     {
@@ -48,9 +50,12 @@ public class DiceRollManager : MonoBehaviour
 
     private void OnPlayerFinishedMovement()
     {
+        ResetDiceTurnState();
+
         if (EnemyManager.Instance != null)
             EnemyManager.Instance.StartEnemyTurns();
     }
+
 
     // -------------------------------------------------------------------------
     // DICE SPAWNING
@@ -221,8 +226,18 @@ public class DiceRollManager : MonoBehaviour
         if (TryResolveAsyncEffects(slot, baseRoll, finalRoll, ctx))
             return;
 
+        rolledThisTurn.Add(slot);
         rollHistory[slot] = (baseRoll, finalRoll);
         FinalizeRoll(finalRoll);
+
+        // Auto-move when all dice have been rolled
+        if (HaveAllActiveDiceRolled())
+        {
+            int total = GetTotalRoll();
+            if (playerMovement != null)
+                playerMovement.StartMovingFixed(total);
+        }
+
     }
 
     private int ApplySynchronousEffects(ItemSlot slot, int roll, DiceContext ctx)
@@ -330,6 +345,31 @@ public class DiceRollManager : MonoBehaviour
 
         return null;
     }
+    public bool HasSlotRolledThisTurn(ItemSlot slot)
+    {
+        return rolledThisTurn.Contains(slot);
+    }
+    public bool HaveAllActiveDiceRolled()
+    {
+        foreach (var slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
+        {
+            if (!rolledThisTurn.Contains(slot))
+                return false;
+        }
+        return true;
+    }
+    public int GetTotalRoll()
+    {
+        int total = 0;
+
+        foreach (var slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
+        {
+            if (rollHistory.TryGetValue(slot, out var info))
+                total += info.finalRoll;
+        }
+
+        return total;
+    }
 
     // -------------------------------------------------------------------------
     // TARGET FACE SELECTION
@@ -372,12 +412,13 @@ public class DiceRollManager : MonoBehaviour
     private void FinalizeRoll(int finalRoll)
     {
         Debug.Log("Final roll result: " + finalRoll);
-
         StatManager.Instance.OnDiceFinalResult(finalRoll);
-
-        if (playerMovement != null)
-            playerMovement.StartMoving();
-        else
-            Debug.LogError("DiceRollManager: playerMovement is NULL. CharacterSpawner must register it.");
     }
+
+    public void ResetDiceTurnState()
+    {
+        rolledThisTurn.Clear();
+        rollHistory.Clear();
+    }
+
 }

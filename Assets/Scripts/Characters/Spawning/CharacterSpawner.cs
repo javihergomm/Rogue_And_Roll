@@ -44,6 +44,10 @@ public class CharacterSpawner : MonoBehaviour
         SpawnCup(character);
         SpawnTile(character);
         RegisterMovementFromSpawnedObjects();
+
+        // Give the character-specific starting dice
+        if (character.startingDice != null)
+            InventoryManager.Instance.AddStartingDice(character.startingDice);
     }
 
     /*

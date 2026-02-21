@@ -31,9 +31,6 @@ public class InventoryManager : MonoBehaviour
     [Header("UI")]
     [SerializeField] private GameObject inventoryMenu;
 
-    [Header("Starting Dice")]
-    [SerializeField] private DiceSO startingDice;
-
     public IReadOnlyList<ItemSlot> AllSlots => slots.AllSlots;
     public IReadOnlyList<ItemSlot> ItemSlots => slots.AllSlots;
     public ActiveDiceSlots ActiveDice => activeDice;
@@ -69,32 +66,16 @@ public class InventoryManager : MonoBehaviour
                 canvasGroup = inventoryMenu.AddComponent<CanvasGroup>();
         }
     }
-
-    private void Start()
+    public void AddStartingDice(DiceSO dice)
     {
-        Debug.Log("InventoryManager Start");
-        GiveStartingDice();
-        OnActiveDiceChanged?.Invoke();
-    }
-
-    private void GiveStartingDice()
-    {
-        Debug.Log("GiveStartingDice");
-
-        if (startingDice == null)
-        {
-            Debug.Log("No starting dice assigned");
-            return;
-        }
-
         ItemSlot slot = activeDice.GetFirstEmptySlot();
         if (slot == null)
         {
-            Debug.Log("No empty active dice slot");
+            Debug.Log("No empty active dice slot for starting dice");
             return;
         }
 
-        slot.AddItem(startingDice.ItemName, 1, startingDice.Icon, startingDice.Description);
+        slot.AddItem(dice.ItemName, 1, dice.Icon, dice.Description);
         activeDice.SyncSlot(slot);
         OnActiveDiceChanged?.Invoke();
     }
@@ -160,6 +141,19 @@ public class InventoryManager : MonoBehaviour
         if (from == null || to == null)
             return;
 
+        // Prevent swapping dice that have already been rolled this turn
+        if (DiceRollManager.Instance.HasSlotRolledThisTurn(from))
+        {
+            Debug.Log("Cannot move a dice that has already been rolled this turn");
+            return;
+        }
+
+        if (DiceRollManager.Instance.HasSlotRolledThisTurn(to))
+        {
+            Debug.Log("Cannot replace a dice that has already been rolled this turn");
+            return;
+        }
+
         BaseItemSO item = GetItemSO(from.ItemName);
 
         if (activeDice.Contains(to) && !(item is DiceSO))
@@ -178,14 +172,7 @@ public class InventoryManager : MonoBehaviour
 
     public int GetFinalDiceNumber()
     {
-        Debug.Log("GetFinalDiceNumber");
-
-        ItemSlot slot = activeDice.GetSelectedSlot();
-        if (slot == null)
-            return 0;
-
-        var info = DiceRollManager.Instance.GetRollInfo(slot);
-        return info?.finalRoll ?? 0;
+        return DiceRollManager.Instance.GetTotalRoll();
     }
 
     public void DeselectAllSlots()

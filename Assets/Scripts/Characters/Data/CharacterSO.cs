@@ -23,4 +23,8 @@ public class CharacterSO : ScriptableObject
 
     [Header("Effects")]
     public BaseEffect[] effects;
+
+    [Header("Starting Dice")]
+    public DiceSO startingDice;
+
 }

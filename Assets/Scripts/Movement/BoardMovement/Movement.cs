@@ -8,7 +8,7 @@ using UnityEngine;
  * Controla el movimiento del jugador o enemigo en el tablero.
  * Se mueve paso a paso, comprueba conexiones tipo puente,
  * aplica efectos de casilla al finalizar y permite efectos temporales
- * como ocultar la pieza del jugador (por ejemplo, Broken Map).
+ * como ocultar la pieza del jugador.
  */
 public class Movement : MonoBehaviour
 {
@@ -57,7 +57,7 @@ public class Movement : MonoBehaviour
     /*
      * Inicia el movimiento usando la tirada del jugador.
      * Se usa una corrutina para asegurarse de que los efectos
-     * (como ocultar la pieza) ya están aplicados.
+     * visuales ya están aplicados antes de mover.
      */
     public void StartMoving()
     {
@@ -77,8 +77,8 @@ public class Movement : MonoBehaviour
 
     /*
      * Asegura que la visibilidad de la pieza se actualiza
-     * DESPUÉS de que la tirada final esté calculada.
-     * Esto garantiza que efectos como Broken Map funcionen siempre.
+     * después de que StatManager haya aplicado efectos como
+     * ocultar la pieza este turno.
      */
     private IEnumerator MoveWithVisibilityCheck(int? fixedSteps = null)
     {
@@ -181,6 +181,10 @@ public class Movement : MonoBehaviour
             cachedRenderer.enabled = true;
             wasHiddenByEffect = false;
         }
+
+        // Reinicia el estado de los dados para el siguiente turno del jugador
+        if (isPlayer)
+            DiceRollManager.Instance.ResetDiceTurnState();
 
         OnMovementFinished?.Invoke();
     }

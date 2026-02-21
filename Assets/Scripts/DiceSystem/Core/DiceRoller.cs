@@ -100,6 +100,10 @@ public class DiceRoller : MonoBehaviour
         if (rb == null)
             return;
 
+        // Prevent rerolling a dice that has already been rolled this turn
+        if (DiceRollManager.Instance.HasSlotRolledThisTurn(linkedSlot))
+            return;
+
         if (isRolling)
             return;
 
@@ -110,6 +114,7 @@ public class DiceRoller : MonoBehaviour
         rb.AddForce(Vector3.up * 10f, ForceMode.Impulse);
         rb.AddTorque(Random.insideUnitSphere * 50f, ForceMode.Impulse);
     }
+
 
     // Waits for the dice to spin, slow down, and settle
     private IEnumerator HandleRoll()
