@@ -1,16 +1,15 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 /*
- * ShopPedestalRandomizer
- * ----------------------
- * Selects a random item for the pedestal, prevents repeats,
- * spawns the 3D model, normalizes it using AutoCenterModel,
- * and positions the container on top of the pedestal.
+ * Handles item selection, model spawning, and pedestal refresh logic.
  */
 public class ShopPedestalRandomizer : MonoBehaviour
 {
-    [Header("Possible items for this pedestal")]
     [SerializeField] private BaseItemSO[] possibleItems;
 
     private BaseItemSO chosenItem;
@@ -28,22 +27,49 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
     private void Start()
     {
-        CreateContainer();
+        EnsureSingleContainer();
         RefreshItem();
         hasGeneratedThisVisit = true;
     }
 
+
+    private void EnsureSingleContainer()
+    {
+        List<Transform> containers = new List<Transform>();
+
+        foreach (Transform t in GetComponentsInChildren<Transform>())
+        {
+            if (t.name == "ItemContainer")
+                containers.Add(t);
+        }
+
+        if (containers.Count == 0)
+        {
+            CreateContainer();
+            return;
+        }
+
+        itemContainer = containers[0];
+
+        for (int i = 1; i < containers.Count; i++)
+        {
+            if (Application.isPlaying)
+                Destroy(containers[i].gameObject);
+            else
+                DestroyImmediate(containers[i].gameObject);
+        }
+    }
+
+
     private void CreateContainer()
     {
-        if (itemContainer != null)
-            return;
-
         itemContainer = new GameObject("ItemContainer").transform;
         itemContainer.SetParent(transform);
         itemContainer.localPosition = Vector3.zero;
         itemContainer.localRotation = Quaternion.identity;
         itemContainer.localScale = Vector3.one;
     }
+
 
     public static void PrepareForReroll()
     {
@@ -54,6 +80,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
     {
         UsedItemsThisVisit.Clear();
     }
+
 
     public void GenerateIfNeeded()
     {
@@ -70,18 +97,24 @@ public class ShopPedestalRandomizer : MonoBehaviour
         isAwaitingDecision = false;
     }
 
+
     public void RefreshItem()
     {
+        EnsureSingleContainer();
+
         if (possibleItems == null || possibleItems.Length == 0)
             return;
 
-        if (spawnedModel != null)
+        for (int i = itemContainer.childCount - 1; i >= 0; i--)
         {
+            var child = itemContainer.GetChild(i);
             if (Application.isPlaying)
-                Destroy(spawnedModel);
+                Destroy(child.gameObject);
             else
-                DestroyImmediate(spawnedModel);
+                DestroyImmediate(child.gameObject);
         }
+
+        spawnedModel = null;
 
         List<BaseItemSO> availableItems = new List<BaseItemSO>();
 
@@ -108,36 +141,29 @@ public class ShopPedestalRandomizer : MonoBehaviour
         SpawnModel();
     }
 
+
     private void SpawnModel()
     {
         if (chosenItem == null || chosenItem.Prefab3D == null)
             return;
 
         if (itemContainer == null)
-            CreateContainer();
+            EnsureSingleContainer();
 
-        // Reset container
-        itemContainer.localPosition = Vector3.zero;
-        itemContainer.localRotation = Quaternion.identity;
-
-        // Instantiate model
         spawnedModel = Instantiate(chosenItem.Prefab3D, itemContainer);
         spawnedModel.transform.localPosition = Vector3.zero;
         spawnedModel.transform.localRotation = Quaternion.identity;
         spawnedModel.transform.localScale = Vector3.one;
 
-        // Remove physics
         foreach (var rb in spawnedModel.GetComponentsInChildren<Rigidbody>())
             if (Application.isPlaying) Destroy(rb); else DestroyImmediate(rb);
 
         foreach (var col in spawnedModel.GetComponentsInChildren<Collider>())
             if (Application.isPlaying) Destroy(col); else DestroyImmediate(col);
 
-        // Normalize model inside container
         var center = spawnedModel.AddComponent<AutoCenterModel>();
         center.Normalize(chosenItem);
 
-        // Place container on top of pedestal
         MeshRenderer pedestalRenderer = GetComponentInChildren<MeshRenderer>();
         Vector3 topCenter = transform.position;
 
@@ -150,10 +176,12 @@ public class ShopPedestalRandomizer : MonoBehaviour
         itemContainer.position = topCenter;
     }
 
+
     public BaseItemSO GetChosenItem()
     {
         return chosenItem;
     }
+
 
     public void HandleOuijaAnswer(OuijaAnswerZone.AnswerType answer)
     {
@@ -172,14 +200,11 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
             if (currentGold >= chosenItem.BuyPrice)
             {
-                // Pay and give item
                 StatManager.Instance.ChangeStat(StatType.Gold, -chosenItem.BuyPrice);
                 InventoryManager.Instance.AddItem(chosenItem, 1);
 
-                // Mark item as used this visit
                 UsedItemsThisVisit.Add(chosenItem);
 
-                // Remove model
                 if (spawnedModel != null)
                 {
                     if (Application.isPlaying)
@@ -192,7 +217,6 @@ public class ShopPedestalRandomizer : MonoBehaviour
             }
         }
 
-        // Hide popup
         OptionPopupManager.Instance.HidePopup();
 
         isAwaitingDecision = false;
@@ -200,6 +224,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
         if (currentPedestal == this)
             currentPedestal = null;
     }
+
 
     private void OnTriggerEnter(Collider other)
     {
@@ -222,6 +247,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
         }
     }
 
+
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Player"))
@@ -231,27 +257,36 @@ public class ShopPedestalRandomizer : MonoBehaviour
             currentPedestal = null;
     }
 
+
 #if UNITY_EDITOR
     public void EditorPreview(BaseItemSO item)
     {
-        if (itemContainer == null)
-            CreateContainer();
+        EnsureSingleContainer();
 
         chosenItem = item;
 
-        if (spawnedModel != null)
-            DestroyImmediate(spawnedModel);
+        for (int i = itemContainer.childCount - 1; i >= 0; i--)
+        {
+            var child = itemContainer.GetChild(i);
+            DestroyImmediate(child.gameObject);
+        }
 
         SpawnModel();
-        UnityEditor.SceneView.RepaintAll();
+        SceneView.RepaintAll();
     }
 
     public void EditorClearPreview()
     {
-        if (spawnedModel != null)
-            DestroyImmediate(spawnedModel);
+        EnsureSingleContainer();
 
-        UnityEditor.SceneView.RepaintAll();
+        for (int i = itemContainer.childCount - 1; i >= 0; i--)
+        {
+            var child = itemContainer.GetChild(i);
+            DestroyImmediate(child.gameObject);
+        }
+
+        SceneView.RepaintAll();
     }
+    public void ForceRefreshForEditor() { EnsureSingleContainer(); hasGeneratedThisVisit = false; RefreshItem(); SceneView.RepaintAll(); }
 #endif
 }

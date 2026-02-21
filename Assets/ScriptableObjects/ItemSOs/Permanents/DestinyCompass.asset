@@ -21,7 +21,9 @@ MonoBehaviour:
   polarity: 0
   StoreRotationOffset: {x: -45, y: 180, z: 0}
   StoreHeightOffset: -0.05
-  StoreScaleMultiplier: 1.3
+  StoreScaleMultiplier: 1
+  StoreZPositionOffset: 0
+  StoreXPositionOffset: 0
   CanBeDiscarded: 1
   ConsumeOnUse: 0
   effects:

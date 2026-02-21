@@ -20,7 +20,15 @@ MonoBehaviour:
   buyPrice: 4
   sellPrice: 2
   polarity: 0
+  StoreRotationOffset: {x: 0, y: 0, z: 0}
+  StoreHeightOffset: -0.15
+  StoreScaleMultiplier: 0.2
+  StoreZPositionOffset: 0
+  StoreXPositionOffset: 0
+  CanBeDiscarded: 1
+  ConsumeOnUse: 1
   AppearsIn3D: 1
+  AutoUseOnPickup: 0
   canBeUsedOnSpot: 1
   effects:
   - {fileID: 11400000, guid: 376a58fe14de4bc4dabc4aa117c8918b, type: 2}
