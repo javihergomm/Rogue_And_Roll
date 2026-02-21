@@ -19,6 +19,13 @@ MonoBehaviour:
   buyPrice: 0
   sellPrice: 0
   polarity: 0
+  StoreRotationOffset: {x: 0, y: 0, z: 0}
+  StoreHeightOffset: 0.2
+  StoreScaleMultiplier: 0.7
+  StoreZPositionOffset: 0
+  StoreXPositionOffset: 0
+  CanBeDiscarded: 1
+  ConsumeOnUse: 1
   lootType: 0
   possibleItems:
   - {fileID: 11400000, guid: 52a0e4dbd2fc5bc449c7a6c7e7e9fe76, type: 2}

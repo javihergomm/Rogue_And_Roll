@@ -19,5 +19,12 @@ MonoBehaviour:
   buyPrice: 10
   sellPrice: 5
   polarity: 1
+  StoreRotationOffset: {x: 0, y: 0, z: 0}
+  StoreHeightOffset: 0.1
+  StoreScaleMultiplier: 0.8
+  StoreZPositionOffset: 0
+  StoreXPositionOffset: 0
+  CanBeDiscarded: 1
+  ConsumeOnUse: 1
   effects:
   - {fileID: 11400000, guid: dc81746af49f28a40a0ac5073e394d2b, type: 2}

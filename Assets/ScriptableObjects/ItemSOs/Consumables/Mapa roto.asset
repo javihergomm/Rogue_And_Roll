@@ -19,6 +19,11 @@ MonoBehaviour:
   buyPrice: 0
   sellPrice: 0
   polarity: 1
+  StoreRotationOffset: {x: 0, y: 0, z: 0}
+  StoreHeightOffset: 0.1
+  StoreScaleMultiplier: 0.8
+  StoreZPositionOffset: -0.1
+  StoreXPositionOffset: -0.01
   CanBeDiscarded: 0
   ConsumeOnUse: 1
   AppearsIn3D: 0

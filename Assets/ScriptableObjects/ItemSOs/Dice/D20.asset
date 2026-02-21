@@ -19,5 +19,12 @@ MonoBehaviour:
   buyPrice: 1
   sellPrice: 0
   polarity: 0
+  StoreRotationOffset: {x: 0, y: 0, z: 0}
+  StoreHeightOffset: 0.1
+  StoreScaleMultiplier: 1
+  StoreZPositionOffset: -0.1
+  StoreXPositionOffset: 0
+  CanBeDiscarded: 1
+  ConsumeOnUse: 1
   diceType: 3
   effects: []

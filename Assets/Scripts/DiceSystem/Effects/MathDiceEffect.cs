@@ -71,6 +71,7 @@ public class MathDiceEffect : BaseDiceEffect
 
             case MathOperation.RandomMultiplier:
                 int mult = Random.Range(randomMultiplierRange.x, randomMultiplierRange.y + 1);
+                Debug.Log($"[RandomMultiplier] roll inicial = {roll}, multiplicador = {mult}, resultado = {roll * mult}");
                 return roll * mult;
         }
 

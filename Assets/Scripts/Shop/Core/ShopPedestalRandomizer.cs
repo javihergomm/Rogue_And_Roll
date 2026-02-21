@@ -5,16 +5,13 @@ using System.Collections.Generic;
  * ShopPedestalRandomizer
  * ----------------------
  * Selects a random item for the pedestal, prevents repeats,
- * scales and positions the 3D model, and handles purchase logic.
+ * spawns the 3D model, normalizes it using AutoCenterModel,
+ * and positions the container on top of the pedestal.
  */
 public class ShopPedestalRandomizer : MonoBehaviour
 {
     [Header("Possible items for this pedestal")]
     [SerializeField] private BaseItemSO[] possibleItems;
-
-    [Header("Visual Settings")]
-    [SerializeField] private float targetItemSize = 0.2f;
-    [SerializeField] private float floatOffset = 0.05f;
 
     private BaseItemSO chosenItem;
     private GameObject spawnedModel;
@@ -25,7 +22,6 @@ public class ShopPedestalRandomizer : MonoBehaviour
     public static ShopPedestalRandomizer currentPedestal;
     public bool isAwaitingDecision = false;
 
-    // Global memory for preventing repeats
     public static HashSet<BaseItemSO> UsedItemsThisVisit { get; private set; } = new HashSet<BaseItemSO>();
     public static HashSet<BaseItemSO> UsedItemsThisReroll { get; private set; } = new HashSet<BaseItemSO>();
 
@@ -39,6 +35,9 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
     private void CreateContainer()
     {
+        if (itemContainer != null)
+            return;
+
         itemContainer = new GameObject("ItemContainer").transform;
         itemContainer.SetParent(transform);
         itemContainer.localPosition = Vector3.zero;
@@ -77,7 +76,12 @@ public class ShopPedestalRandomizer : MonoBehaviour
             return;
 
         if (spawnedModel != null)
-            Destroy(spawnedModel);
+        {
+            if (Application.isPlaying)
+                Destroy(spawnedModel);
+            else
+                DestroyImmediate(spawnedModel);
+        }
 
         List<BaseItemSO> availableItems = new List<BaseItemSO>();
 
@@ -104,91 +108,36 @@ public class ShopPedestalRandomizer : MonoBehaviour
         SpawnModel();
     }
 
-    private bool IsFlatObject(Bounds b)
-    {
-        float min = Mathf.Min(b.size.x, b.size.y, b.size.z);
-        float max = Mathf.Max(b.size.x, b.size.y, b.size.z);
-        return min < max * 0.2f;
-    }
-
-    private Bounds GetLocalBounds(GameObject obj)
-    {
-        var renderers = obj.GetComponentsInChildren<MeshRenderer>();
-        if (renderers.Length == 0)
-            return new Bounds(Vector3.zero, Vector3.one);
-
-        Bounds combined = new Bounds(
-            obj.transform.InverseTransformPoint(renderers[0].bounds.center),
-            renderers[0].bounds.size
-        );
-
-        foreach (var r in renderers)
-        {
-            Vector3 localCenter = obj.transform.InverseTransformPoint(r.bounds.center);
-            Bounds lb = new Bounds(localCenter, r.bounds.size);
-            combined.Encapsulate(lb);
-        }
-
-        return combined;
-    }
-
     private void SpawnModel()
     {
         if (chosenItem == null || chosenItem.Prefab3D == null)
             return;
 
-        itemContainer.localPosition = Vector3.zero;
+        if (itemContainer == null)
+            CreateContainer();
 
+        // Reset container
+        itemContainer.localPosition = Vector3.zero;
+        itemContainer.localRotation = Quaternion.identity;
+
+        // Instantiate model
         spawnedModel = Instantiate(chosenItem.Prefab3D, itemContainer);
         spawnedModel.transform.localPosition = Vector3.zero;
         spawnedModel.transform.localRotation = Quaternion.identity;
         spawnedModel.transform.localScale = Vector3.one;
 
-        // Auto center the model so its pivot is correct
-        spawnedModel.AddComponent<AutoCenterModel>();
-
+        // Remove physics
         foreach (var rb in spawnedModel.GetComponentsInChildren<Rigidbody>())
-            Destroy(rb);
+            if (Application.isPlaying) Destroy(rb); else DestroyImmediate(rb);
+
         foreach (var col in spawnedModel.GetComponentsInChildren<Collider>())
-            Destroy(col);
+            if (Application.isPlaying) Destroy(col); else DestroyImmediate(col);
 
-        Bounds localBounds = GetLocalBounds(spawnedModel);
+        // Normalize model inside container
+        var center = spawnedModel.AddComponent<AutoCenterModel>();
+        center.Normalize(chosenItem);
 
-        bool isFlat = IsFlatObject(localBounds);
-
-        float finalSize = targetItemSize;
-        float finalOffset = floatOffset;
-
-        if (isFlat)
-        {
-            spawnedModel.transform.localRotation = Quaternion.identity;
-
-            if (localBounds.size.y < localBounds.size.z)
-                spawnedModel.transform.localRotation = Quaternion.Euler(90, 0, 0);
-
-            finalSize *= 1.4f;
-            finalOffset *= 1.5f;
-
-            localBounds = GetLocalBounds(spawnedModel);
-        }
-
-        float largest = Mathf.Max(localBounds.size.x, localBounds.size.y, localBounds.size.z);
-        if (largest <= 0.0001f) largest = 1f;
-
-        float scaleFactor = finalSize / largest;
-        spawnedModel.transform.localScale = Vector3.one * scaleFactor;
-
-        localBounds = GetLocalBounds(spawnedModel);
-
-        float bottomY = localBounds.min.y;
-        Vector3 lp = spawnedModel.transform.localPosition;
-        lp.y -= bottomY;
-        spawnedModel.transform.localPosition = lp;
-
-        lp = spawnedModel.transform.localPosition;
-        lp.y += finalOffset;
-        spawnedModel.transform.localPosition = lp;
-
+        // Place container on top of pedestal
         MeshRenderer pedestalRenderer = GetComponentInChildren<MeshRenderer>();
         Vector3 topCenter = transform.position;
 
@@ -197,12 +146,8 @@ public class ShopPedestalRandomizer : MonoBehaviour
             Bounds pb = pedestalRenderer.bounds;
             topCenter = new Vector3(pb.center.x, pb.max.y, pb.center.z);
         }
-        else
-        {
-            topCenter = transform.position + Vector3.up * 0.1f;
-        }
 
-        itemContainer.position = topCenter + Vector3.up * finalOffset;
+        itemContainer.position = topCenter;
     }
 
     public BaseItemSO GetChosenItem()
@@ -227,18 +172,27 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
             if (currentGold >= chosenItem.BuyPrice)
             {
+                // Pay and give item
                 StatManager.Instance.ChangeStat(StatType.Gold, -chosenItem.BuyPrice);
                 InventoryManager.Instance.AddItem(chosenItem, 1);
 
+                // Mark item as used this visit
                 UsedItemsThisVisit.Add(chosenItem);
 
+                // Remove model
                 if (spawnedModel != null)
-                    Destroy(spawnedModel);
+                {
+                    if (Application.isPlaying)
+                        Destroy(spawnedModel);
+                    else
+                        DestroyImmediate(spawnedModel);
+                }
 
                 chosenItem = null;
             }
         }
 
+        // Hide popup
         OptionPopupManager.Instance.HidePopup();
 
         isAwaitingDecision = false;
@@ -276,4 +230,28 @@ public class ShopPedestalRandomizer : MonoBehaviour
         if (!isAwaitingDecision && currentPedestal == this)
             currentPedestal = null;
     }
+
+#if UNITY_EDITOR
+    public void EditorPreview(BaseItemSO item)
+    {
+        if (itemContainer == null)
+            CreateContainer();
+
+        chosenItem = item;
+
+        if (spawnedModel != null)
+            DestroyImmediate(spawnedModel);
+
+        SpawnModel();
+        UnityEditor.SceneView.RepaintAll();
+    }
+
+    public void EditorClearPreview()
+    {
+        if (spawnedModel != null)
+            DestroyImmediate(spawnedModel);
+
+        UnityEditor.SceneView.RepaintAll();
+    }
+#endif
 }

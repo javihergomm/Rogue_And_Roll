@@ -32,11 +32,6 @@ public class ShopRerollManager : MonoBehaviour
             TryRerollAllPedestals();
     }
 
-    /*
-     * Attempts to reroll all pedestals in the shop.
-     * Checks gold cost and available shop rerolls before executing.
-     * Fully resets pedestal state and global item memory to ensure true randomness.
-     */
     private void TryRerollAllPedestals()
     {
         int shopRerolls = StatManager.Instance.GetCurrentValue(StatType.ShopRerolls);
@@ -51,7 +46,7 @@ public class ShopRerollManager : MonoBehaviour
         StatManager.Instance.ChangeStat(StatType.Gold, -globalRerollCost);
         StatManager.Instance.UseShopReroll();
 
-        // Reset global item memory so the shop can generate fresh items
+        // Reset global item memory
         ShopPedestalRandomizer.PrepareForReroll();
         ShopPedestalRandomizer.ClearVisitMemory();
 
@@ -59,8 +54,36 @@ public class ShopRerollManager : MonoBehaviour
         var pedestals = Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsSortMode.None);
         foreach (var pedestal in pedestals)
         {
-            pedestal.ResetForNextVisit();   // clears hasGeneratedThisVisit
-            pedestal.GenerateIfNeeded();    // forces new random item
+            pedestal.ResetForNextVisit();
+            pedestal.GenerateIfNeeded();
         }
     }
+
+#if UNITY_EDITOR
+    public void EditorForceReroll()
+    {
+        ShopPedestalRandomizer.PrepareForReroll();
+        ShopPedestalRandomizer.ClearVisitMemory();
+
+        var pedestals = Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsSortMode.None);
+
+        foreach (var pedestal in pedestals)
+        {
+            pedestal.ResetForNextVisit();
+            pedestal.GenerateIfNeeded();
+        }
+
+        UnityEditor.SceneView.RepaintAll();
+    }
+
+    public void EditorClearAll()
+    {
+        var pedestals = Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsSortMode.None);
+
+        foreach (var pedestal in pedestals)
+            pedestal.EditorClearPreview();
+
+        UnityEditor.SceneView.RepaintAll();
+    }
+#endif
 }

@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 685d7c17f6d7b2441bd9b175233ce3df, type: 3}
-  m_Name: PlusOneEffect
+  m_Name: RandomPotionEffect
   m_EditorClassIdentifier: Assembly-CSharp::MathDiceEffect
   alignment: 0
   isGlobalEffect: 0
-  operation: 0
+  operation: 6
   value: 1
   roundUp: 1
   randomMultiplierRange: {x: 2, y: 5}

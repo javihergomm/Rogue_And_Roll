@@ -3,56 +3,93 @@ using UnityEngine;
 /*
  * AutoCenterModel
  * ----------------
- * Automatically centers a 3D model so that:
- *  - Its pivot is centered horizontally
- *  - Its base sits exactly on Y = 0
- *  - It works with any imported prefab (FBX, OBJ, etc.)
- *
- * Attach this script to the parent object that contains the model.
+ * Normalizes a 3D model inside its own container:
+ * - Applies item-specific rotation, scale and height offsets
+ * - Computes bounds using real mesh vertices
+ * - Recenters horizontally (X/Z)
+ * - Aligns the base to Y = 0
+ * 
  */
 public class AutoCenterModel : MonoBehaviour
 {
-    [Header("Optional extra offset")]
-    public float extraYOffset = 0f;
-
-    private void Start()
+    public void Normalize(BaseItemSO item)
     {
-        CenterModel();
-    }
-
-    public void CenterModel()
-    {
-        MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>();
-
-        if (renderers.Length == 0)
+        if (item == null)
             return;
 
-        // Calculate combined bounds in world space
-        Bounds combined = renderers[0].bounds;
-        foreach (var r in renderers)
-            combined.Encapsulate(r.bounds);
+        // Reset transform
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+        transform.localScale = Vector3.one;
 
-        // Convert bounds center to local space
-        Vector3 localCenter = transform.InverseTransformPoint(combined.center);
+        // Apply item-specific rotation
+        transform.localRotation = Quaternion.Euler(item.StoreRotationOffset);
 
-        // Move model so its center is at local zero
-        foreach (Transform child in transform)
-            child.localPosition -= localCenter;
+        // Compute bounds after rotation
+        Bounds b = ComputeLocalBounds();
 
-        // Recalculate bounds after centering
-        combined = new Bounds();
-        foreach (var r in renderers)
-            combined.Encapsulate(r.bounds);
+        // Scale using item multiplier
+        float largest = Mathf.Max(b.size.x, b.size.y, b.size.z);
+        if (largest < 0.0001f) largest = 1f;
 
-        // Move model up so the bottom sits on Y = 0
-        float bottomY = transform.InverseTransformPoint(combined.min).y;
+        float scaleFactor = item.StoreScaleMultiplier;
+        transform.localScale = Vector3.one * scaleFactor;
 
-        foreach (Transform child in transform)
+        // Recompute bounds after scaling
+        b = ComputeLocalBounds();
+
+        // Align base to Y = 0
+        float bottomY = b.min.y;
+        Vector3 p = transform.localPosition;
+        p.y -= bottomY;
+        transform.localPosition = p;
+
+        // Apply height offset
+        p = transform.localPosition;
+        p.y += item.StoreHeightOffset;
+        transform.localPosition = p;
+
+        // Final horizontal centering
+        b = ComputeLocalBounds();
+        Vector3 horizontalOffset = new Vector3(b.center.x, 0f, b.center.z);
+        transform.localPosition -= horizontalOffset;
+
+        // Apply X and Z offsets
+        p = transform.localPosition;
+        p.x += item.StoreXPositionOffset;
+        p.z += item.StoreZPositionOffset;
+        transform.localPosition = p;
+    }
+
+
+    private Bounds ComputeLocalBounds()
+    {
+        MeshFilter[] filters = GetComponentsInChildren<MeshFilter>();
+        Bounds combined = new Bounds();
+        bool first = true;
+
+        foreach (var f in filters)
         {
-            Vector3 p = child.localPosition;
-            p.y -= bottomY;
-            p.y += extraYOffset;
-            child.localPosition = p;
+            Mesh mesh = f.sharedMesh;
+            if (mesh == null) continue;
+
+            foreach (var v in mesh.vertices)
+            {
+                Vector3 worldV = f.transform.TransformPoint(v);
+                Vector3 localV = transform.InverseTransformPoint(worldV);
+
+                if (first)
+                {
+                    combined = new Bounds(localV, Vector3.zero);
+                    first = false;
+                }
+                else
+                {
+                    combined.Encapsulate(localV);
+                }
+            }
         }
+
+        return combined;
     }
 }

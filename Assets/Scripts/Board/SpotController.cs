@@ -29,10 +29,6 @@ public class SpotController : MonoBehaviour
     public Spot GetSpot() { return spot; }
     public Spot[] GetAllSpots() { return spots; }
 
-    // -------------------------
-    // AÑADIDO NUEVO (SIN MODIFICAR LO EXISTENTE)
-    // -------------------------
-
     // Devuelve los spots ordenados por índice
     public Spot[] GetSpotsOrdered()
     {

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bd3dc40917a57e40920014beee12295, type: 3}
+  m_Name: "Poci\xF3n del Azar"
+  m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
+  itemName: "Poci\xF3n del Azar"
+  icon: {fileID: 0}
+  itemDescription: 
+  prefab3D: {fileID: 6623611296740254087, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
+  buyPrice: 0
+  sellPrice: 0
+  polarity: 0
+  CanBeDiscarded: 1
+  ConsumeOnUse: 0
+  AppearsIn3D: 0
+  AutoUseOnPickup: 0
+  canBeUsedOnSpot: 0
+  effects:
+  - {fileID: 11400000, guid: 8548c6a9691863c48b89cca0e6a938ec, type: 2}
