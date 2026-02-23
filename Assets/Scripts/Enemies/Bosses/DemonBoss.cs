@@ -4,16 +4,17 @@ using UnityEngine;
  * DemonBoss
  * ---------
  * Enemy behavior for the Demon Boss.
- * - Activates after a number of player laps
- * - Spawns its cup using EnemyBase logic
- * - Spawns its token on a fixed Spot
- * - Moves using dice rolls
- * - Kills the player on collision or triple six
+ *
+ * Summary:
+ * - Activates after the player completes a required number of laps.
+ * - Spawns its cup using EnemyBase logic (opposite to the player's spawn).
+ * - Spawns its board token and places it safely behind the player.
+ * - Moves using three six-sided dice (3d6).
+ * - Instantly kills the player if all three dice roll a six (666).
+ * - Also kills the player if it lands on the same board spot as the player.
  */
 public class DemonBoss : EnemyBase
 {
-    public Spot fixedSpawnSpot;   // Fixed Spot where the demon token appears
-
     private GameObject demonTokenInstance;
     private int playerLaps = 0;
 
@@ -28,6 +29,42 @@ public class DemonBoss : EnemyBase
             KillPlayer();
     }
 
+    /*
+     * InitializeDemon
+     * ---------------
+     * Prepares the demon's Movement component so it behaves exactly
+     * as it would during a real game. This is required for tests to work.
+     */
+    void InitializeDemon()
+    {
+        if (player == null)
+        {
+            Movement[] allMovements = FindObjectsByType<Movement>(FindObjectsSortMode.None);
+
+            foreach (Movement m in allMovements)
+            {
+                if (m != null && m.isPlayer)
+                {
+                    player = m.transform;
+                    break;
+                }
+            }
+        }
+
+        Movement playerMovement = player.GetComponent<Movement>();
+
+        movement.SetPositions(playerMovement.Positions);
+
+        movement.startPos = movement.ActualPos;
+        movement.lastPos = movement.ActualPos;
+    }
+
+
+    /*
+     * OnPlayerCompletedLap
+     * --------------------
+     * Called whenever the player completes a lap.
+     */
     public void OnPlayerCompletedLap()
     {
         if (!data.requiresPlayerLap)
@@ -39,25 +76,31 @@ public class DemonBoss : EnemyBase
             ActivateDemon();
     }
 
+    /*
+     * ActivateDemon
+     * -------------
+     * Spawns the Demon cup and token, initializes Movement,
+     * and places the token safely behind the player.
+     */
     void ActivateDemon()
     {
-        // Spawn the cup using EnemyBase logic (opposite to the player)
         SpawnEnemy();
 
-        // Spawn the demon token on the fixed Spot
         demonTokenInstance = Instantiate(data.tilePrefab);
-
         movement = demonTokenInstance.GetComponent<Movement>();
 
-        Movement playerMovement = player.GetComponent<Movement>();
-        movement.SetPositions(playerMovement.Positions);
+        InitializeDemon();
 
-        movement.ActualPos = fixedSpawnSpot.index;
-        movement.transform.position = movement.Positions[fixedSpawnSpot.index].position;
+        PlaceEnemyBehindPlayer(18);
 
         isActive = true;
     }
 
+    /*
+     * StartTurn
+     * ---------
+     * Rolls 3d6 and moves the Demon.
+     */
     public override void StartTurn()
     {
         if (!isActive || movement == null)

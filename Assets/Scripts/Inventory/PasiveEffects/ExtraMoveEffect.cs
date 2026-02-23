@@ -11,7 +11,7 @@ public class ExtraMoveEffect : BasePassiveEffect
     [SerializeField] private int turns = 2;
     private int remaining;
 
-    public void Activate()
+    public override void Activate()
     {
         remaining = turns;
     }

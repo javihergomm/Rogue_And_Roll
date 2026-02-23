@@ -4,11 +4,14 @@ using UnityEngine;
  * EnemyBase
  * ---------
  * Base class for all enemies.
- * - Spawns the enemy cup at the spawn opposite to the player's spawn
- * - Spawns the enemy tile at a fixed Spot (handled by child classes)
- * - Provides activation and turn structure for enemy behaviors
+ *
+ * Responsibilities:
+ * - Spawns the enemy's cup at the spawn point opposite to the player's spawn.
+ * - Provides shared references (player, movement, data).
+ * - Offers a universal method to place the enemy's token safely behind the player.
+ * - Defines the turn structure through the abstract StartTurn() method.
  */
-public abstract class EnemyBase : MonoBehaviour
+public class EnemyBase : MonoBehaviour
 {
     [Header("Enemy Data")]
     public EnemySO data;              // ScriptableObject containing enemy configuration
@@ -17,7 +20,7 @@ public abstract class EnemyBase : MonoBehaviour
     protected GameObject tileInstance; // Spawned enemy tile (optional, depends on enemy type)
 
     public Transform player;          // Reference to the player
-    public Movement movement;         // Movement component for the enemy tile
+    public Movement movement;         // Movement component for the enemy token
 
     protected bool isActive = false;  // Whether the enemy is active in the game
 
@@ -25,7 +28,7 @@ public abstract class EnemyBase : MonoBehaviour
      * SpawnEnemy
      * ----------
      * Spawns the enemy's cup at the spawn point opposite to the player's spawn.
-     * Tile spawning is handled by child classes (e.g., DemonBoss).
+     * Token spawning is handled by child classes.
      */
     public virtual void SpawnEnemy()
     {
@@ -49,6 +52,46 @@ public abstract class EnemyBase : MonoBehaviour
 
         // Spawn the enemy cup
         cupInstance = Instantiate(data.cupPrefab, cupSpawn.position, cupSpawn.rotation);
+    }
+
+    /*
+     * PlaceEnemyBehindPlayer
+     * ----------------------
+     * Places the enemy token behind the player at a safe distance.
+     *
+     * The safe distance is calculated as:
+     *      playerSpot - (maxRoll + 1)
+     *
+     * This guarantees that the enemy cannot reach the player
+     * with its highest possible roll during the turn that begins.
+     *
+     * Parameters:
+     * - maxRoll: the maximum roll value the enemy can achieve.
+     */
+    protected void PlaceEnemyBehindPlayer(int maxRoll)
+    {
+        if (movement == null || player == null)
+        {
+            Debug.LogError("EnemyBase: Missing movement or player reference.");
+            return;
+        }
+
+        Movement playerMovement = player.GetComponent<Movement>();
+        if (playerMovement == null)
+            return;
+
+        int playerSpot = playerMovement.ActualPos;
+
+        // Safe distance behind the player
+        int safeSpot = playerSpot - (maxRoll + 1);
+
+        // Clamp to minimum spot
+        safeSpot = Mathf.Max(1, safeSpot);
+
+        movement.ActualPos = safeSpot;
+        movement.transform.position = movement.Positions[safeSpot - 1].position;
+
+        Debug.Log($"Enemy spawned behind player at spot {safeSpot} (player at {playerSpot}, maxRoll {maxRoll})");
     }
 
     /*
@@ -93,5 +136,5 @@ public abstract class EnemyBase : MonoBehaviour
      * ---------
      * Called by the turn manager. Each enemy implements its own behavior.
      */
-    public abstract void StartTurn();
+    public virtual void StartTurn() { }
 }

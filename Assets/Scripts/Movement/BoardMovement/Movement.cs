@@ -5,14 +5,9 @@ using UnityEngine;
 /*
  * Movement
  * --------
- * Controla el movimiento del jugador o enemigo en el tablero.
- * Se mueve paso a paso, comprueba conexiones tipo puente,
- * aplica efectos de casilla al finalizar y permite efectos
- * temporales como ocultar la pieza del jugador.
- *
- * NOTA:
- * - El movimiento del jugador puede ser bloqueado por efectos pasivos.
- * - 
+ * Controls movement for player or enemy tokens on the board.
+ * Moves step by step, checks bridge connections, applies spot effects,
+ * and supports temporary effects such as hiding the token.
  */
 public class Movement : MonoBehaviour
 {
@@ -28,8 +23,9 @@ public class Movement : MonoBehaviour
 
     [SerializeField] float speed;
     [SerializeField] int actualPos = -1;
-    [SerializeField] bool isPlayer;
-
+    [SerializeField] public bool isPlayer;
+    bool EcanMove = true;
+    bool PcanMove = true;
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip moveSound;
 
@@ -38,29 +34,35 @@ public class Movement : MonoBehaviour
     private Renderer cachedRenderer;
     private bool wasHiddenByEffect = false;
 
+    // Added for lap detection and enemy initialization
+    public int startPos;
+    public int lastPos;
+
     private void Start()
     {
-        // 1. Cargar y ordenar las casillas del tablero
+        // Load and sort board spots
         spots = FindObjectsOfType<Spot>();
         Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
-        // 2. Guardar las posiciones de cada casilla
+        // Cache positions from spots
         positions = new Transform[spots.Length];
         for (int i = 0; i < spots.Length; i++)
             positions[i] = spots[i].transform;
 
-        // 3. Cachear el renderer para ocultar/mostrar la pieza
+        // Cache renderer
         cachedRenderer = GetComponentInChildren<Renderer>();
 
-        // 4. Colocar la pieza en la casilla inicial (index 1..N)
+        // Place token at initial position (index 1..N)
         if (actualPos >= 1 && actualPos <= positions.Length)
             transform.position = positions[actualPos - 1].position;
+
+        // Initialize lap tracking and enemy movement state
+        startPos = actualPos;
+        lastPos = actualPos;
     }
 
     /*
-     * Inicia el movimiento usando la tirada del jugador.
-     * Si el jugador tiene un efecto que bloquea el movimiento,
-     * simplemente no se mueve.
+     * Starts movement using the player's dice roll.
      */
     public void StartMoving()
     {
@@ -71,7 +73,7 @@ public class Movement : MonoBehaviour
     }
 
     /*
-     * Inicia un movimiento con un número fijo de pasos.
+     * Starts movement with a fixed number of steps.
      */
     public void StartMovingFixed(int steps)
     {
@@ -79,7 +81,7 @@ public class Movement : MonoBehaviour
     }
 
     /*
-     * Actualiza la visibilidad antes de comenzar el movimiento.
+     * Updates visibility before movement.
      */
     private IEnumerator MoveWithVisibilityCheck(int? fixedSteps = null)
     {
@@ -104,12 +106,11 @@ public class Movement : MonoBehaviour
     }
 
     /*
-     * Realiza el movimiento paso a paso, comprueba puentes
-     * y aplica efectos de casilla.
+     * Performs movement step by step, checks bridges,
+     * and applies spot effects.
      */
     private IEnumerator Move(int steps)
     {
-        // El enemigo espera un poco antes de moverse
         if (!isPlayer)
             yield return new WaitForSeconds(1f);
 
@@ -117,10 +118,13 @@ public class Movement : MonoBehaviour
         {
             actualPos++;
 
+            // Wrap-around: if we pass the last spot, return to 1
+            if (actualPos > positions.Length)
+                actualPos = 1;
+
             Vector3 destino = positions[actualPos - 1].position;
             PlayMovementSound();
 
-            // Movimiento suave hacia la casilla
             while (Vector3.Distance(transform.position, destino) > 0.0001f)
             {
                 transform.position = Vector3.MoveTowards(
@@ -133,7 +137,7 @@ public class Movement : MonoBehaviour
 
             transform.position = destino;
 
-            // Comprobar si hay puente desde esta casilla
+            // Bridge connections
             var conexiones = SpotConnectionManager.Instance.GetConnections(actualPos);
             if (conexiones.Count > 0)
             {
@@ -158,7 +162,6 @@ public class Movement : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
         }
 
-        // Aplicar efectos de casilla
         var tipo = spots[actualPos - 1].getType();
 
         if (tipo == Spot.SpotType.Good)
@@ -168,14 +171,12 @@ public class Movement : MonoBehaviour
 
         SpotConnectionManager.Instance.OnRoundStepCompleted();
 
-        // Restaurar visibilidad si estaba oculta por un efecto
         if (isPlayer && cachedRenderer != null && wasHiddenByEffect)
         {
             cachedRenderer.enabled = true;
             wasHiddenByEffect = false;
         }
 
-        // Resetear estado del dado
         if (isPlayer)
             DiceRollManager.Instance.ResetDiceTurnState();
 
@@ -189,7 +190,24 @@ public class Movement : MonoBehaviour
         if (effectType == 1)
         {
             int extra = UnityEngine.Random.Range(3, 6);
+
+            Debug.Log((isPlayer ? "Player" : "Enemy") +
+                      " received GOOD effect: extra steps = " + extra);
+
             StartCoroutine(Move(extra));
+        }
+        else if (effectType == 2)
+        {
+            EcanMove = false;
+
+            Debug.Log((isPlayer ? "Player" : "Enemy") +
+                      " received GOOD effect: enemy cannot move next turn");
+        }
+        else if (effectType == 3)
+        {
+            Debug.Log((isPlayer ? "Player" : "Enemy") +
+                      " received GOOD effect: lootbox");
+            // Lootbox logic here
         }
     }
 
@@ -200,9 +218,28 @@ public class Movement : MonoBehaviour
         if (effectType == 1)
         {
             int extra = UnityEngine.Random.Range(-3, -6);
+
+            Debug.Log((isPlayer ? "Player" : "Enemy") +
+                      " received BAD effect: extra steps = " + extra);
+
             StartCoroutine(Move(extra));
         }
+        else if (effectType == 2)
+        {
+            PcanMove = false;
+
+            Debug.Log((isPlayer ? "Player" : "Enemy") +
+                      " received BAD effect: player cannot move next turn");
+        }
+        else if (effectType == 3)
+        {
+            Debug.Log((isPlayer ? "Player" : "Enemy") +
+                      " received BAD effect: other negative effect");
+            // Other negative effect
+        }
     }
+
+
 
     void PlayMovementSound()
     {

@@ -11862,6 +11862,7 @@ MonoBehaviour:
   HideRollThisTurn: 0
   HidePieceThisTurn: 0
   HasPlayerRolledThisTurn: 0
+  PreventMovementThisTurn: 0
 --- !u!114 &1548563261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12649,7 +12650,6 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 66faf68494507c9448c4bfbdb8be7ba5, type: 2}
   player: {fileID: 0}
   movement: {fileID: 8580833200976862543, guid: 4725713aefe17a141a811387680fdc66, type: 3}
-  fixedSpawnSpot: {fileID: 0}
 --- !u!4 &1584179048
 Transform:
   m_ObjectHideFlags: 0
@@ -13243,12 +13243,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   possibleItems:
-  - {fileID: 11400000, guid: f9914aad9a10ecc4e86193813341d837, type: 2}
-  - {fileID: 11400000, guid: de977bcbcdb91584093f07f9f25ef05c, type: 2}
-  - {fileID: 11400000, guid: 00af29748962fbb4eb0ae9dcc0f8f0c4, type: 2}
-  - {fileID: 11400000, guid: 72beb3d75265bd0459490e871877011b, type: 2}
   - {fileID: 11400000, guid: a30dabc911e4f4d44935a12c6b5c1232, type: 2}
-  - {fileID: 11400000, guid: 194792809603b9d4694c8be1b4adc2b1, type: 2}
+  - {fileID: 11400000, guid: 23ed9ca15439c534f894c2498edb003c, type: 2}
   isAwaitingDecision: 0
 --- !u!4 &1659123278 stripped
 Transform:

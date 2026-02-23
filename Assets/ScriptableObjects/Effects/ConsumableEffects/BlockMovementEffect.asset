@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 741f8ea60aa319849a389b3c2fe6e55e, type: 3}
   m_Name: BlockMovementEffect
   m_EditorClassIdentifier: Assembly-CSharp::BlockMovementEffect
-  alignment: 0
+  alignment: 1
   turnsBlocked: 2
