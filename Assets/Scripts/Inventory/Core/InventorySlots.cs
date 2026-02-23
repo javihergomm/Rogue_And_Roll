@@ -100,6 +100,23 @@ public class InventorySlots
     }
 
     /*
+     * NEW: Removes an item by name (used for auto-use consumables)
+     */
+    public void RemoveItemByName(string itemName, int qty)
+    {
+        foreach (var slot in allSlots)
+        {
+            if (slot.ItemName == itemName)
+            {
+                RemoveItem(slot, qty);
+                return;
+            }
+        }
+
+        Debug.LogWarning("[InventorySlots] Tried to remove '" + itemName + "' but no slot contains it.");
+    }
+
+    /*
      * Returns the correct slot group for an item type.
      */
     private List<ItemSlot> GetCategory(BaseItemSO item)

@@ -5,7 +5,14 @@ using UnityEngine;
  * ------------
  * ScriptableObject representing a consumable item.
  * A consumable executes one or more effects when used.
- * Effects can modify dice, apply consumable logic, or trigger passive behaviors.
+ *
+ * Behavior:
+ * - Dice effects may apply immediately or be deferred to the next roll.
+ * - Consumable effects execute custom logic through BaseConsumableEffect.
+ * - Passive effects must be activated (Activate()) so they register
+ *   themselves and manage their own turn-based duration.
+ *
+ * InventoryManager handles removing the item after use.
  */
 [CreateAssetMenu(fileName = "NewConsumable", menuName = "Inventory/Consumable")]
 public class ConsumableSO : BaseItemSO
@@ -21,16 +28,23 @@ public class ConsumableSO : BaseItemSO
 
     public override void UseItem()
     {
-        // Generic use (for example, from a button)
+        // Generic use (e.g., from a button)
         UseItem(new ConsumableContext());
-        // Do NOT remove the item here. InventoryManager handles removal using the correct ItemSlot.
+        // Do NOT remove the item here. InventoryManager handles removal.
     }
 
     /*
      * Executes all effects assigned to this consumable.
-     * Handles dice effects correctly:
-     *  - Immediate effects if the player has not rolled yet
-     *  - Deferred effects (next turn) if ApplyOnNextAvailableRoll is true
+     * Dice effects:
+     *  - Apply immediately if the player has not rolled yet.
+     *  - Otherwise, they are queued for the next available roll.
+     *
+     * Consumable effects:
+     *  - Execute custom logic through BaseConsumableEffect.Activate().
+     *
+     * Passive effects:
+     *  - Must call Activate() so they register themselves and manage
+     *    their own multi-turn behavior.
      */
     public void UseItem(ConsumableContext ctx)
     {
@@ -59,7 +73,7 @@ public class ConsumableSO : BaseItemSO
                     StatManager.Instance.ActiveConsumableEffects.Add(diceEff);
                 }
 
-                ctx.WasUsed = true; // REQUIRED so InventoryManager removes the item
+                ctx.WasUsed = true; // Required so InventoryManager removes the item
                 continue;
             }
 
@@ -70,10 +84,10 @@ public class ConsumableSO : BaseItemSO
                 continue;
             }
 
-            // Passive effects triggered immediately
+            // Passive effects (must be activated properly)
             if (eff is BasePassiveEffect passiveEff)
             {
-                passiveEff.OnTurnStart(new PassiveContext());
+                passiveEff.Activate();   
                 ctx.WasUsed = true;
                 continue;
             }

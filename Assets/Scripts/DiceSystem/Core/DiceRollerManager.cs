@@ -1,6 +1,16 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/*
+ * DiceRollManager
+ * ----------------
+ * Handles all dice-related logic:
+ *  - Spawns dice in the world
+ *  - Processes dice rolls and applies effects
+ *  - Stores roll history for each die
+ *  - Provides final roll values for movement
+ *  - Resets dice state at the end of the player's movement
+ */
 public class DiceRollManager : MonoBehaviour
 {
     public static DiceRollManager Instance { get; private set; }
@@ -55,7 +65,6 @@ public class DiceRollManager : MonoBehaviour
         if (EnemyManager.Instance != null)
             EnemyManager.Instance.StartEnemyTurns();
     }
-
 
     // -------------------------------------------------------------------------
     // DICE SPAWNING
@@ -230,14 +239,6 @@ public class DiceRollManager : MonoBehaviour
         rollHistory[slot] = (baseRoll, finalRoll);
         FinalizeRoll(finalRoll);
 
-        // Auto-move when all dice have been rolled
-        if (HaveAllActiveDiceRolled())
-        {
-            int total = GetTotalRoll();
-            if (playerMovement != null)
-                playerMovement.StartMovingFixed(total);
-        }
-
     }
 
     private int ApplySynchronousEffects(ItemSlot slot, int roll, DiceContext ctx)
@@ -345,10 +346,12 @@ public class DiceRollManager : MonoBehaviour
 
         return null;
     }
+
     public bool HasSlotRolledThisTurn(ItemSlot slot)
     {
         return rolledThisTurn.Contains(slot);
     }
+
     public bool HaveAllActiveDiceRolled()
     {
         foreach (var slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
@@ -358,6 +361,7 @@ public class DiceRollManager : MonoBehaviour
         }
         return true;
     }
+
     public int GetTotalRoll()
     {
         int total = 0;
@@ -413,12 +417,16 @@ public class DiceRollManager : MonoBehaviour
     {
         Debug.Log("Final roll result: " + finalRoll);
         StatManager.Instance.OnDiceFinalResult(finalRoll);
+
+        // Trigger player movement after the final roll
+        if (playerMovement != null)
+            playerMovement.StartMoving();
     }
+
 
     public void ResetDiceTurnState()
     {
         rolledThisTurn.Clear();
         rollHistory.Clear();
     }
-
 }

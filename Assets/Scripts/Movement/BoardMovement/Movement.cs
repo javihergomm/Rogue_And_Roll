@@ -7,8 +7,12 @@ using UnityEngine;
  * --------
  * Controla el movimiento del jugador o enemigo en el tablero.
  * Se mueve paso a paso, comprueba conexiones tipo puente,
- * aplica efectos de casilla al finalizar y permite efectos temporales
- * como ocultar la pieza del jugador.
+ * aplica efectos de casilla al finalizar y permite efectos
+ * temporales como ocultar la pieza del jugador.
+ *
+ * NOTA:
+ * - El movimiento del jugador puede ser bloqueado por efectos pasivos.
+ * - 
  */
 public class Movement : MonoBehaviour
 {
@@ -26,11 +30,6 @@ public class Movement : MonoBehaviour
     [SerializeField] int actualPos = -1;
     [SerializeField] bool isPlayer;
 
-    bool EcanMove = true;
-    bool PcanMove = true;
-    int Pturn = 1;
-    int Eturn = 1;
-
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip moveSound;
 
@@ -41,28 +40,32 @@ public class Movement : MonoBehaviour
 
     private void Start()
     {
-        // Obtiene todas las casillas del tablero y las ordena por índice
+        // 1. Cargar y ordenar las casillas del tablero
         spots = FindObjectsOfType<Spot>();
         Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
-        // Guarda las posiciones de cada casilla
+        // 2. Guardar las posiciones de cada casilla
         positions = new Transform[spots.Length];
         for (int i = 0; i < spots.Length; i++)
             positions[i] = spots[i].transform;
 
-        // Cachea el renderer para poder ocultar/mostrar la pieza
+        // 3. Cachear el renderer para ocultar/mostrar la pieza
         cachedRenderer = GetComponentInChildren<Renderer>();
+
+        // 4. Colocar la pieza en la casilla inicial (index 1..N)
+        if (actualPos >= 1 && actualPos <= positions.Length)
+            transform.position = positions[actualPos - 1].position;
     }
 
     /*
      * Inicia el movimiento usando la tirada del jugador.
-     * Se usa una corrutina para asegurarse de que los efectos
-     * visuales ya están aplicados antes de mover.
+     * Si el jugador tiene un efecto que bloquea el movimiento,
+     * simplemente no se mueve.
      */
     public void StartMoving()
     {
-        Pturn = 1;
-        Eturn = 1;
+        if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
+            return;
 
         StartCoroutine(MoveWithVisibilityCheck());
     }
@@ -76,13 +79,10 @@ public class Movement : MonoBehaviour
     }
 
     /*
-     * Asegura que la visibilidad de la pieza se actualiza
-     * después de que StatManager haya aplicado efectos como
-     * ocultar la pieza este turno.
+     * Actualiza la visibilidad antes de comenzar el movimiento.
      */
     private IEnumerator MoveWithVisibilityCheck(int? fixedSteps = null)
     {
-        // Espera un frame para que StatManager actualice los flags
         yield return null;
 
         if (isPlayer && cachedRenderer != null)
@@ -104,85 +104,78 @@ public class Movement : MonoBehaviour
     }
 
     /*
-     * Realiza el movimiento paso a paso.
-     * Comprueba puentes y aplica efectos de casilla.
+     * Realiza el movimiento paso a paso, comprueba puentes
+     * y aplica efectos de casilla.
      */
     private IEnumerator Move(int steps)
     {
-        // Los enemigos esperan un poco antes de moverse
+        // El enemigo espera un poco antes de moverse
         if (!isPlayer)
             yield return new WaitForSeconds(1f);
 
         for (int i = 0; i < steps; i++)
         {
-            // Avanza a la siguiente casilla
-            if (actualPos + 1 >= positions.Length)
-                actualPos = -1;
-
             actualPos++;
 
-            Vector3 destination = positions[actualPos].position;
+            Vector3 destino = positions[actualPos - 1].position;
             PlayMovementSound();
 
             // Movimiento suave hacia la casilla
-            while (Vector3.Distance(transform.position, destination) > 0.0001f)
+            while (Vector3.Distance(transform.position, destino) > 0.0001f)
             {
                 transform.position = Vector3.MoveTowards(
                     transform.position,
-                    destination,
+                    destino,
                     speed * Time.deltaTime
                 );
                 yield return null;
             }
 
-            transform.position = destination;
+            transform.position = destino;
 
-            // Comprueba si hay un puente desde esta casilla
-            var connections = SpotConnectionManager.Instance.GetConnections(actualPos);
-            if (connections.Count > 0)
+            // Comprobar si hay puente desde esta casilla
+            var conexiones = SpotConnectionManager.Instance.GetConnections(actualPos);
+            if (conexiones.Count > 0)
             {
-                int target = connections[0];
+                int target = conexiones[0];
                 actualPos = target;
 
-                Vector3 destBridge = positions[target].position;
+                Vector3 destinoPuente = positions[target - 1].position;
 
-                while (Vector3.Distance(transform.position, destBridge) > 0.0001f)
+                while (Vector3.Distance(transform.position, destinoPuente) > 0.0001f)
                 {
                     transform.position = Vector3.MoveTowards(
                         transform.position,
-                        destBridge,
+                        destinoPuente,
                         speed * Time.deltaTime
                     );
                     yield return null;
                 }
 
-                transform.position = destBridge;
+                transform.position = destinoPuente;
             }
 
             yield return new WaitForSeconds(0.1f);
         }
 
-        // Aplica efectos de casilla
-        if (spots[actualPos].getType() == Spot.SpotType.Good)
-        {
-            GoodSpotEffect();
-        }
-        else if (spots[actualPos].getType() == Spot.SpotType.Bad)
-        {
-            BadSpotEffect();
-        }
+        // Aplicar efectos de casilla
+        var tipo = spots[actualPos - 1].getType();
 
-        // Avanza el sistema de puentes
+        if (tipo == Spot.SpotType.Good)
+            GoodSpotEffect();
+        else if (tipo == Spot.SpotType.Bad)
+            BadSpotEffect();
+
         SpotConnectionManager.Instance.OnRoundStepCompleted();
 
-        // Restaura la visibilidad si fue ocultada por un efecto
+        // Restaurar visibilidad si estaba oculta por un efecto
         if (isPlayer && cachedRenderer != null && wasHiddenByEffect)
         {
             cachedRenderer.enabled = true;
             wasHiddenByEffect = false;
         }
 
-        // Reinicia el estado de los dados para el siguiente turno del jugador
+        // Resetear estado del dado
         if (isPlayer)
             DiceRollManager.Instance.ResetDiceTurnState();
 
@@ -195,15 +188,8 @@ public class Movement : MonoBehaviour
 
         if (effectType == 1)
         {
-            StartCoroutine(Move(UnityEngine.Random.Range(3, 6)));
-        }
-        else if (effectType == 2)
-        {
-            EcanMove = false;
-        }
-        else if (effectType == 3)
-        {
-            // Lootbox
+            int extra = UnityEngine.Random.Range(3, 6);
+            StartCoroutine(Move(extra));
         }
     }
 
@@ -213,15 +199,8 @@ public class Movement : MonoBehaviour
 
         if (effectType == 1)
         {
-            StartCoroutine(Move(UnityEngine.Random.Range(-3, -6)));
-        }
-        else if (effectType == 2)
-        {
-            PcanMove = false;
-        }
-        else if (effectType == 3)
-        {
-            // Otro efecto negativo
+            int extra = UnityEngine.Random.Range(-3, -6);
+            StartCoroutine(Move(extra));
         }
     }
 

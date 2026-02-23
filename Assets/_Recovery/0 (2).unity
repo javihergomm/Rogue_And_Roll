@@ -11862,6 +11862,7 @@ MonoBehaviour:
   HideRollThisTurn: 0
   HidePieceThisTurn: 0
   HasPlayerRolledThisTurn: 0
+  PreventMovementThisTurn: 0
 --- !u!114 &1548563261
 MonoBehaviour:
   m_ObjectHideFlags: 0

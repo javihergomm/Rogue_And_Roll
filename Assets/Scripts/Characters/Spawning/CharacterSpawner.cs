@@ -3,10 +3,10 @@ using UnityEngine;
 /*
  * CharacterSpawner
  * ----------------
- * Handles spawning of the selected character's cup and tile.
- * Applies color palettes when required.
- * Registers the Movement component so the dice system can control movement.
- * Sets the initial board index so the character starts on the correct tile.
+ * Handles spawning of the selected character's cup and tile,
+ * applies color palettes when needed, registers the Movement
+ * component, and sets the initial board position before any
+ * movement logic begins.
  */
 public class CharacterSpawner : MonoBehaviour
 {
@@ -29,7 +29,7 @@ public class CharacterSpawner : MonoBehaviour
     }
 
     /*
-     * Spawns the selected character's cup and tile.
+     * Spawns the selected character and initializes all related systems.
      */
     public void Spawn(CharacterSO character)
     {
@@ -45,13 +45,13 @@ public class CharacterSpawner : MonoBehaviour
         SpawnTile(character);
         RegisterMovementFromSpawnedObjects();
 
-        // Give the character-specific starting dice
         if (character.startingDice != null)
             InventoryManager.Instance.AddStartingDice(character.startingDice);
     }
 
     /*
-     * Spawns the character's cup at the assigned spawn point.
+     * Spawns the character's cup at the assigned spawn point
+     * and applies the palette if required.
      */
     private void SpawnCup(CharacterSO character)
     {
@@ -72,11 +72,15 @@ public class CharacterSpawner : MonoBehaviour
         currentCup = Instantiate(character.cupPrefab, spawnPoint.position, spawnPoint.rotation);
 
         if (character.applyColor)
-            ApplyPalette(currentCup, character.spawnPointName);
+        {
+            (Color light, Color dark) = GetPalette(character.spawnPointName);
+            ApplyPaletteToCup(currentCup, light, dark);
+        }
     }
 
     /*
-     * Spawns the character's tile at the indexed board spot.
+     * Spawns the character's tile at the specified board index
+     * and recolors the selected material if enabled.
      */
     private void SpawnTile(CharacterSO character)
     {
@@ -94,27 +98,37 @@ public class CharacterSpawner : MonoBehaviour
 
         Transform tilePoint = spots[character.tileSpotIndex].transform;
         currentTile = Instantiate(character.tilePrefab, tilePoint.position, tilePoint.rotation);
+
+        if (character.applyTileColor && character.tileMaterial != null)
+        {
+            (Color light, _) = GetPalette(character.spawnPointName);
+            ApplyPaletteToTile(currentTile, character.tileMaterial, light);
+        }
     }
 
     /*
-     * Registers the Movement component and assigns the initial board index.
+     * Registers the Movement component and assigns the initial board
+     * position before any movement logic is executed.
      */
     private void RegisterMovementFromSpawnedObjects()
     {
-        Movement mov = null;
-
-        if (currentCup != null)
-            mov = currentCup.GetComponentInChildren<Movement>();
-
-        if (mov == null && currentTile != null)
-            mov = currentTile.GetComponentInChildren<Movement>();
+        Movement mov = currentCup?.GetComponentInChildren<Movement>()
+                      ?? currentTile?.GetComponentInChildren<Movement>();
 
         if (mov != null)
         {
             DiceRollManager.Instance.RegisterPlayerMovement(mov);
 
-            // Assigns the initial board index after Movement has completed its Start() method.
-            StartCoroutine(AssignInitialPosition(mov));
+            // Assign initial board index
+            mov.ActualPos = lastCharacter.tileSpotIndex;
+
+            // Place the piece at the correct starting tile
+            if (mov.Positions != null &&
+                mov.ActualPos >= 0 &&
+                mov.ActualPos < mov.Positions.Length)
+            {
+                mov.transform.position = mov.Positions[mov.ActualPos].position;
+            }
         }
         else
         {
@@ -122,48 +136,37 @@ public class CharacterSpawner : MonoBehaviour
         }
     }
 
-    /*
-     * Waits one frame to ensure Movement.Start() has finished,
-     * then sets the initial board index.
-     */
-    private System.Collections.IEnumerator AssignInitialPosition(Movement mov)
-    {
-        yield return null;
-
-        mov.ActualPos = lastCharacter.tileSpotIndex;
-    }
+    // ---------------------------------------------------------
+    //  PALETTE SYSTEM
+    // ---------------------------------------------------------
 
     /*
-     * Applies a two-tone palette to the cup based on the spawn point name.
+     * Returns the light/dark palette based on the spawn point name.
      */
-    private void ApplyPalette(GameObject obj, string spawnName)
+    private (Color light, Color dark) GetPalette(string spawnName)
     {
-        Color light = Color.white;
-        Color dark = Color.white;
-
         spawnName = spawnName.ToLower();
 
         if (spawnName.Contains("red"))
-        {
-            light = HexToColor("#FF6A6A");
-            dark = HexToColor("#C62828");
-        }
-        else if (spawnName.Contains("blue"))
-        {
-            light = HexToColor("#6AB0FF");
-            dark = HexToColor("#1565C0");
-        }
-        else if (spawnName.Contains("green"))
-        {
-            light = HexToColor("#6AFF8A");
-            dark = HexToColor("#2E7D32");
-        }
-        else if (spawnName.Contains("yellow"))
-        {
-            light = HexToColor("#FFE66A");
-            dark = HexToColor("#F9A825");
-        }
+            return (HexToColor("#FF6A6A"), HexToColor("#C62828"));
 
+        if (spawnName.Contains("blue"))
+            return (HexToColor("#6AB0FF"), HexToColor("#1565C0"));
+
+        if (spawnName.Contains("green"))
+            return (HexToColor("#6AFF8A"), HexToColor("#2E7D32"));
+
+        if (spawnName.Contains("yellow"))
+            return (HexToColor("#FFE66A"), HexToColor("#F9A825"));
+
+        return (Color.white, Color.white);
+    }
+
+    /*
+     * Applies the palette to the cup: first material = light, others = dark.
+     */
+    private void ApplyPaletteToCup(GameObject obj, Color light, Color dark)
+    {
         foreach (Renderer r in obj.GetComponentsInChildren<Renderer>())
         {
             Material[] mats = r.materials;
@@ -179,12 +182,34 @@ public class CharacterSpawner : MonoBehaviour
     }
 
     /*
-     * Converts a hex color string into a Unity Color.
+     * Applies the palette color only to the specific material assigned
+     * in the CharacterSO. Uses name matching because Unity instantiates
+     * materials at runtime.
+     */
+    private void ApplyPaletteToTile(GameObject tile, Material targetMat, Color color)
+    {
+        string baseName = targetMat.name;
+
+        foreach (Renderer r in tile.GetComponentsInChildren<Renderer>())
+        {
+            Material[] mats = r.materials;
+
+            for (int i = 0; i < mats.Length; i++)
+            {
+                if (mats[i].name.StartsWith(baseName) && mats[i].HasProperty("_BaseColor"))
+                    mats[i].SetColor("_BaseColor", color);
+            }
+
+            r.materials = mats;
+        }
+    }
+
+    /*
+     * Converts a hex string into a Unity Color.
      */
     private Color HexToColor(string hex)
     {
-        Color c;
-        ColorUtility.TryParseHtmlString(hex, out c);
+        ColorUtility.TryParseHtmlString(hex, out Color c);
         return c;
     }
 }

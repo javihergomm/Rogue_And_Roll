@@ -4,12 +4,15 @@ using System.Collections.Generic;
 /*
  * StatManager
  * -----------
- * Core stat logic:
- * - Stores and updates stat values
- * - Tracks turns and dice results
- * - Registers temporary consumable dice effects
- * - Handles effects that apply immediately or on the next available roll
- * - Provides turn-based flags for temporary effects
+ * Central system for managing player stats and turn-based state.
+ *
+ * Responsibilities:
+ * - Stores and updates core stats (gold, rolls, rerolls).
+ * - Tracks turn progression and dice results.
+ * - Manages temporary dice effects from consumable items.
+ * - Handles effects that apply immediately or on the next roll.
+ * - Executes passive effects at the start of each turn.
+ * - Provides turn-based flags used by other systems (UI, movement, effects).
  */
 public class StatManager : MonoBehaviour
 {
@@ -31,24 +34,30 @@ public class StatManager : MonoBehaviour
     public int PreviousRoll { get; private set; }
     public int CurrentTurn { get; private set; } = 1;
 
-    // Active effects that apply to the current roll
+    // Active dice effects applied to the current roll
     public List<BaseDiceEffect> ActiveConsumableEffects { get; private set; }
         = new List<BaseDiceEffect>();
 
-    // Effects that should apply on the next available roll
+    // Dice effects waiting for the next available roll
     public List<BaseDiceEffect> PendingDiceEffects { get; private set; }
         = new List<BaseDiceEffect>();
+
+    // Active passive effects executed at the start of each turn
+    public List<BasePassiveEffect> ActivePassiveEffects { get; private set; }
+        = new List<BasePassiveEffect>();
 
     private ShopExitManager cachedExitManager;
 
     public event System.Action OnStatsChanged;
 
     /*
-     * Temporary turn-based flags used by consumable effects.
+     * Turn-based flags used by consumable and passive effects.
+     * These are reset every turn.
      */
     public bool HideRollThisTurn = false;
     public bool HidePieceThisTurn = false;
     public bool HasPlayerRolledThisTurn = false;
+    public bool PreventMovementThisTurn = false;
 
     private void Awake()
     {
@@ -87,10 +96,8 @@ public class StatManager : MonoBehaviour
     }
 
     /*
-     * Registers dice effects granted by a consumable item.
-     * If the player already rolled this turn and the effect
-     * is marked as ApplyOnNextAvailableRoll, it is stored
-     * for the next turn instead of applying immediately.
+     * Registers dice effects from a consumable item.
+     * Effects may apply immediately or be queued for the next roll.
      */
     public void RegisterConsumableEffects(ConsumableSO item)
     {
@@ -101,20 +108,24 @@ public class StatManager : MonoBehaviour
         {
             if (eff is BaseDiceEffect diceEff)
             {
-                // Store reference to the consumable that created this effect
                 diceEff.SourceItem = item;
-
-                // If the effect must wait for the next roll
-                if (diceEff.ApplyOnNextAvailableRoll && HasPlayerRolledThisTurn)
-                {
-                    PendingDiceEffects.Add(diceEff);
-                }
-                else
-                {
-                    ActiveConsumableEffects.Add(diceEff);
-                }
+                ActiveConsumableEffects.Add(diceEff);
+            }
+            else if (eff is BasePassiveEffect passive)
+            {
+                RegisterPassiveEffect(passive);
             }
         }
+    }
+
+
+    /*
+     * Registers a passive effect that executes every turn.
+     */
+    public void RegisterPassiveEffect(BasePassiveEffect effect)
+    {
+        if (!ActivePassiveEffects.Contains(effect))
+            ActivePassiveEffects.Add(effect);
     }
 
     public void ChangeStat(StatType stat, int amount)
@@ -153,19 +164,19 @@ public class StatManager : MonoBehaviour
 
     /*
      * Called when the final dice result is known.
-     * Stores the roll and removes effects that last only one roll.
+     * Stores the roll and removes single-use effects.
      */
     public void OnDiceFinalResult(int finalRoll)
     {
         PreviousRoll = finalRoll;
         HasPlayerRolledThisTurn = true;
 
-        // Remove only effects that last a single roll
         ActiveConsumableEffects.RemoveAll(e => e.RemoveAfterRoll);
     }
 
     /*
-     * Advances the turn counter and activates pending effects.
+     * Advances the turn counter, executes passive effects,
+     * activates pending dice effects, and resets temporary flags.
      */
     public void NextTurn()
     {
@@ -173,7 +184,15 @@ public class StatManager : MonoBehaviour
 
         ResetTurnFlags();
 
-        // Move pending effects into active effects
+        // Execute passive effects
+        PassiveContext ctx = new PassiveContext();
+        foreach (var eff in ActivePassiveEffects)
+            eff.OnTurnStart(ctx);
+
+        // Apply passive movement block
+        PreventMovementThisTurn = ctx.PreventMovement;
+
+        // Activate pending dice effects
         if (PendingDiceEffects.Count > 0)
         {
             ActiveConsumableEffects.AddRange(PendingDiceEffects);
@@ -184,13 +203,14 @@ public class StatManager : MonoBehaviour
     }
 
     /*
-     * Resets temporary flags used by consumable effects.
+     * Resets temporary flags that only last one turn.
      */
     public void ResetTurnFlags()
     {
         HideRollThisTurn = false;
         HidePieceThisTurn = false;
         HasPlayerRolledThisTurn = false;
+        PreventMovementThisTurn = false;
     }
 
     private void HandleShopStateChanged(bool inShop)

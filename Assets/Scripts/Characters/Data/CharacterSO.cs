@@ -13,18 +13,23 @@ public class CharacterSO : ScriptableObject
     public Color characterColor = Color.white;
     public bool applyColor = true;
 
+    // Determines whether the tile should be recolored
+    public bool applyTileColor;
+
+    // The specific material inside the tile that should receive the palette color
+    public Material tileMaterial;
+
     [Header("Prefabs")]
-    public GameObject cupPrefab;   // Visible player cup
-    public GameObject tilePrefab;  // Visible player tile
+    public GameObject cupPrefab;
+    public GameObject tilePrefab;
 
     [Header("Spawn")]
-    public string spawnPointName;  // Cup spawn point
-    public int tileSpotIndex;      // Tile spawn point
+    public string spawnPointName;
+    public int tileSpotIndex;
 
     [Header("Effects")]
     public BaseEffect[] effects;
 
     [Header("Starting Dice")]
     public DiceSO startingDice;
-
 }

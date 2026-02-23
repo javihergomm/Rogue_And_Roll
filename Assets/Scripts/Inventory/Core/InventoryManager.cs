@@ -91,13 +91,24 @@ public class InventoryManager : MonoBehaviour
         slots.AddItem(item, qty);
         permanentEffects.TryActivate(item);
 
+        // Auto-use consumables
         if (item is ConsumableSO consumable && consumable.AutoUseOnPickup)
         {
-            consumable.UseItem(new ConsumableContext());
+            var ctx = new ConsumableContext();
+            consumable.UseItem(ctx);
+
+            if (ctx.WasUsed)
+            {
+                // Remove the item from inventory
+                slots.RemoveItemByName(consumable.ItemName, 1);
+
+            }
         }
 
         OnInventoryChanged?.Invoke();
     }
+
+
 
     public void RemoveItem(ItemSlot slot, int qty)
     {
