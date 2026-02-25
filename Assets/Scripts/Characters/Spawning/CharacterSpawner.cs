@@ -71,6 +71,10 @@ public class CharacterSpawner : MonoBehaviour
 
         currentCup = Instantiate(character.cupPrefab, spawnPoint.position, spawnPoint.rotation);
 
+        // Register cup so BoardHider can hide it inside the shop
+        if (BoardHider.Instance != null)
+            BoardHider.Instance.RegisterObject(currentCup);
+
         if (character.applyColor)
         {
             (Color light, Color dark) = GetPalette(character.spawnPointName);
@@ -98,6 +102,10 @@ public class CharacterSpawner : MonoBehaviour
 
         Transform tilePoint = spots[character.tileSpotIndex].transform;
         currentTile = Instantiate(character.tilePrefab, tilePoint.position, tilePoint.rotation);
+
+        // Register tile so BoardHider can hide it inside the shop
+        if (BoardHider.Instance != null)
+            BoardHider.Instance.RegisterObject(currentTile);
 
         if (character.applyTileColor && character.tileMaterial != null)
         {
@@ -140,9 +148,6 @@ public class CharacterSpawner : MonoBehaviour
     //  PALETTE SYSTEM
     // ---------------------------------------------------------
 
-    /*
-     * Returns the light/dark palette based on the spawn point name.
-     */
     private (Color light, Color dark) GetPalette(string spawnName)
     {
         spawnName = spawnName.ToLower();
@@ -162,9 +167,6 @@ public class CharacterSpawner : MonoBehaviour
         return (Color.white, Color.white);
     }
 
-    /*
-     * Applies the palette to the cup: first material = light, others = dark.
-     */
     private void ApplyPaletteToCup(GameObject obj, Color light, Color dark)
     {
         foreach (Renderer r in obj.GetComponentsInChildren<Renderer>())
@@ -181,11 +183,6 @@ public class CharacterSpawner : MonoBehaviour
         }
     }
 
-    /*
-     * Applies the palette color only to the specific material assigned
-     * in the CharacterSO. Uses name matching because Unity instantiates
-     * materials at runtime.
-     */
     private void ApplyPaletteToTile(GameObject tile, Material targetMat, Color color)
     {
         string baseName = targetMat.name;
@@ -204,9 +201,6 @@ public class CharacterSpawner : MonoBehaviour
         }
     }
 
-    /*
-     * Converts a hex string into a Unity Color.
-     */
     private Color HexToColor(string hex)
     {
         ColorUtility.TryParseHtmlString(hex, out Color c);

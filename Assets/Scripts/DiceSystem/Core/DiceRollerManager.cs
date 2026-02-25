@@ -97,6 +97,9 @@ public class DiceRollManager : MonoBehaviour
         GameObject instance = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
         instance.transform.localScale = prefab.transform.localScale;
 
+        if (BoardHider.Instance != null)
+            BoardHider.Instance.RegisterObject(instance);
+
         DiceRoller roller = instance.GetComponent<DiceRoller>();
         if (roller != null)
             roller.AssignDice(dice, slot);
@@ -107,6 +110,7 @@ public class DiceRollManager : MonoBehaviour
         worldDice[slot] = instance;
         return instance;
     }
+
 
     public void RemoveDiceFromWorld(ItemSlot slot)
     {

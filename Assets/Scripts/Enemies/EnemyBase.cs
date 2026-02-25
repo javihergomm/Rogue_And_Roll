@@ -52,6 +52,10 @@ public class EnemyBase : MonoBehaviour
 
         // Spawn the enemy cup
         cupInstance = Instantiate(data.cupPrefab, cupSpawn.position, cupSpawn.rotation);
+
+        // Register cup so BoardHider can hide it inside the shop
+        if (BoardHider.Instance != null)
+            BoardHider.Instance.RegisterObject(cupInstance);
     }
 
     /*

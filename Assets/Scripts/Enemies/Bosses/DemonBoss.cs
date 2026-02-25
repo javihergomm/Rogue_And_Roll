@@ -59,7 +59,6 @@ public class DemonBoss : EnemyBase
         movement.lastPos = movement.ActualPos;
     }
 
-
     /*
      * OnPlayerCompletedLap
      * --------------------
@@ -87,6 +86,11 @@ public class DemonBoss : EnemyBase
         SpawnEnemy();
 
         demonTokenInstance = Instantiate(data.tilePrefab);
+
+        // Register demon token so BoardHider can hide it inside the shop
+        if (BoardHider.Instance != null)
+            BoardHider.Instance.RegisterObject(demonTokenInstance);
+
         movement = demonTokenInstance.GetComponent<Movement>();
 
         InitializeDemon();

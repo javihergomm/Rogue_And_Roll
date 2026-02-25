@@ -59,6 +59,39 @@ public class ShopExitManager : MonoBehaviour
 
         inShop = true;
 
+        // ---------------------------------------------------------
+        // 1. PAUSAR ENEMIGOS
+        // ---------------------------------------------------------
+        if (EnemyManager.Instance != null)
+        {
+            foreach (var enemy in EnemyManager.Instance.enemies)
+            {
+                if (enemy != null)
+                    enemy.enabled = false; // desactiva Update() y StartTurn()
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 2. OCULTAR TABLERO (cubiletes, fichas, enemigos, dados)
+        // ---------------------------------------------------------
+        OnShopStateChanged?.Invoke(true);
+        // (Tu BoardHider u otros scripts escucharán este evento)
+
+        // ---------------------------------------------------------
+        // 3. BLOQUEAR INTERACCIÓN DEL TABLERO
+        // ---------------------------------------------------------
+        // Bloquear movimiento del jugador
+        Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
+        if (playerMovement != null)
+            playerMovement.enabled = false;
+
+        // Bloquear tiradas de dados
+        if (DiceRollManager.Instance != null)
+            DiceRollManager.Instance.enabled = false;
+
+        // ---------------------------------------------------------
+        // 4. ACTIVAR TIENDA
+        // ---------------------------------------------------------
         if (tableroOuijaPuntero != null)
             tableroOuijaPuntero.SetActive(true);
 
@@ -68,12 +101,9 @@ public class ShopExitManager : MonoBehaviour
         foreach (var empty in decisionEmpties)
             if (empty != null) empty.SetActive(true);
 
-        if (StatManager.Instance != null)
-        {
-            int maxRerolls = StatManager.Instance.GetMaxValue(StatType.ShopRerolls);
-            StatManager.Instance.ChangeStat(StatType.ShopRerolls, maxRerolls);
-        }
-
+        // ---------------------------------------------------------
+        // 5. ROTAR TABLERO HACIA LA TIENDA
+        // ---------------------------------------------------------
         if (boardTransform != null)
         {
             Vector3 euler = boardTransform.eulerAngles;
@@ -81,7 +111,9 @@ public class ShopExitManager : MonoBehaviour
             boardTransform.eulerAngles = euler;
         }
 
-        // Resets global item memory and pedestal state so each shop visit generates new items
+        // ---------------------------------------------------------
+        // 6. RESETEAR PEDESTALES Y GENERAR NUEVOS ITEMS
+        // ---------------------------------------------------------
         ShopPedestalRandomizer.PrepareForReroll();
         ShopPedestalRandomizer.ClearVisitMemory();
 
@@ -97,8 +129,12 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
+        // ---------------------------------------------------------
+        // 7. NOTIFICAR ENTRADA A LA TIENDA
+        // ---------------------------------------------------------
         OnShopStateChanged?.Invoke(true);
     }
+
 
     public void TriggerGoodbye()
     {
