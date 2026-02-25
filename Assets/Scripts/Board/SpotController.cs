@@ -10,6 +10,7 @@ public class SpotController : MonoBehaviour
         spot = GetComponent<Spot>();
         spots = FindObjectsOfType<Spot>();
         AssingRandomType();
+        AssingCheckpoints(1);
     }
 
     void AssingRandomType()
@@ -18,6 +19,37 @@ public class SpotController : MonoBehaviour
         {
             s.AssignType(RandomType());
         }
+    }
+    void AssingCheckpoints(int color)
+    {
+        int[] checkpoints = null;
+
+        if (color == 1)
+        {
+            checkpoints = new int[] { 12, 22, 34, 46, 56, 68 };
+        }
+        else if (color == 2) {
+
+            checkpoints = new int[] { 29, 39, 51, 63, 5, 17 };
+
+        }else if (color == 3)
+        {
+            checkpoints = new int[] { 46, 56, 68, 12, 22, 34 };
+
+        }else
+        {
+            checkpoints = new int[] { 63, 5, 17, 29, 39, 51 };
+        }
+
+
+
+            foreach (Spot spot in spots)
+            {
+                if (System.Array.Exists(checkpoints, x => x == spot.index))
+                {
+                    spot.checkpoint = true;
+                }
+            }
     }
 
     Spot.SpotType RandomType()

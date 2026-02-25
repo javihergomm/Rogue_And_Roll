@@ -15,7 +15,7 @@ public class Movement : MonoBehaviour
 
     [SerializeField] private Transform[] positions;
     public Transform[] Positions => positions;
-
+    private ShopExitManager shopExitManager;
     public void SetPositions(Transform[] newPositions)
     {
         positions = newPositions;
@@ -28,11 +28,12 @@ public class Movement : MonoBehaviour
     bool PcanMove = true;
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip moveSound;
-
+    private int NextCheckpoint;
     public Action OnMovementFinished;
 
     private Renderer cachedRenderer;
     private bool wasHiddenByEffect = false;
+    private int round=1;
 
     // Added for lap detection and enemy initialization
     public int startPos;
@@ -42,6 +43,7 @@ public class Movement : MonoBehaviour
     {
         // Load and sort board spots
         spots = FindObjectsOfType<Spot>();
+        shopExitManager = FindFirstObjectByType<ShopExitManager>();
         Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
         // Cache positions from spots
@@ -66,6 +68,7 @@ public class Movement : MonoBehaviour
      */
     public void StartMoving()
     {
+        NextCheckpoint = GetNextCheckpoint();
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
             return;
 
@@ -77,6 +80,7 @@ public class Movement : MonoBehaviour
      */
     public void StartMovingFixed(int steps)
     {
+
         StartCoroutine(MoveWithVisibilityCheck(steps));
     }
 
@@ -102,6 +106,17 @@ public class Movement : MonoBehaviour
         }
 
         int steps = fixedSteps ?? InventoryManager.Instance.GetFinalDiceNumber();
+        int divisor = 1;
+
+        if (round >= 3)
+        {
+            divisor = ((round - 3) / 2) + 2;
+        }
+        if (isPlayer)
+        {
+            steps = steps / divisor;
+        }
+        
         yield return StartCoroutine(Move(steps));
     }
 
@@ -111,6 +126,12 @@ public class Movement : MonoBehaviour
      */
     private IEnumerator Move(int steps)
     {
+        int hipoteticSpot = actualPos + steps;
+        if(hipoteticSpot > NextCheckpoint)
+        {
+            steps = NextCheckpoint - actualPos;
+        }
+
         if (!isPlayer)
             yield return new WaitForSeconds(1f);
 
@@ -163,11 +184,19 @@ public class Movement : MonoBehaviour
         }
 
         var tipo = spots[actualPos - 1].getType();
-
-        if (tipo == Spot.SpotType.Good)
-            GoodSpotEffect();
-        else if (tipo == Spot.SpotType.Bad)
-            BadSpotEffect();
+        if (isPlayer)
+        {
+            if (spots[actualPos-1].checkpoint == true)
+            {
+                shopExitManager.EnterShop();
+                round++;
+            }
+            else if (tipo == Spot.SpotType.Good)
+                GoodSpotEffect();
+            else if (tipo == Spot.SpotType.Bad)
+                BadSpotEffect();
+        }
+        
 
         SpotConnectionManager.Instance.OnRoundStepCompleted();
 
@@ -239,7 +268,22 @@ public class Movement : MonoBehaviour
         }
     }
 
+    public int GetNextCheckpoint()
+    {
+        int total = spots.Length;
 
+        for (int i = 1; i <= total; i++)
+        {
+            int nextPos = ((actualPos - 1 + i) % total);
+
+            if (spots[nextPos].checkpoint)
+            {
+                return spots[nextPos].index;
+            }
+        }
+
+        return -1;
+    }
 
     void PlayMovementSound()
     {

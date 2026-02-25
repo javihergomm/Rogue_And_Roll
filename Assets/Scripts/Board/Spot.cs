@@ -6,6 +6,7 @@ public class Spot : MonoBehaviour
 
     public SpotType type;
 
+    public bool checkpoint;
     public enum SpotType
     {
         Good,
