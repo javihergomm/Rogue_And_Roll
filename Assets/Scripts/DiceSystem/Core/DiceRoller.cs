@@ -1,25 +1,38 @@
-using UnityEngine;
-using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
-
-[System.Serializable]
-public class FaceEntry
-{
-    public Vector3 normal;   // Local-space outward normal of the face
-    public int value;        // Numeric value of the face
-}
+using UnityEngine;
 
 /*
  * DiceRoller
  * ----------
- * Handles rolling physics, stabilization, face detection,
- * optional mid-air correction, and snapping.
- * Automatically disables itself when no Rigidbody is present
- * (e.g., when the dice is displayed in the shop).
+ * Handles the physical rolling of a dice:
+ *  - Applies force and torque to start a roll
+ *  - Waits until the dice stabilizes
+ *  - Detects the upward face
+ *  - Applies mid-air correction and snapping if needed
+ *  - Reports the final result to DiceRollManager
+ *
+ * IMPORTANT:
+ * This version does NOT react to mouse clicks anymore.
+ * Dice rolls must be triggered externally (for example, from a UI button).
  */
 public class DiceRoller : MonoBehaviour
 {
+    /*
+     * FaceEntry
+     * ---------
+     * Represents a single face of a dice.
+     * Stores:
+     *  - The local-space normal vector of the face
+     *  - The numeric value associated with that face
+     */
+    [System.Serializable]
+    public struct FaceEntry
+    {
+        public Vector3 normal;
+        public int value;
+    }
+
     private Rigidbody rb;
     private Camera cam;
 
@@ -47,13 +60,16 @@ public class DiceRoller : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
 
-        // If the dice has no Rigidbody (e.g., shop display), disable all physics logic
         if (rb == null)
             return;
 
         ResetPhysics();
     }
 
+    /*
+     * Assigns the dice data and inventory slot to this roller.
+     * Called by DiceRollManager when spawning dice in the world.
+     */
     public void AssignDice(DiceSO data, ItemSlot slot)
     {
         diceData = data;
@@ -62,7 +78,10 @@ public class DiceRoller : MonoBehaviour
         InitFaceMap();
     }
 
-    // Converts the serialized face list into a lookup dictionary
+    /*
+     * Converts the serialized face list into a dictionary
+     * mapping local-space normals to face values.
+     */
     public void InitFaceMap()
     {
         FaceMap = new Dictionary<Vector3, int>();
@@ -71,36 +90,26 @@ public class DiceRoller : MonoBehaviour
             FaceMap[entry.normal] = entry.value;
 
         if (FaceMap.Count == 0)
-            Debug.LogWarning($"{name}: Prefab has no FaceMap assigned.");
+            Debug.LogWarning(name + ": Prefab has no FaceMap assigned.");
     }
 
-    private void Update()
+    /*
+     * PUBLIC: Called externally to begin the roll routine.
+     */
+    public void StartRollRoutine()
     {
-        // Ignore input if no Rigidbody (shop mode)
-        if (rb == null)
-            return;
-
-        if (!Mouse.current.leftButton.wasPressedThisFrame)
-            return;
-
-        Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
-        if (!Physics.Raycast(ray, out RaycastHit hit))
-            return;
-
-        if (hit.collider.gameObject != gameObject)
-            return;
-
-        RollDice();
         StartCoroutine(HandleRoll());
     }
 
-    // Applies force and torque to start the roll
+    /*
+     * Applies force and torque to start the roll.
+     * Does NOT start the roll routine automatically.
+     */
     public void RollDice()
     {
         if (rb == null)
             return;
 
-        // Prevent rerolling a dice that has already been rolled this turn
         if (DiceRollManager.Instance.HasSlotRolledThisTurn(linkedSlot))
             return;
 
@@ -115,8 +124,15 @@ public class DiceRoller : MonoBehaviour
         rb.AddTorque(Random.insideUnitSphere * 50f, ForceMode.Impulse);
     }
 
-
-    // Waits for the dice to spin, slow down, and settle
+    /*
+     * Main roll routine:
+     *  - Waits for the dice to spin
+     *  - Waits for it to slow down
+     *  - Detects the physical face
+     *  - Applies mid-air correction if needed
+     *  - Snaps to allowed face if needed
+     *  - Sends final result to DiceRollManager
+     */
     private IEnumerator HandleRoll()
     {
         if (rb == null)
@@ -164,7 +180,9 @@ public class DiceRoller : MonoBehaviour
         InventoryManager.Instance.RefreshActiveDiceUI();
     }
 
-    // Applies torque to rotate the dice toward a target face while airborne
+    /*
+     * Applies torque to rotate the dice toward a target face while airborne.
+     */
     private IEnumerator ApplyMidAirCorrection(int targetValue)
     {
         if (rb == null)
@@ -190,7 +208,9 @@ public class DiceRoller : MonoBehaviour
         }
     }
 
-    // Smoothly rotates the dice to align a target face upward
+    /*
+     * Smoothly rotates the dice to align a target face upward.
+     */
     private IEnumerator SnapToFace(int targetValue)
     {
         if (rb == null)
@@ -219,7 +239,9 @@ public class DiceRoller : MonoBehaviour
         transform.rotation = endRot;
     }
 
-    // Determines which face normal is closest to world-up
+    /*
+     * Determines which face normal is closest to world-up.
+     */
     private int GetFaceUp()
     {
         float bestDot = -1f;
@@ -240,7 +262,9 @@ public class DiceRoller : MonoBehaviour
         return bestValue;
     }
 
-    // Returns the local-space normal for a given face value
+    /*
+     * Returns the local-space normal for a given face value.
+     */
     private Vector3 GetLocalDirectionForFace(int value)
     {
         foreach (var kvp in FaceMap)
@@ -250,7 +274,9 @@ public class DiceRoller : MonoBehaviour
         return Vector3.up;
     }
 
-    // Stops all motion and resets the rigidbody
+    /*
+     * Stops all motion and resets the rigidbody.
+     */
     private void ResetPhysics()
     {
         if (rb == null)

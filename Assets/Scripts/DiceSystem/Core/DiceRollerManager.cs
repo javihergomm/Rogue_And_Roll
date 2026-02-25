@@ -4,12 +4,18 @@ using System.Collections.Generic;
 /*
  * DiceRollManager
  * ----------------
- * Handles all dice-related logic:
+ * Central controller for all dice-related logic:
+ *
  *  - Spawns dice in the world
- *  - Processes dice rolls and applies effects
- *  - Stores roll history for each die
- *  - Provides final roll values for movement
- *  - Resets dice state at the end of the player's movement
+ *  - Tracks roll history for each die
+ *  - Determines allowed faces based on effects
+ *  - Applies synchronous and asynchronous dice effects
+ *  - Computes final roll values
+ *  - Detects when all dice have rolled
+ *  - Triggers player movement after the final roll
+ *
+ * This version includes RollAllActiveDice(), which rolls every active die
+ * and starts their roll routines (since clicking dice is disabled).
  */
 public class DiceRollManager : MonoBehaviour
 {
@@ -28,8 +34,13 @@ public class DiceRollManager : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private Movement playerMovement;
 
+    // Stores dice instances in the world
     private readonly Dictionary<ItemSlot, GameObject> worldDice = new();
+
+    // Stores (baseRoll, finalRoll) for each die
     private readonly Dictionary<ItemSlot, (int baseRoll, int finalRoll)> rollHistory = new();
+
+    // Tracks which dice have rolled this turn
     private readonly HashSet<ItemSlot> rolledThisTurn = new HashSet<ItemSlot>();
 
 
@@ -58,6 +69,10 @@ public class DiceRollManager : MonoBehaviour
             playerMovement.OnMovementFinished += OnPlayerFinishedMovement;
     }
 
+    /*
+     * Called when the player finishes moving.
+     * Resets dice state and starts enemy turns.
+     */
     private void OnPlayerFinishedMovement()
     {
         ResetDiceTurnState();
@@ -70,6 +85,9 @@ public class DiceRollManager : MonoBehaviour
     // DICE SPAWNING
     // -------------------------------------------------------------------------
 
+    /*
+     * Spawns a dice prefab in the world at the correct spawn point.
+     */
     public GameObject SpawnDiceInWorld(DiceSO dice, ItemSlot slot)
     {
         if (slot == null || dice == null || InventoryManager.Instance == null)
@@ -110,7 +128,6 @@ public class DiceRollManager : MonoBehaviour
         worldDice[slot] = instance;
         return instance;
     }
-
 
     public void RemoveDiceFromWorld(ItemSlot slot)
     {
@@ -154,6 +171,31 @@ public class DiceRollManager : MonoBehaviour
             DiceType.D20 => d20Prefabs,
             _ => null
         };
+    }
+
+
+    // -------------------------------------------------------------------------
+    // ROLL ALL DICE (BUTTON FEATURE)
+    // -------------------------------------------------------------------------
+
+    /*
+     * Rolls all active dice and starts their roll routines.
+     * Required because clicking dice is now disabled.
+     */
+    public void RollAllActiveDice()
+    {
+        foreach (var slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
+        {
+            if (worldDice.TryGetValue(slot, out GameObject diceObj))
+            {
+                DiceRoller roller = diceObj.GetComponent<DiceRoller>();
+                if (roller != null)
+                {
+                    roller.RollDice();          // Apply force + torque
+                    roller.StartRollRoutine();  // Start HandleRoll()
+                }
+            }
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -224,6 +266,9 @@ public class DiceRollManager : MonoBehaviour
     // ROLL PROCESSING
     // -------------------------------------------------------------------------
 
+    /*
+     * Called by DiceRoller when a dice finishes rolling.
+     */
     public void OnDiceResult(ItemSlot slot, int baseRoll)
     {
         DiceContext ctx = new()
@@ -242,7 +287,6 @@ public class DiceRollManager : MonoBehaviour
         rolledThisTurn.Add(slot);
         rollHistory[slot] = (baseRoll, finalRoll);
         FinalizeRoll(finalRoll);
-
     }
 
     private int ApplySynchronousEffects(ItemSlot slot, int roll, DiceContext ctx)
@@ -427,7 +471,9 @@ public class DiceRollManager : MonoBehaviour
             playerMovement.StartMoving();
     }
 
-
+    /*
+     * Resets all dice state at the end of the turn.
+     */
     public void ResetDiceTurnState()
     {
         rolledThisTurn.Clear();

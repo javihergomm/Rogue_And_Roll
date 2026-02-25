@@ -23,7 +23,7 @@ public class Movement : MonoBehaviour
 
     [SerializeField] float speed;
     [SerializeField] int actualPos = -1;
-    [SerializeField] public bool isPlayer;
+    public bool isPlayer;
     bool EcanMove = true;
     bool PcanMove = true;
     [SerializeField] AudioSource audioSource;
