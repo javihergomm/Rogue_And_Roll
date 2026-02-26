@@ -38,9 +38,14 @@ public class OptionPopupManager : MonoBehaviour
 
         Instance = this;
 
-        popupPanel?.SetActive(false);
-        popupSlider?.gameObject.SetActive(false);
-        sliderLabel?.gameObject.SetActive(false);
+        if (popupPanel != null)
+            popupPanel.SetActive(false);
+
+        if (popupSlider != null)
+            popupSlider.gameObject.SetActive(false);
+
+        if (sliderLabel != null)
+            sliderLabel.gameObject.SetActive(false);
     }
 
     // -------------------------------------------------------------------------
@@ -69,8 +74,11 @@ public class OptionPopupManager : MonoBehaviour
 
     public void ShowMessage(string message)
     {
-        popupPanel?.SetActive(true);
-        popupText.text = message;
+        if (popupPanel != null)
+            popupPanel.SetActive(true);
+
+        if (popupText != null)
+            popupText.text = message;
 
         ClearButtons();
         HideSlider();
@@ -78,7 +86,9 @@ public class OptionPopupManager : MonoBehaviour
 
     public void HidePopup()
     {
-        popupPanel?.SetActive(false);
+        if (popupPanel != null)
+            popupPanel.SetActive(false);
+
         ClearButtons();
         HideSlider();
     }
@@ -107,7 +117,8 @@ public class OptionPopupManager : MonoBehaviour
         btn.onClick.RemoveAllListeners();
         btn.onClick.AddListener(() =>
         {
-            popupPanel.SetActive(false);
+            if (popupPanel != null)
+                popupPanel.SetActive(false);
 
             if (useSlider && onConfirmWithNumber != null && option.IsConfirm)
             {
@@ -124,8 +135,10 @@ public class OptionPopupManager : MonoBehaviour
     private void ClearButtons()
     {
         foreach (var btn in activeButtons)
+        {
             if (btn != null)
                 Destroy(btn.gameObject);
+        }
 
         activeButtons.Clear();
     }
@@ -158,7 +171,10 @@ public class OptionPopupManager : MonoBehaviour
 
     private void HideSlider()
     {
-        popupSlider?.gameObject.SetActive(false);
-        sliderLabel?.gameObject.SetActive(false);
+        if (popupSlider != null)
+            popupSlider.gameObject.SetActive(false);
+
+        if (sliderLabel != null)
+            sliderLabel.gameObject.SetActive(false);
     }
 }

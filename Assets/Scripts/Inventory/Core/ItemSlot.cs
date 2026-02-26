@@ -29,7 +29,7 @@ public class ItemSlot : MonoBehaviour,
     [SerializeField] private Image itemImage;
     [SerializeField] private GameObject selectedShader;
 
-    public bool thisItemSelected { get; private set; }
+    public bool ThisItemSelected { get; private set; }
 
     private CanvasGroup canvasGroup;
     private GameObject dragIcon;
@@ -60,7 +60,7 @@ public class ItemSlot : MonoBehaviour,
         itemSprite = null;
         itemDescription = "";
         quantity = 0;
-        thisItemSelected = false;
+        ThisItemSelected = false;
 
         RefreshUI();
     }
@@ -74,21 +74,28 @@ public class ItemSlot : MonoBehaviour,
             quantityText.text = quantity > 1 ? quantity.ToString() : "";
 
         if (selectedShader != null)
-            selectedShader.SetActive(thisItemSelected);
+            selectedShader.SetActive(ThisItemSelected);
     }
 
     public void SelectSlot()
     {
-        InventoryManager.Instance?.DeselectAllSlots();
-        thisItemSelected = true;
-        selectedShader?.SetActive(true);
+        if (InventoryManager.Instance != null)
+            InventoryManager.Instance.DeselectAllSlots();
+
+        ThisItemSelected = true;
+
+        if (selectedShader != null)
+            selectedShader.SetActive(true);
+
         RefreshUI();
     }
 
+
     public void DeselectSlot()
     {
-        thisItemSelected = false;
-        selectedShader?.SetActive(false);
+        ThisItemSelected = false;
+        if (selectedShader != null)
+            selectedShader.SetActive(false);
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -211,12 +218,17 @@ public class ItemSlot : MonoBehaviour,
 
     public void OnDrop(PointerEventData eventData)
     {
-        ItemSlot from = eventData.pointerDrag?.GetComponent<ItemSlot>();
-        if (from == null)
+        GameObject draggedObject = eventData.pointerDrag;
+        if (draggedObject == null)
+            return;
+
+        if (!draggedObject.TryGetComponent<ItemSlot>(out var from))
             return;
 
         InventoryManager.Instance.HandleSlotDrop(from, this);
     }
+
+
 
     private void CreateDragIcon()
     {
@@ -251,7 +263,7 @@ public class ItemSlot : MonoBehaviour,
     private MonoBehaviour GetClosestSpotToMouse(PointerEventData eventData)
     {
         SpotController controller = Object.FindFirstObjectByType<SpotController>();
-        List<MonoBehaviour> all = new List<MonoBehaviour>();
+        List<MonoBehaviour> all = new();
 
         if (controller != null)
         {

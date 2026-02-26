@@ -14,8 +14,8 @@ using System.Collections.Generic;
 public class ShopExitManager : MonoBehaviour
 {
     [Header("References (assign in Inspector)")]
-    [SerializeField] private List<GameObject> shopPedestals = new List<GameObject>();
-    [SerializeField] private List<GameObject> decisionEmpties = new List<GameObject>();
+    [SerializeField] private List<GameObject> shopPedestals = new();
+    [SerializeField] private List<GameObject> decisionEmpties = new();
     [SerializeField] private Transform boardTransform;
 
     [Header("Rotation Settings")]
@@ -67,25 +67,22 @@ public class ShopExitManager : MonoBehaviour
             foreach (var enemy in EnemyManager.Instance.enemies)
             {
                 if (enemy != null)
-                    enemy.enabled = false; // desactiva Update() y StartTurn()
+                    enemy.enabled = false;
             }
         }
 
         // ---------------------------------------------------------
-        // 2. OCULTAR TABLERO (cubiletes, fichas, enemigos, dados)
+        // 2. OCULTAR TABLERO
         // ---------------------------------------------------------
         OnShopStateChanged?.Invoke(true);
-        // (Tu BoardHider u otros scripts escucharán este evento)
 
         // ---------------------------------------------------------
         // 3. BLOQUEAR INTERACCIÓN DEL TABLERO
         // ---------------------------------------------------------
-        // Bloquear movimiento del jugador
         Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
         if (playerMovement != null)
             playerMovement.enabled = false;
 
-        // Bloquear tiradas de dados
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = false;
 
@@ -121,8 +118,7 @@ public class ShopExitManager : MonoBehaviour
         {
             if (pedestalObj == null) continue;
 
-            var pedestal = pedestalObj.GetComponent<ShopPedestalRandomizer>();
-            if (pedestal != null)
+            if (pedestalObj.TryGetComponent<ShopPedestalRandomizer>(out var pedestal))
             {
                 pedestal.ResetForNextVisit();
                 pedestal.GenerateIfNeeded();
@@ -134,7 +130,6 @@ public class ShopExitManager : MonoBehaviour
         // ---------------------------------------------------------
         OnShopStateChanged?.Invoke(true);
     }
-
 
     public void TriggerGoodbye()
     {

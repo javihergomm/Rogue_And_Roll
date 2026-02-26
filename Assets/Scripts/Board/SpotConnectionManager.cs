@@ -12,10 +12,10 @@ public class SpotConnectionManager : MonoBehaviour
 {
     public static SpotConnectionManager Instance { get; private set; }
 
-    private Dictionary<int, List<int>> connections = new Dictionary<int, List<int>>();
+    private Dictionary<int, List<int>> connections = new();
 
     // Active bridges with their remaining round duration
-    private List<BridgeData> activeBridges = new List<BridgeData>();
+    private List<BridgeData> activeBridges = new();
 
     private void Awake()
     {

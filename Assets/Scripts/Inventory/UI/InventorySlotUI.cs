@@ -14,12 +14,6 @@ public class InventorySlotUI : MonoBehaviour
     [SerializeField] private Image itemImage;
     [SerializeField] private Sprite emptySprite;
 
-    // Connects this UI element to its corresponding ItemSlot
-    public void Initialize(ItemSlot slot)
-    {
-        // No drag handler needed in the current system
-    }
-
     public void UpdateUI(Sprite sprite, int quantity)
     {
         itemImage.sprite = sprite != null ? sprite : emptySprite;

@@ -61,17 +61,16 @@ public class CharacterSpawner : MonoBehaviour
             return;
         }
 
-        Transform spawnPoint = GameObject.Find(character.spawnPointName)?.transform;
-
-        if (spawnPoint == null)
+        GameObject spawnObj = GameObject.Find(character.spawnPointName);
+        if (spawnObj == null)
         {
             Debug.LogError("Spawn point not found: " + character.spawnPointName);
             return;
         }
 
+        Transform spawnPoint = spawnObj.transform;
         currentCup = Instantiate(character.cupPrefab, spawnPoint.position, spawnPoint.rotation);
 
-        // Register cup so BoardHider can hide it inside the shop
         if (BoardHider.Instance != null)
             BoardHider.Instance.RegisterObject(currentCup);
 
@@ -103,7 +102,6 @@ public class CharacterSpawner : MonoBehaviour
         Transform tilePoint = spots[character.tileSpotIndex].transform;
         currentTile = Instantiate(character.tilePrefab, tilePoint.position, tilePoint.rotation);
 
-        // Register tile so BoardHider can hide it inside the shop
         if (BoardHider.Instance != null)
             BoardHider.Instance.RegisterObject(currentTile);
 
@@ -120,17 +118,20 @@ public class CharacterSpawner : MonoBehaviour
      */
     private void RegisterMovementFromSpawnedObjects()
     {
-        Movement mov = currentCup?.GetComponentInChildren<Movement>()
-                      ?? currentTile?.GetComponentInChildren<Movement>();
+        Movement mov = null;
+
+        if (currentCup != null)
+            mov = currentCup.GetComponentInChildren<Movement>();
+
+        if (mov == null && currentTile != null)
+            mov = currentTile.GetComponentInChildren<Movement>();
 
         if (mov != null)
         {
             DiceRollManager.Instance.RegisterPlayerMovement(mov);
 
-            // Assign initial board index
             mov.ActualPos = lastCharacter.tileSpotIndex;
 
-            // Place the piece at the correct starting tile
             if (mov.Positions != null &&
                 mov.ActualPos >= 0 &&
                 mov.ActualPos < mov.Positions.Length)
@@ -169,7 +170,9 @@ public class CharacterSpawner : MonoBehaviour
 
     private void ApplyPaletteToCup(GameObject obj, Color light, Color dark)
     {
-        foreach (Renderer r in obj.GetComponentsInChildren<Renderer>())
+        Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+
+        foreach (Renderer r in renderers)
         {
             Material[] mats = r.materials;
 
@@ -187,7 +190,9 @@ public class CharacterSpawner : MonoBehaviour
     {
         string baseName = targetMat.name;
 
-        foreach (Renderer r in tile.GetComponentsInChildren<Renderer>())
+        Renderer[] renderers = tile.GetComponentsInChildren<Renderer>();
+
+        foreach (Renderer r in renderers)
         {
             Material[] mats = r.materials;
 

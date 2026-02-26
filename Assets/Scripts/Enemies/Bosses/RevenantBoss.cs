@@ -180,7 +180,7 @@ public class RevenantBoss : EnemyBase
 
     private int[] GetRowsForSpot(int spot)
     {
-        List<int> result = new List<int>();
+        List<int> result = new();
 
         for (int i = 0; i < rows.Length; i++)
         {

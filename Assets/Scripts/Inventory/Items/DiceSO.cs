@@ -19,17 +19,15 @@ public class DiceSO : BaseItemSO
     public DiceType DiceType => diceType;
     public BaseEffect[] Effects => effects;
 
-    public int GetMaxFaceValue()
-    {
-        switch (diceType)
-        {
-            case DiceType.D4: return 4;
-            case DiceType.D6: return 6;
-            case DiceType.D8: return 8;
-            case DiceType.D20: return 20;
-        }
-        return 0;
-    }
+    public int GetMaxFaceValue() =>
+     diceType switch
+     {
+         DiceType.D4 => 4,
+         DiceType.D6 => 6,
+         DiceType.D8 => 8,
+         DiceType.D20 => 20,
+         _ => 0
+     };
 
     public override void UseItem() { }
 

@@ -28,8 +28,8 @@ public class DestinyChoiceEffect : BaseDiceEffect
         // Nuevo sistema de opciones
         var options = new List<PopupOption>
         {
-            new PopupOption($"Tirada actual: {currentRoll}", () => callback(currentRoll), isConfirm: true),
-            new PopupOption($"Tirada alternativa: {alt}", () => callback(alt))
+            new($"Tirada actual: {currentRoll}", () => callback(currentRoll), isConfirm: true),
+            new($"Tirada alternativa: {alt}", () => callback(alt))
         };
 
         OptionPopupManager.Instance.ShowPopup(

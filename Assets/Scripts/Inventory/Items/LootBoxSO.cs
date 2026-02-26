@@ -53,7 +53,7 @@ public class LootBoxSO : BaseItemSO
         if (possibleItems == null)
             return;
 
-        List<BaseItemSO> valid = new List<BaseItemSO>();
+        List<BaseItemSO> valid = new();
 
         foreach (var item in possibleItems)
         {

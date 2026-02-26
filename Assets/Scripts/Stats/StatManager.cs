@@ -101,7 +101,7 @@ public class StatManager : MonoBehaviour
      */
     public void RegisterConsumableEffects(ConsumableSO item)
     {
-        if (item?.Effects == null)
+        if (item == null || item.Effects == null)
             return;
 
         foreach (var eff in item.Effects)
@@ -117,7 +117,6 @@ public class StatManager : MonoBehaviour
             }
         }
     }
-
 
     /*
      * Registers a passive effect that executes every turn.
@@ -185,7 +184,7 @@ public class StatManager : MonoBehaviour
         ResetTurnFlags();
 
         // Execute passive effects
-        PassiveContext ctx = new PassiveContext();
+        PassiveContext ctx = new();
         foreach (var eff in ActivePassiveEffects)
             eff.OnTurnStart(ctx);
 

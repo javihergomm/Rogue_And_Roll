@@ -4,43 +4,36 @@ using UnityEngine;
  * EnemyBase
  * ---------
  * Base class for all enemies.
- *
- * Responsibilities:
- * - Spawns the enemy's cup at the spawn point opposite to the player's spawn.
- * - Provides shared references (player, movement, data).
- * - Offers a universal method to place the enemy's token safely behind the player.
- * - Defines the turn structure through the abstract StartTurn() method.
  */
 public class EnemyBase : MonoBehaviour
 {
     [Header("Enemy Data")]
-    public EnemySO data;              // ScriptableObject containing enemy configuration
+    public EnemySO data;
 
-    protected GameObject cupInstance; // Spawned enemy cup
-    protected GameObject tileInstance; // Spawned enemy tile (optional, depends on enemy type)
+    protected GameObject cupInstance;
+    protected GameObject tileInstance;
 
-    public Transform player;          // Reference to the player
-    public Movement movement;         // Movement component for the enemy token
+    public Transform player;
+    public Movement movement;
 
-    protected bool isActive = false;  // Whether the enemy is active in the game
+    private Movement cachedPlayerMovement;
+    protected bool isActive = false;
 
     /*
      * SpawnEnemy
      * ----------
      * Spawns the enemy's cup at the spawn point opposite to the player's spawn.
-     * Token spawning is handled by child classes.
      */
     public virtual void SpawnEnemy()
     {
         isActive = true;
 
-        // Get player's spawn name
-        string playerSpawnName = CharacterSelectManager.Instance.SelectedCharacter.spawnPointName;
+        if (player != null)
+            cachedPlayerMovement = player.GetComponent<Movement>();
 
-        // Determine opposite spawn
+        string playerSpawnName = CharacterSelectManager.Instance.SelectedCharacter.spawnPointName;
         string enemyCupSpawnName = GetOppositeSpawn(playerSpawnName);
 
-        // Find spawn point (case-insensitive)
         Transform cupSpawn = FindSpawnPoint(enemyCupSpawnName);
 
         if (cupSpawn == null)
@@ -50,10 +43,8 @@ public class EnemyBase : MonoBehaviour
             return;
         }
 
-        // Spawn the enemy cup
         cupInstance = Instantiate(data.cupPrefab, cupSpawn.position, cupSpawn.rotation);
 
-        // Register cup so BoardHider can hide it inside the shop
         if (BoardHider.Instance != null)
             BoardHider.Instance.RegisterObject(cupInstance);
     }
@@ -62,15 +53,6 @@ public class EnemyBase : MonoBehaviour
      * PlaceEnemyBehindPlayer
      * ----------------------
      * Places the enemy token behind the player at a safe distance.
-     *
-     * The safe distance is calculated as:
-     *      playerSpot - (maxRoll + 1)
-     *
-     * This guarantees that the enemy cannot reach the player
-     * with its highest possible roll during the turn that begins.
-     *
-     * Parameters:
-     * - maxRoll: the maximum roll value the enemy can achieve.
      */
     protected void PlaceEnemyBehindPlayer(int maxRoll)
     {
@@ -80,16 +62,13 @@ public class EnemyBase : MonoBehaviour
             return;
         }
 
-        Movement playerMovement = player.GetComponent<Movement>();
-        if (playerMovement == null)
+        // Usar el componente cacheado (sin GetComponent)
+        if (cachedPlayerMovement == null)
             return;
 
-        int playerSpot = playerMovement.ActualPos;
+        int playerSpot = cachedPlayerMovement.ActualPos;
 
-        // Safe distance behind the player
         int safeSpot = playerSpot - (maxRoll + 1);
-
-        // Clamp to minimum spot
         safeSpot = Mathf.Max(1, safeSpot);
 
         movement.ActualPos = safeSpot;
@@ -101,8 +80,6 @@ public class EnemyBase : MonoBehaviour
     /*
      * GetOppositeSpawn
      * ----------------
-     * Returns the opposite spawn point name based on the player's spawn.
-     * Case-insensitive and returns exact scene names.
      */
     private string GetOppositeSpawn(string playerSpawn)
     {
@@ -120,7 +97,6 @@ public class EnemyBase : MonoBehaviour
     /*
      * FindSpawnPoint
      * --------------
-     * Finds a GameObject in the scene by name, case-insensitive.
      */
     private Transform FindSpawnPoint(string name)
     {
@@ -128,7 +104,8 @@ public class EnemyBase : MonoBehaviour
 
         foreach (GameObject obj in allObjects)
         {
-            if (obj.scene.isLoaded && obj.name.Equals(name, System.StringComparison.OrdinalIgnoreCase))
+            if (obj.scene.isLoaded &&
+                obj.name.Equals(name, System.StringComparison.OrdinalIgnoreCase))
                 return obj.transform;
         }
 
@@ -138,7 +115,6 @@ public class EnemyBase : MonoBehaviour
     /*
      * StartTurn
      * ---------
-     * Called by the turn manager. Each enemy implements its own behavior.
      */
     public virtual void StartTurn() { }
 }

@@ -19,8 +19,8 @@ public static class PopupHelpers
     {
         var options = new List<PopupOption>
         {
-            new PopupOption("Si", onConfirm, isConfirm: true),
-            new PopupOption("No", onCancel)
+            new("Si", onConfirm, isConfirm: true),
+            new("No", onCancel)
         };
 
         OptionPopupManager.Instance.ShowPopup(
@@ -37,7 +37,7 @@ public static class PopupHelpers
     {
         var options = new List<PopupOption>
         {
-            new PopupOption("Si, reemplazar un objeto", () =>
+            new("Si, reemplazar un objeto", () =>
             {
                 InventoryManager.Instance.PrepareReplace(
                     InventoryManager.Instance.GetItemSO(itemName),
@@ -46,7 +46,7 @@ public static class PopupHelpers
                 InventoryManager.Instance.OpenInventory();
             }, isConfirm: true),
 
-            new PopupOption("No reemplazar", () => {})
+            new("No reemplazar", () => {})
         };
 
         OptionPopupManager.Instance.ShowPopup(
@@ -65,8 +65,8 @@ public static class PopupHelpers
 
         var options = new List<PopupOption>
         {
-            new PopupOption("Confirmar", onConfirm, isConfirm: true),
-            new PopupOption("Cancelar", () => {})
+            new("Confirmar", onConfirm, isConfirm: true),
+            new("Cancelar", () => {})
         };
 
         OptionPopupManager.Instance.ShowPopup(message, options);
@@ -85,12 +85,12 @@ public static class PopupHelpers
 
         var options = new List<PopupOption>
         {
-            new PopupOption("Eliminar 1 unidad", () =>
+            new("Eliminar 1 unidad", () =>
             {
                 InventoryManager.Instance.RemoveItem(itemSlots[0], 1);
             }, isConfirm: true),
 
-            new PopupOption("Eliminar todo", () =>
+            new("Eliminar todo", () =>
             {
                 foreach (var slot in itemSlots)
                 {
@@ -99,7 +99,7 @@ public static class PopupHelpers
                 }
             }),
 
-            new PopupOption("Eliminar cantidad personalizada", () =>
+            new("Eliminar cantidad personalizada", () =>
             {
                 int total = 0;
                 foreach (var slot in itemSlots)
@@ -108,7 +108,7 @@ public static class PopupHelpers
                 ShowNumberSliderPopup(itemSlots, total);
             }),
 
-            new PopupOption("Cancelar", () => {})
+            new("Cancelar", () => {})
         };
 
         OptionPopupManager.Instance.ShowPopup(
@@ -127,8 +127,8 @@ public static class PopupHelpers
 
         var options = new List<PopupOption>
         {
-            new PopupOption("Confirmar", () => {}, isConfirm: true),
-            new PopupOption("Cancelar", () => {})
+            new("Confirmar", () => {}, isConfirm: true),
+            new("Cancelar", () => {})
         };
 
         OptionPopupManager.Instance.ShowPopup(
@@ -161,8 +161,8 @@ public static class PopupHelpers
     {
         var options = new List<PopupOption>
         {
-            new PopupOption("Si", onConfirm, isConfirm: true),
-            new PopupOption("No", onCancel)
+            new("Si", onConfirm, isConfirm: true),
+            new("No", onCancel)
         };
 
         OptionPopupManager.Instance.ShowPopup(

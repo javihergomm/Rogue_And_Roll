@@ -35,7 +35,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
     private void EnsureSingleContainer()
     {
-        List<Transform> containers = new List<Transform>();
+        List<Transform> containers = new();
 
         foreach (Transform t in GetComponentsInChildren<Transform>())
         {
@@ -65,8 +65,9 @@ public class ShopPedestalRandomizer : MonoBehaviour
     {
         itemContainer = new GameObject("ItemContainer").transform;
         itemContainer.SetParent(transform);
-        itemContainer.localPosition = Vector3.zero;
-        itemContainer.localRotation = Quaternion.identity;
+
+        // OPTIMIZADO: una sola llamada
+        itemContainer.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         itemContainer.localScale = Vector3.one;
     }
 
@@ -116,7 +117,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
         spawnedModel = null;
 
-        List<BaseItemSO> availableItems = new List<BaseItemSO>();
+        List<BaseItemSO> availableItems = new();
 
         foreach (var item in possibleItems)
         {
@@ -151,8 +152,8 @@ public class ShopPedestalRandomizer : MonoBehaviour
             EnsureSingleContainer();
 
         spawnedModel = Instantiate(chosenItem.Prefab3D, itemContainer);
-        spawnedModel.transform.localPosition = Vector3.zero;
-        spawnedModel.transform.localRotation = Quaternion.identity;
+
+        spawnedModel.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         spawnedModel.transform.localScale = Vector3.one;
 
         foreach (var rb in spawnedModel.GetComponentsInChildren<Rigidbody>())
@@ -287,6 +288,13 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
         SceneView.RepaintAll();
     }
-    public void ForceRefreshForEditor() { EnsureSingleContainer(); hasGeneratedThisVisit = false; RefreshItem(); SceneView.RepaintAll(); }
+
+    public void ForceRefreshForEditor()
+    {
+        EnsureSingleContainer();
+        hasGeneratedThisVisit = false;
+        RefreshItem();
+        SceneView.RepaintAll();
+    }
 #endif
 }

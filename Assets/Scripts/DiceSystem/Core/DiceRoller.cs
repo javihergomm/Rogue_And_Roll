@@ -43,7 +43,7 @@ public class DiceRoller : MonoBehaviour
     [SerializeField] private DiceType diceType = DiceType.D6;
 
     [Header("Face Map (Prefab Only)")]
-    [SerializeField] private List<FaceEntry> serializedFaceMap = new List<FaceEntry>();
+    [SerializeField] private List<FaceEntry> serializedFaceMap = new();
 
     public Dictionary<Vector3, int> FaceMap { get; private set; }
 
@@ -148,7 +148,7 @@ public class DiceRoller : MonoBehaviour
 
         int physicalRoll = GetFaceUp();
 
-        DiceContext ctx = new DiceContext
+        DiceContext ctx = new()
         {
             turnNumber = StatManager.Instance.CurrentTurn,
             previousRoll = StatManager.Instance.PreviousRoll,

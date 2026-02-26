@@ -17,7 +17,7 @@ public class MathDiceEffect : BaseDiceEffect
     [SerializeField] private MathOperation operation;
     [SerializeField] private float value = 1f;
     [SerializeField] private bool roundUp = true;
-    [SerializeField] private Vector2Int randomMultiplierRange = new Vector2Int(2, 5);
+    [SerializeField] private Vector2Int randomMultiplierRange = new(2, 5);
 
     public override void ApplyToRange(ref int minAllowed, ref int maxAllowed, DiceContext ctx)
     {

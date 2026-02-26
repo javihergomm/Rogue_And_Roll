@@ -1,22 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/*
- * DiceRollManager
- * ----------------
- * Central controller for all dice-related logic:
- *
- *  - Spawns dice in the world
- *  - Tracks roll history for each die
- *  - Determines allowed faces based on effects
- *  - Applies synchronous and asynchronous dice effects
- *  - Computes final roll values
- *  - Detects when all dice have rolled
- *  - Triggers player movement after the final roll
- *
- * This version includes RollAllActiveDice(), which rolls every active die
- * and starts their roll routines (since clicking dice is disabled).
- */
 public class DiceRollManager : MonoBehaviour
 {
     public static DiceRollManager Instance { get; private set; }
@@ -34,15 +18,20 @@ public class DiceRollManager : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private Movement playerMovement;
 
-    // Stores dice instances in the world
     private readonly Dictionary<ItemSlot, GameObject> worldDice = new();
 
-    // Stores (baseRoll, finalRoll) for each die
+    private readonly Dictionary<ItemSlot, DiceCached> cachedDice = new();
+
     private readonly Dictionary<ItemSlot, (int baseRoll, int finalRoll)> rollHistory = new();
 
-    // Tracks which dice have rolled this turn
-    private readonly HashSet<ItemSlot> rolledThisTurn = new HashSet<ItemSlot>();
+    private readonly HashSet<ItemSlot> rolledThisTurn = new();
 
+    private struct DiceCached
+    {
+        public DiceRoller roller;
+        public Rigidbody body;
+        public Collider col;
+    }
 
     private void Awake()
     {
@@ -69,10 +58,6 @@ public class DiceRollManager : MonoBehaviour
             playerMovement.OnMovementFinished += OnPlayerFinishedMovement;
     }
 
-    /*
-     * Called when the player finishes moving.
-     * Resets dice state and starts enemy turns.
-     */
     private void OnPlayerFinishedMovement()
     {
         ResetDiceTurnState();
@@ -85,16 +70,13 @@ public class DiceRollManager : MonoBehaviour
     // DICE SPAWNING
     // -------------------------------------------------------------------------
 
-    /*
-     * Spawns a dice prefab in the world at the correct spawn point.
-     */
     public GameObject SpawnDiceInWorld(DiceSO dice, ItemSlot slot)
     {
         if (slot == null || dice == null || InventoryManager.Instance == null)
             return null;
 
-        if (worldDice.ContainsKey(slot))
-            return worldDice[slot];
+        if (worldDice.TryGetValue(slot, out GameObject existing))
+            return existing;
 
         List<GameObject> prefabList = GetPrefabListForDice(dice.DiceType);
         if (prefabList == null || prefabList.Count == 0)
@@ -118,12 +100,20 @@ public class DiceRollManager : MonoBehaviour
         if (BoardHider.Instance != null)
             BoardHider.Instance.RegisterObject(instance);
 
-        DiceRoller roller = instance.GetComponent<DiceRoller>();
-        if (roller != null)
-            roller.AssignDice(dice, slot);
+        DiceCached cache = new()
+        {
+            roller = instance.GetComponent<DiceRoller>(),
+            body = instance.GetComponent<Rigidbody>(),
+            col = instance.GetComponent<Collider>()
+        };
 
-        AdjustSpawnHeight(instance);
-        ResetPhysics(instance);
+        cachedDice[slot] = cache;
+
+        if (cache.roller != null)
+            cache.roller.AssignDice(dice, slot);
+
+        AdjustSpawnHeight(instance, cache.col);
+        ResetPhysics(cache.body);
 
         worldDice[slot] = instance;
         return instance;
@@ -134,14 +124,17 @@ public class DiceRollManager : MonoBehaviour
         if (!worldDice.ContainsKey(slot))
             return;
 
-        Destroy(worldDice[slot]);
+        GameObject obj = worldDice[slot];
+        if (obj != null)
+            Destroy(obj);
+
         worldDice.Remove(slot);
+        cachedDice.Remove(slot);
         rollHistory.Remove(slot);
     }
 
-    private void AdjustSpawnHeight(GameObject instance)
+    private void AdjustSpawnHeight(GameObject instance, Collider col)
     {
-        Collider col = instance.GetComponent<Collider>();
         if (col == null)
             return;
 
@@ -150,9 +143,8 @@ public class DiceRollManager : MonoBehaviour
         instance.transform.position = new Vector3(p.x, p.y + halfHeight + spawnLift, p.z);
     }
 
-    private void ResetPhysics(GameObject instance)
+    private void ResetPhysics(Rigidbody rb)
     {
-        Rigidbody rb = instance.GetComponent<Rigidbody>();
         if (rb == null)
             return;
 
@@ -169,31 +161,27 @@ public class DiceRollManager : MonoBehaviour
             DiceType.D6 => d6Prefabs,
             DiceType.D8 => d8Prefabs,
             DiceType.D20 => d20Prefabs,
-            _ => null
+            _ => null,
         };
     }
 
-
     // -------------------------------------------------------------------------
-    // ROLL ALL DICE (BUTTON FEATURE)
+    // ROLL ALL DICE
     // -------------------------------------------------------------------------
 
-    /*
-     * Rolls all active dice and starts their roll routines.
-     * Required because clicking dice is now disabled.
-     */
     public void RollAllActiveDice()
     {
-        foreach (var slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
+        foreach (ItemSlot slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
         {
-            if (worldDice.TryGetValue(slot, out GameObject diceObj))
+            if (!worldDice.ContainsKey(slot))
+                continue;
+
+            DiceCached cache = cachedDice[slot];
+
+            if (cache.roller != null)
             {
-                DiceRoller roller = diceObj.GetComponent<DiceRoller>();
-                if (roller != null)
-                {
-                    roller.RollDice();          // Apply force + torque
-                    roller.StartRollRoutine();  // Start HandleRoll()
-                }
+                cache.roller.RollDice();
+                cache.roller.StartRollRoutine();
             }
         }
     }
@@ -210,7 +198,8 @@ public class DiceRollManager : MonoBehaviour
             return allowed;
 
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.ItemName);
-        if (item is not DiceSO dice)
+        DiceSO dice = item as DiceSO;
+        if (dice == null)
             return allowed;
 
         int minAllowed = 1;
@@ -244,40 +233,44 @@ public class DiceRollManager : MonoBehaviour
         if (effects == null)
             return;
 
-        foreach (var eff in effects)
-            if (eff is BaseDiceEffect diceEff)
+        foreach (BaseEffect eff in effects)
+        {
+            BaseDiceEffect diceEff = eff as BaseDiceEffect;
+            if (diceEff != null)
                 diceEff.ApplyToRange(ref min, ref max, ctx);
+        }
     }
 
     private void ApplyCharacterEffectsToRange(ref int min, ref int max, DiceContext ctx)
     {
-        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+        foreach (BaseDiceEffect eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             eff.ApplyToRange(ref min, ref max, ctx);
     }
 
     private void ApplyConsumableEffectsToRange(ref int min, ref int max, DiceContext ctx)
     {
-        foreach (var eff in StatManager.Instance.ActiveConsumableEffects)
-            if (eff is BaseDiceEffect diceEff)
+        foreach (BaseEffect eff in StatManager.Instance.ActiveConsumableEffects)
+        {
+            BaseDiceEffect diceEff = eff as BaseDiceEffect;
+            if (diceEff != null)
                 diceEff.ApplyToRange(ref min, ref max, ctx);
+        }
     }
 
     // -------------------------------------------------------------------------
     // ROLL PROCESSING
     // -------------------------------------------------------------------------
 
-    /*
-     * Called by DiceRoller when a dice finishes rolling.
-     */
     public void OnDiceResult(ItemSlot slot, int baseRoll)
     {
-        DiceContext ctx = new()
+        DiceContext diceContext = new()
         {
             turnNumber = StatManager.Instance.CurrentTurn,
             previousRoll = StatManager.Instance.PreviousRoll,
             slot = slot,
             IsFinal = true
         };
+        DiceContext ctx = diceContext;
 
         int finalRoll = ApplySynchronousEffects(slot, baseRoll, ctx);
 
@@ -294,16 +287,20 @@ public class DiceRollManager : MonoBehaviour
         int result = roll;
 
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.ItemName);
-        if (item is DiceSO dice && dice.Effects != null)
+        DiceSO dice = item as DiceSO;
+        if (dice != null && dice.Effects != null)
             result = ApplySyncList(dice.Effects, result, ctx);
 
-        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+        foreach (BaseDiceEffect eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             if (!eff.RequiresAsyncResolution)
                 result = eff.ModifyRoll(result, ctx);
 
-        foreach (var eff in StatManager.Instance.ActiveConsumableEffects)
-            if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
+        foreach (BaseEffect eff in StatManager.Instance.ActiveConsumableEffects)
+        {
+            BaseDiceEffect diceEff = eff as BaseDiceEffect;
+            if (diceEff != null && !diceEff.RequiresAsyncResolution)
                 result = diceEff.ModifyRoll(result, ctx);
+        }
 
         return result;
     }
@@ -312,9 +309,12 @@ public class DiceRollManager : MonoBehaviour
     {
         int result = roll;
 
-        foreach (var eff in effects)
-            if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
+        foreach (BaseEffect eff in effects)
+        {
+            BaseDiceEffect diceEff = eff as BaseDiceEffect;
+            if (diceEff != null && !diceEff.RequiresAsyncResolution)
                 result = diceEff.ModifyRoll(result, ctx);
+        }
 
         return result;
     }
@@ -322,26 +322,32 @@ public class DiceRollManager : MonoBehaviour
     private bool TryResolveAsyncEffects(ItemSlot slot, int baseRoll, int finalRoll, DiceContext ctx)
     {
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.ItemName);
-        if (item is DiceSO dice && dice.Effects != null)
+        DiceSO dice = item as DiceSO;
+
+        if (dice != null && dice.Effects != null)
             if (TryAsyncList(dice.Effects, slot, baseRoll, finalRoll, ctx))
                 return true;
 
-        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+        foreach (BaseDiceEffect eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             if (eff.RequiresAsyncResolution)
                 return ResolveAsync(slot, baseRoll, finalRoll, ctx, eff);
 
-        foreach (var eff in StatManager.Instance.ActiveConsumableEffects)
-            if (eff is BaseDiceEffect diceEff && diceEff.RequiresAsyncResolution)
+        foreach (BaseEffect eff in StatManager.Instance.ActiveConsumableEffects)
+        {
+            BaseDiceEffect diceEff = eff as BaseDiceEffect;
+            if (diceEff != null && diceEff.RequiresAsyncResolution)
                 return ResolveAsync(slot, baseRoll, finalRoll, ctx, diceEff);
+        }
 
         return false;
     }
 
     private bool TryAsyncList(BaseEffect[] effects, ItemSlot slot, int baseRoll, int finalRoll, DiceContext ctx)
     {
-        foreach (var eff in effects)
+        foreach (BaseEffect eff in effects)
         {
-            if (eff is BaseDiceEffect diceEff && diceEff.RequiresAsyncResolution)
+            BaseDiceEffect diceEff = eff as BaseDiceEffect;
+            if (diceEff != null && diceEff.RequiresAsyncResolution)
                 return ResolveAsync(slot, baseRoll, finalRoll, ctx, diceEff);
         }
 
@@ -350,7 +356,7 @@ public class DiceRollManager : MonoBehaviour
 
     private bool ResolveAsync(ItemSlot slot, int baseRoll, int finalRoll, DiceContext ctx, BaseDiceEffect eff)
     {
-        eff.ModifyRollAsync(finalRoll, ctx, resolvedValue =>
+        eff.ModifyRollAsync(finalRoll, ctx, delegate (int resolvedValue)
         {
             rollHistory[slot] = (baseRoll, resolvedValue);
             FinalizeRoll(resolvedValue);
@@ -369,16 +375,21 @@ public class DiceRollManager : MonoBehaviour
         int result = rawRoll;
 
         BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.ItemName);
-        if (item is DiceSO dice && dice.Effects != null)
+        DiceSO dice = item as DiceSO;
+
+        if (dice != null && dice.Effects != null)
             result = ApplySyncList(dice.Effects, result, ctx);
 
-        foreach (var eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+        foreach (BaseDiceEffect eff in CharacterEffectManager.Instance.ActiveDiceEffects)
             if (!eff.RequiresAsyncResolution)
                 result = eff.ModifyRoll(result, ctx);
 
-        foreach (var eff in StatManager.Instance.ActiveConsumableEffects)
-            if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
+        foreach (BaseEffect eff in StatManager.Instance.ActiveConsumableEffects)
+        {
+            BaseDiceEffect diceEff = eff as BaseDiceEffect;
+            if (diceEff != null && !diceEff.RequiresAsyncResolution)
                 result = diceEff.ModifyRoll(result, ctx);
+        }
 
         return result;
     }
@@ -389,7 +400,7 @@ public class DiceRollManager : MonoBehaviour
 
     public (int baseRoll, int finalRoll)? GetRollInfo(ItemSlot slot)
     {
-        if (rollHistory.TryGetValue(slot, out var info))
+        if (rollHistory.TryGetValue(slot, out (int baseRoll, int finalRoll) info))
             return info;
 
         return null;
@@ -402,7 +413,7 @@ public class DiceRollManager : MonoBehaviour
 
     public bool HaveAllActiveDiceRolled()
     {
-        foreach (var slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
+        foreach (ItemSlot slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
         {
             if (!rolledThisTurn.Contains(slot))
                 return false;
@@ -414,9 +425,9 @@ public class DiceRollManager : MonoBehaviour
     {
         int total = 0;
 
-        foreach (var slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
+        foreach (ItemSlot slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
         {
-            if (rollHistory.TryGetValue(slot, out var info))
+            if (rollHistory.TryGetValue(slot, out (int baseRoll, int finalRoll) info))
                 total += info.finalRoll;
         }
 
@@ -466,14 +477,10 @@ public class DiceRollManager : MonoBehaviour
         Debug.Log("Final roll result: " + finalRoll);
         StatManager.Instance.OnDiceFinalResult(finalRoll);
 
-        // Trigger player movement after the final roll
         if (playerMovement != null)
             playerMovement.StartMoving();
     }
 
-    /*
-     * Resets all dice state at the end of the turn.
-     */
     public void ResetDiceTurnState()
     {
         rolledThisTurn.Clear();

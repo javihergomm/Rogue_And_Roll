@@ -12,7 +12,7 @@ public class BoardHider : MonoBehaviour
 {
     public static BoardHider Instance;
 
-    private List<GameObject> objectsToHide = new List<GameObject>();
+    private List<GameObject> objectsToHide = new();
 
     private void Awake()
     {

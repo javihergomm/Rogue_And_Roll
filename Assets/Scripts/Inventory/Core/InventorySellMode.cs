@@ -24,7 +24,9 @@ public class InventorySellMode
 
     public void HandleClick(ItemSlot slot)
     {
-        activePedestal?.OnItemClicked(slot);
+        if (activePedestal != null)
+            activePedestal.OnItemClicked(slot);
+
     }
 }
 

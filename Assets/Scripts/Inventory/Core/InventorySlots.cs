@@ -22,7 +22,7 @@ public class InventorySlots
     [SerializeField] private BaseItemSO[] itemSOs;
 
     private Dictionary<string, BaseItemSO> lookup;
-    private readonly List<ItemSlot> allSlots = new List<ItemSlot>();
+    private readonly List<ItemSlot> allSlots = new();
 
     public IReadOnlyList<ItemSlot> AllSlots => allSlots;
     public List<ItemSlot> ActiveDiceSlots => activeDiceSlots;
@@ -148,7 +148,7 @@ public class InventorySlots
 
         if (item is LootBoxSO box)
         {
-            if (!slot.thisItemSelected)
+            if (!slot.ThisItemSelected)
             {
                 slot.SelectSlot();
                 return;
@@ -161,7 +161,7 @@ public class InventorySlots
 
         if (item is ConsumableSO cons)
         {
-            if (!slot.thisItemSelected)
+            if (!slot.ThisItemSelected)
             {
                 slot.SelectSlot();
                 return;

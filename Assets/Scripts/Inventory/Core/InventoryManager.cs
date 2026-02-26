@@ -167,7 +167,7 @@ public class InventoryManager : MonoBehaviour
 
         BaseItemSO item = GetItemSO(from.ItemName);
 
-        if (activeDice.Contains(to) && !(item is DiceSO))
+        if (activeDice.Contains(to) && item is not DiceSO)
         {
             Debug.Log("Cannot drop non-dice into active dice slot");
             return;
@@ -329,7 +329,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         BaseItemSO item = GetItemSO(slot.ItemName);
-        if (!(item is ConsumableSO consumable))
+        if (item is not ConsumableSO consumable)
         {
             Debug.Log("Item is not ConsumableSO");
             return;
@@ -337,7 +337,7 @@ public class InventoryManager : MonoBehaviour
 
         Debug.Log("Consumable detected: " + consumable.ItemName);
 
-        ConsumableContext ctx = new ConsumableContext();
+        ConsumableContext ctx = new();
 
         if (target is ColorSpot colorSpot)
         {
