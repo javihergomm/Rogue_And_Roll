@@ -8,7 +8,7 @@ public class SpotController : MonoBehaviour
     void Start()
     {
         spot = GetComponent<Spot>();
-        spots = FindObjectsOfType<Spot>();
+        spots = UnityEngine.Object.FindObjectsByType<Spot>(FindObjectsSortMode.None);
         AssingRandomType();
         AssingCheckpoints(1);
     }

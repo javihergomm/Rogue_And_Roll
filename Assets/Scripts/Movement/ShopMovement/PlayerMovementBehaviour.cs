@@ -25,7 +25,7 @@ public class PlayerMovementBehaviour : MonoBehaviour
         Vector3 moveDirection = CalculateMoveDirection();
 
         // Move the playerObject in the chosen direction
-        transform.position += moveDirection * movementSpeed * Time.deltaTime;
+        transform.position += movementSpeed * Time.deltaTime * moveDirection;
 
         // Rotate towards movement direction if moving
         if (moveDirection.magnitude != 0)

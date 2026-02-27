@@ -4,8 +4,6 @@
  * Provides contextual information for dice roll effects.
  * Used by BaseDiceEffect and its subclasses to evaluate conditions
  * or modify the roll result based on game state.
- *
- * This class contains ONLY data. It has no logic.
  */
 public class DiceContext
 {

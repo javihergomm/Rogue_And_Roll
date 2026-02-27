@@ -823,7 +823,7 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Standalone: ENABLE_UNITY_COLLECTIONS_CHECKS
+    Standalone: ENABLE_UNITY_COLLECTIONS_CHECKS;-diag-job-temp-memory-leak-validation
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
