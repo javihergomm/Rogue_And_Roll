@@ -30,6 +30,8 @@ public class InventoryManager : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private GameObject inventoryMenu;
+    [SerializeField] private InventoryDescriptionUI descriptionUI;
+    public InventoryDescriptionUI DescriptionUI => descriptionUI;
 
     public IReadOnlyList<ItemSlot> AllSlots => slots.AllSlots;
     public IReadOnlyList<ItemSlot> ItemSlots => slots.AllSlots;

@@ -24,8 +24,6 @@ public class Movement : MonoBehaviour
     [SerializeField] float speed;
     [SerializeField] int actualPos = -1;
     public bool isPlayer;
-    bool EcanMove = true;
-    bool PcanMove = true;
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip moveSound;
     private int NextCheckpoint;
@@ -42,7 +40,7 @@ public class Movement : MonoBehaviour
     private void Start()
     {
         // Load and sort board spots
-        spots = FindObjectsOfType<Spot>();
+        spots = FindObjectsByType<Spot>(FindObjectsSortMode.None);
         shopExitManager = FindFirstObjectByType<ShopExitManager>();
         Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
@@ -114,7 +112,7 @@ public class Movement : MonoBehaviour
         }
         if (isPlayer)
         {
-            steps = steps / divisor;
+            steps /= divisor;
         }
         
         yield return StartCoroutine(Move(steps));
@@ -227,7 +225,6 @@ public class Movement : MonoBehaviour
         }
         else if (effectType == 2)
         {
-            EcanMove = false;
 
             Debug.Log((isPlayer ? "Player" : "Enemy") +
                       " received GOOD effect: enemy cannot move next turn");
@@ -255,7 +252,6 @@ public class Movement : MonoBehaviour
         }
         else if (effectType == 2)
         {
-            PcanMove = false;
 
             Debug.Log((isPlayer ? "Player" : "Enemy") +
                       " received BAD effect: player cannot move next turn");

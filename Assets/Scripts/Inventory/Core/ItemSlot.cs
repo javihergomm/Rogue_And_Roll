@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 /*
  * ItemSlot
@@ -12,7 +13,9 @@ using System.Collections.Generic;
  * and placing consumables onto board Spots or ColorSpots.
  */
 public class ItemSlot : MonoBehaviour,
-    IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
+    IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler,
+    IPointerEnterHandler, IPointerExitHandler
+
 {
     [SerializeField] private string itemName = "";
     [SerializeField] private int quantity = 0;
@@ -300,4 +303,20 @@ public class ItemSlot : MonoBehaviour,
 
         return closest;
     }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (quantity <= 0)
+            return;
+
+        InventoryDescriptionUI ui = InventoryManager.Instance.DescriptionUI;
+        ui.Show(itemName, itemDescription, itemSprite);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        InventoryDescriptionUI ui = InventoryManager.Instance.DescriptionUI;
+        ui.Clear();
+    }
+
 }
