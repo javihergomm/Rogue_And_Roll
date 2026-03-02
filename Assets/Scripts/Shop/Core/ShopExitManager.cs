@@ -5,11 +5,12 @@ using System.Collections.Generic;
 /*
  * ShopExitManager
  * ----------------
- * Controls entering and exiting the shop.
- * Activates and deactivates shop pedestals, decision zones, and UI elements.
- * Adjusts the board rotation depending on shop state.
- * Restores available shop rerolls when entering the shop.
+ * Handles entering and exiting the shop.
+ * Enables and disables shop pedestals, decision zones, and UI elements.
+ * Rotates the board depending on shop state.
+ * Restores shop rerolls when entering the shop.
  * Resets pedestal state and global item memory so each shop visit generates new items.
+ * Ensures the Ouija pointer always appears at its original position when entering the shop.
  */
 public class ShopExitManager : MonoBehaviour
 {
@@ -28,10 +29,22 @@ public class ShopExitManager : MonoBehaviour
     [Header("Ouija Pointer")]
     [SerializeField] private GameObject tableroOuijaPuntero;
 
+    // Stores the initial local position and rotation of the Ouija pointer
+    private Vector3 punteroInitialLocalPos;
+    private Quaternion punteroInitialLocalRot;
+
     public event Action<bool> OnShopStateChanged;
 
     private void Start()
     {
+        // Save the initial local position and rotation of the Ouija pointer
+        if (tableroOuijaPuntero != null)
+        {
+            punteroInitialLocalPos = tableroOuijaPuntero.transform.localPosition;
+            punteroInitialLocalRot = tableroOuijaPuntero.transform.localRotation;
+        }
+
+        // Initial shop state setup
         if (!inShop)
         {
             foreach (var pedestal in shopPedestals)
@@ -59,9 +72,7 @@ public class ShopExitManager : MonoBehaviour
 
         inShop = true;
 
-        // ---------------------------------------------------------
-        // 1. PAUSAR ENEMIGOS
-        // ---------------------------------------------------------
+        // Pause all enemies
         if (EnemyManager.Instance != null)
         {
             foreach (var enemy in EnemyManager.Instance.enemies)
@@ -71,14 +82,10 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
-        // ---------------------------------------------------------
-        // 2. OCULTAR TABLERO
-        // ---------------------------------------------------------
+        // Notify that the board should hide
         OnShopStateChanged?.Invoke(true);
 
-        // ---------------------------------------------------------
-        // 3. BLOQUEAR INTERACCIÓN DEL TABLERO
-        // ---------------------------------------------------------
+        // Disable player interaction with the board
         Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
         if (playerMovement != null)
             playerMovement.enabled = false;
@@ -86,21 +93,22 @@ public class ShopExitManager : MonoBehaviour
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = false;
 
-        // ---------------------------------------------------------
-        // 4. ACTIVAR TIENDA
-        // ---------------------------------------------------------
+        // Reset Ouija pointer to its original position and enable it
         if (tableroOuijaPuntero != null)
+        {
+            tableroOuijaPuntero.transform.localPosition = punteroInitialLocalPos;
+            tableroOuijaPuntero.transform.localRotation = punteroInitialLocalRot;
             tableroOuijaPuntero.SetActive(true);
+        }
 
+        // Activate shop pedestals and decision zones
         foreach (var pedestal in shopPedestals)
             if (pedestal != null) pedestal.SetActive(true);
 
         foreach (var empty in decisionEmpties)
             if (empty != null) empty.SetActive(true);
 
-        // ---------------------------------------------------------
-        // 5. ROTAR TABLERO HACIA LA TIENDA
-        // ---------------------------------------------------------
+        // Rotate board to shop orientation
         if (boardTransform != null)
         {
             Vector3 euler = boardTransform.eulerAngles;
@@ -108,9 +116,7 @@ public class ShopExitManager : MonoBehaviour
             boardTransform.eulerAngles = euler;
         }
 
-        // ---------------------------------------------------------
-        // 6. RESETEAR PEDESTALES Y GENERAR NUEVOS ITEMS
-        // ---------------------------------------------------------
+        // Reset pedestal state and generate new items
         ShopPedestalRandomizer.PrepareForReroll();
         ShopPedestalRandomizer.ClearVisitMemory();
 
@@ -125,9 +131,7 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
-        // ---------------------------------------------------------
-        // 7. NOTIFICAR ENTRADA A LA TIENDA
-        // ---------------------------------------------------------
+        // Notify listeners
         OnShopStateChanged?.Invoke(true);
     }
 
@@ -149,15 +153,18 @@ public class ShopExitManager : MonoBehaviour
 
         inShop = false;
 
+        // Disable Ouija pointer
         if (tableroOuijaPuntero != null)
             tableroOuijaPuntero.SetActive(false);
 
+        // Disable pedestals and decision zones
         foreach (var pedestal in shopPedestals)
             if (pedestal != null) pedestal.SetActive(false);
 
         foreach (var empty in decisionEmpties)
             if (empty != null) empty.SetActive(false);
 
+        // Remove remaining rerolls
         if (StatManager.Instance != null)
         {
             int currentRerolls = StatManager.Instance.GetCurrentValue(StatType.ShopRerolls);
@@ -165,6 +172,7 @@ public class ShopExitManager : MonoBehaviour
                 StatManager.Instance.ChangeStat(StatType.ShopRerolls, -currentRerolls);
         }
 
+        // Rotate board back to normal orientation
         if (boardTransform != null)
         {
             Vector3 euler = boardTransform.eulerAngles;
@@ -179,15 +187,18 @@ public class ShopExitManager : MonoBehaviour
     {
         inShop = true;
 
+        // Re-enable Ouija pointer
         if (tableroOuijaPuntero != null)
             tableroOuijaPuntero.SetActive(true);
 
+        // Re-enable pedestals and decision zones
         foreach (var pedestal in shopPedestals)
             if (pedestal != null) pedestal.SetActive(true);
 
         foreach (var empty in decisionEmpties)
             if (empty != null) empty.SetActive(true);
 
+        // Rotate board to shop orientation
         if (boardTransform != null)
         {
             Vector3 euler = boardTransform.eulerAngles;

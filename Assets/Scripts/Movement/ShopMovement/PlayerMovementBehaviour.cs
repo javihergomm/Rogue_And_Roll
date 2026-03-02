@@ -1,69 +1,112 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(BoxCollider))]
 public class PlayerMovementBehaviour : MonoBehaviour
 {
-    [SerializeField] float movementSpeed = 5f;   // Speed of movement
-    [SerializeField] float rotationSpeed = 720f; // Speed of rotation in degrees per second
+    [SerializeField] float movementSpeed = 5f;
+    [SerializeField] float rotationSpeed = 720f;
 
-    /* Control keys with default values set to WASD.
-       These can still be customized in the Unity Inspector. */
-    [SerializeField] Key forwardKey = Key.W;   // Default forward key
-    [SerializeField] Key backwardKey = Key.S;  // Default backward key
-    [SerializeField] Key leftKey = Key.A;      // Default left key
-    [SerializeField] Key rightKey = Key.D;     // Default right key
+    // Teclas configurables desde el inspector
+    [SerializeField] Key forwardKey = Key.W;
+    [SerializeField] Key backwardKey = Key.S;
+    [SerializeField] Key leftKey = Key.A;
+    [SerializeField] Key rightKey = Key.D;
 
-    // Update is called once per frame
+    // Margen extra para evitar clipping
+    [SerializeField] float extraMargin = 1f;
+
+    Rigidbody rb;
+    Transform board;
+    BoxCollider boardCollider;
+    BoxCollider pointerCollider;
+
+    Vector3 moveDirection;
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+        pointerCollider = GetComponent<BoxCollider>();
+
+        GameObject boardObj = GameObject.Find("Tablero");
+        board = boardObj.transform;
+        boardCollider = board.GetComponent<BoxCollider>();
+    }
+
     void Update()
     {
-        Move();
+        moveDirection = CalculateMoveDirection();
     }
 
-    // Handles movement and rotation
-    void Move()
+    void FixedUpdate()
     {
-        Vector3 moveDirection = CalculateMoveDirection();
-
-        // Move the playerObject in the chosen direction
-        transform.position += movementSpeed * Time.deltaTime * moveDirection;
-
-        // Rotate towards movement direction if moving
-        if (moveDirection.magnitude != 0)
-        {
-            LookAt(moveDirection);
-        }
+        MoveWithPhysics();
+        ClampInsideBoard_Local_WithOffset();
+        StickToBoardSurface();
     }
 
-    // Smoothly rotates the playerObject to face the movement direction
-    void LookAt(Vector3 lookDirection)
+    void MoveWithPhysics()
     {
-        Quaternion targetRotation = Quaternion.LookRotation(lookDirection); // Desired rotation
-        Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime); // Smooth rotation
-        transform.rotation = newRotation;
+        rb.linearVelocity = moveDirection * movementSpeed;
+
+        if (moveDirection.sqrMagnitude > 0.01f)
+            RotateTowards(moveDirection);
     }
 
-    // Calculates the movement direction based on pressed keys
+    void RotateTowards(Vector3 direction)
+    {
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        Quaternion newRotation = Quaternion.RotateTowards(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+        rb.MoveRotation(newRotation);
+    }
+
+    void StickToBoardSurface()
+    {
+        float boardTopY = board.position.y
+                          + boardCollider.center.y
+                          + (boardCollider.size.y * 0.5f);
+
+        float pointerHalfHeight = pointerCollider.size.y * 0.5f;
+
+        Vector3 pos = rb.position;
+        pos.y = boardTopY + pointerHalfHeight;
+        rb.position = pos;
+    }
+
+    void ClampInsideBoard_Local_WithOffset()
+    {
+        Vector3 localPos = board.InverseTransformPoint(rb.position);
+
+        Vector3 boardMin = boardCollider.center - boardCollider.size * 0.5f;
+        Vector3 boardMax = boardCollider.center + boardCollider.size * 0.5f;
+
+        Vector3 ext = pointerCollider.size * 0.5f;
+        Vector3 off = pointerCollider.center;
+
+        float forwardMargin = Mathf.Abs(off.z + ext.z) + extraMargin;
+        float backwardMargin = Mathf.Abs(ext.z - off.z) + extraMargin;
+        float rightMargin = Mathf.Abs(off.x + ext.x) + extraMargin;
+        float leftMargin = Mathf.Abs(ext.x - off.x) + extraMargin;
+
+        localPos.x = Mathf.Clamp(localPos.x, boardMin.x + leftMargin, boardMax.x - rightMargin);
+        localPos.z = Mathf.Clamp(localPos.z, boardMin.z + backwardMargin, boardMax.z - forwardMargin);
+
+        rb.position = board.TransformPoint(localPos);
+    }
+
     Vector3 CalculateMoveDirection()
     {
         Vector3 moveVector = Vector3.zero;
 
-        // Forward movement (W by default)
-        if (Keyboard.current[forwardKey].isPressed)
-            moveVector.z += 1;
+        if (Keyboard.current[forwardKey].isPressed) moveVector.z += 1;
+        if (Keyboard.current[backwardKey].isPressed) moveVector.z -= 1;
+        if (Keyboard.current[leftKey].isPressed) moveVector.x -= 1;
+        if (Keyboard.current[rightKey].isPressed) moveVector.x += 1;
 
-        // Backward movement (S by default)
-        if (Keyboard.current[backwardKey].isPressed)
-            moveVector.z -= 1;
-
-        // Left movement (A by default)
-        if (Keyboard.current[leftKey].isPressed)
-            moveVector.x -= 1;
-
-        // Right movement (D by default)
-        if (Keyboard.current[rightKey].isPressed)
-            moveVector.x += 1;
-
-        // Normalize to prevent faster diagonal movement
         return moveVector.normalized;
     }
 }

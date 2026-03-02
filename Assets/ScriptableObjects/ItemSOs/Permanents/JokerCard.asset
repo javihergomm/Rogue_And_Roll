@@ -19,7 +19,7 @@ MonoBehaviour:
   buyPrice: 10
   sellPrice: 5
   polarity: 1
-  StoreRotationOffset: {x: 0, y: 0, z: 0}
+  StoreRotationOffset: {x: 0, y: 180, z: 0}
   StoreHeightOffset: 0.1
   StoreScaleMultiplier: 0.8
   StoreZPositionOffset: 0
