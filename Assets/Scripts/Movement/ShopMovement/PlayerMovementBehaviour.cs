@@ -102,10 +102,10 @@ public class PlayerMovementBehaviour : MonoBehaviour
     {
         Vector3 moveVector = Vector3.zero;
 
-        if (Keyboard.current[forwardKey].isPressed) moveVector.z += 1;
-        if (Keyboard.current[backwardKey].isPressed) moveVector.z -= 1;
-        if (Keyboard.current[leftKey].isPressed) moveVector.x -= 1;
-        if (Keyboard.current[rightKey].isPressed) moveVector.x += 1;
+        if (Keyboard.current[forwardKey].isPressed) moveVector.z -= 1;
+        if (Keyboard.current[backwardKey].isPressed) moveVector.z += 1;
+        if (Keyboard.current[leftKey].isPressed) moveVector.x += 1;
+        if (Keyboard.current[rightKey].isPressed) moveVector.x -= 1;
 
         return moveVector.normalized;
     }
