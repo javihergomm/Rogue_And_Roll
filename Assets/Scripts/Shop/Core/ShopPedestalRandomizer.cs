@@ -292,8 +292,6 @@ public class ShopPedestalRandomizer : MonoBehaviour
     public void ForceRefreshForEditor()
     {
         EnsureSingleContainer();
-        hasGeneratedThisVisit = false;
-        RefreshItem();
         SceneView.RepaintAll();
     }
 #endif

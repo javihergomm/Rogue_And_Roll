@@ -26,7 +26,6 @@ public class ShopPedestalRandomizerEditor : Editor
         if (GUILayout.Button("Preview Item on Pedestal"))
         {
             pedestal.EditorPreview(previewItem);
-            pedestal.ForceRefreshForEditor();
         }
         GUI.enabled = true;
 
