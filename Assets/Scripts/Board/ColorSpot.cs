@@ -12,6 +12,7 @@ public class ColorSpot : MonoBehaviour
     [SerializeField] private int leftPositionIndex;
     [SerializeField] private int rightPositionIndex;
 
-    public int LeftPositionIndex => leftPositionIndex;
-    public int RightPositionIndex => rightPositionIndex;
+    public int LeftPositionIndex { get; set; }
+    public int RightPositionIndex { get; set; }
+
 }

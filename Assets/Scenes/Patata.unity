@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 822345}
   - component: {fileID: 822346}
   m_Layer: 0
-  m_Name: Posicion (10)
+  m_Name: Posicion (44)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 10
+  index: 44
   type: 0
   checkpoint: 0
 --- !u!1 &2020668
@@ -416,7 +416,7 @@ GameObject:
   - component: {fileID: 27513245}
   - component: {fileID: 27513246}
   m_Layer: 0
-  m_Name: Posicion (22)
+  m_Name: Posicion (56)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -449,7 +449,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 22
+  index: 56
   type: 0
   checkpoint: 0
 --- !u!1 &29100707
@@ -463,7 +463,7 @@ GameObject:
   - component: {fileID: 29100708}
   - component: {fileID: 29100709}
   m_Layer: 0
-  m_Name: Posicion (52)
+  m_Name: Posicion (18)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -496,7 +496,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 52
+  index: 18
   type: 0
   checkpoint: 0
 --- !u!1 &40621549
@@ -510,7 +510,7 @@ GameObject:
   - component: {fileID: 40621550}
   - component: {fileID: 40621551}
   m_Layer: 0
-  m_Name: Posicion (7)
+  m_Name: Posicion (41)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -543,7 +543,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 7
+  index: 41
   type: 0
   checkpoint: 0
 --- !u!1001 &60749473
@@ -761,7 +761,7 @@ GameObject:
   - component: {fileID: 64256179}
   - component: {fileID: 64256180}
   m_Layer: 0
-  m_Name: Posicion (9)
+  m_Name: Posicion (43)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -794,7 +794,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 9
+  index: 43
   type: 0
   checkpoint: 0
 --- !u!1 &78209752
@@ -886,7 +886,7 @@ GameObject:
   - component: {fileID: 85319845}
   - component: {fileID: 85319846}
   m_Layer: 0
-  m_Name: YellowSpot (5)
+  m_Name: RedSpot (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -919,8 +919,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 62
-  rightPositionIndex: 6
+  leftPositionIndex: 28
+  rightPositionIndex: 40
 --- !u!1 &92826999
 GameObject:
   m_ObjectHideFlags: 0
@@ -932,7 +932,7 @@ GameObject:
   - component: {fileID: 92827000}
   - component: {fileID: 92827001}
   m_Layer: 0
-  m_Name: Posicion (29)
+  m_Name: Posicion (63)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -965,7 +965,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 29
+  index: 63
   type: 0
   checkpoint: 0
 --- !u!1 &100485576
@@ -979,7 +979,7 @@ GameObject:
   - component: {fileID: 100485577}
   - component: {fileID: 100485578}
   m_Layer: 0
-  m_Name: Posicion (38)
+  m_Name: Posicion (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1012,7 +1012,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 38
+  index: 4
   type: 0
   checkpoint: 0
 --- !u!1 &114692257
@@ -1026,7 +1026,7 @@ GameObject:
   - component: {fileID: 114692258}
   - component: {fileID: 114692259}
   m_Layer: 0
-  m_Name: Posicion (64)
+  m_Name: Posicion (30)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1059,7 +1059,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 64
+  index: 30
   type: 0
   checkpoint: 0
 --- !u!1001 &122599683
@@ -1190,7 +1190,7 @@ GameObject:
   m_Component:
   - component: {fileID: 128708203}
   m_Layer: 0
-  m_Name: Spawn_Yellow
+  m_Name: Spawn_Red
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1253,7 +1253,7 @@ GameObject:
   - component: {fileID: 137316650}
   - component: {fileID: 137316651}
   m_Layer: 0
-  m_Name: Posicion (58)
+  m_Name: Posicion (24)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1286,7 +1286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 58
+  index: 24
   type: 0
   checkpoint: 0
 --- !u!1 &137996079
@@ -1300,7 +1300,7 @@ GameObject:
   - component: {fileID: 137996080}
   - component: {fileID: 137996081}
   m_Layer: 0
-  m_Name: Posicion (16)
+  m_Name: Posicion (50)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1333,7 +1333,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 16
+  index: 50
   type: 0
   checkpoint: 0
 --- !u!1 &151161367
@@ -1515,40 +1515,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1701756041}
-  - {fileID: 844395920}
-  - {fileID: 1176426363}
-  - {fileID: 1171833005}
-  - {fileID: 822198516}
-  - {fileID: 847147488}
-  - {fileID: 40621550}
-  - {fileID: 957882358}
-  - {fileID: 64256179}
-  - {fileID: 822345}
-  - {fileID: 1508195237}
-  - {fileID: 1078663541}
-  - {fileID: 1307462795}
-  - {fileID: 1812520947}
-  - {fileID: 863259482}
-  - {fileID: 137996080}
-  - {fileID: 718035465}
-  - {fileID: 525031429}
-  - {fileID: 1931784349}
-  - {fileID: 1902361180}
-  - {fileID: 233402985}
-  - {fileID: 27513245}
-  - {fileID: 639742457}
-  - {fileID: 801517759}
-  - {fileID: 1217475237}
-  - {fileID: 1027856281}
-  - {fileID: 483839017}
-  - {fileID: 1170819842}
-  - {fileID: 92827000}
-  - {fileID: 968606244}
-  - {fileID: 2138197975}
-  - {fileID: 2082101805}
-  - {fileID: 1194179705}
-  - {fileID: 1099706787}
   - {fileID: 1458267120}
   - {fileID: 1355900187}
   - {fileID: 402311520}
@@ -1583,6 +1549,40 @@ Transform:
   - {fileID: 416567785}
   - {fileID: 422176139}
   - {fileID: 474017734}
+  - {fileID: 1701756041}
+  - {fileID: 844395920}
+  - {fileID: 1176426363}
+  - {fileID: 1171833005}
+  - {fileID: 822198516}
+  - {fileID: 847147488}
+  - {fileID: 40621550}
+  - {fileID: 957882358}
+  - {fileID: 64256179}
+  - {fileID: 822345}
+  - {fileID: 1508195237}
+  - {fileID: 1078663541}
+  - {fileID: 1307462795}
+  - {fileID: 1812520947}
+  - {fileID: 863259482}
+  - {fileID: 137996080}
+  - {fileID: 718035465}
+  - {fileID: 525031429}
+  - {fileID: 1931784349}
+  - {fileID: 1902361180}
+  - {fileID: 233402985}
+  - {fileID: 27513245}
+  - {fileID: 639742457}
+  - {fileID: 801517759}
+  - {fileID: 1217475237}
+  - {fileID: 1027856281}
+  - {fileID: 483839017}
+  - {fileID: 1170819842}
+  - {fileID: 92827000}
+  - {fileID: 968606244}
+  - {fileID: 2138197975}
+  - {fileID: 2082101805}
+  - {fileID: 1194179705}
+  - {fileID: 1099706787}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &178300366
@@ -1729,7 +1729,7 @@ GameObject:
   - component: {fileID: 188412164}
   - component: {fileID: 188412165}
   m_Layer: 0
-  m_Name: BlueSpot (1)
+  m_Name: GreenSpot (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1762,8 +1762,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 15
-  rightPositionIndex: 19
+  leftPositionIndex: 49
+  rightPositionIndex: 53
 --- !u!1001 &232366548
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1893,7 +1893,7 @@ GameObject:
   - component: {fileID: 233402985}
   - component: {fileID: 233402986}
   m_Layer: 0
-  m_Name: Posicion (21)
+  m_Name: Posicion (55)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1926,7 +1926,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 21
+  index: 55
   type: 0
   checkpoint: 0
 --- !u!1001 &246013076
@@ -2042,7 +2042,7 @@ GameObject:
   - component: {fileID: 248168626}
   - component: {fileID: 248168627}
   m_Layer: 0
-  m_Name: Posicion (46)
+  m_Name: Posicion (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2075,7 +2075,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 46
+  index: 12
   type: 0
   checkpoint: 0
 --- !u!1 &276751733
@@ -2088,7 +2088,7 @@ GameObject:
   m_Component:
   - component: {fileID: 276751737}
   m_Layer: 0
-  m_Name: Spawn_Blue
+  m_Name: Spawn_Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2208,7 +2208,7 @@ GameObject:
   - component: {fileID: 287368785}
   - component: {fileID: 287368786}
   m_Layer: 0
-  m_Name: Posicion (57)
+  m_Name: Posicion (23)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2241,7 +2241,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 57
+  index: 23
   type: 0
   checkpoint: 0
 --- !u!1001 &296566836
@@ -2680,7 +2680,7 @@ GameObject:
   - component: {fileID: 386727610}
   - component: {fileID: 386727611}
   m_Layer: 0
-  m_Name: RedSpot (5)
+  m_Name: YellowSpot (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2713,8 +2713,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 28
-  rightPositionIndex: 40
+  leftPositionIndex: 62
+  rightPositionIndex: 6
 --- !u!1001 &397666039
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2941,7 +2941,7 @@ GameObject:
   - component: {fileID: 402311520}
   - component: {fileID: 402311521}
   m_Layer: 0
-  m_Name: Posicion (37)
+  m_Name: Posicion (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2974,7 +2974,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 37
+  index: 3
   type: 0
   checkpoint: 0
 --- !u!1 &409386682
@@ -3115,7 +3115,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &409411471
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3451,7 +3451,7 @@ GameObject:
   - component: {fileID: 416567785}
   - component: {fileID: 416567786}
   m_Layer: 0
-  m_Name: Posicion (66)
+  m_Name: Posicion (32)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3484,7 +3484,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 66
+  index: 32
   type: 0
   checkpoint: 0
 --- !u!1 &422176138
@@ -3498,7 +3498,7 @@ GameObject:
   - component: {fileID: 422176139}
   - component: {fileID: 422176140}
   m_Layer: 0
-  m_Name: Posicion (67)
+  m_Name: Posicion (33)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3531,7 +3531,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 67
+  index: 33
   type: 0
   checkpoint: 0
 --- !u!1 &422583708
@@ -3649,7 +3649,7 @@ GameObject:
   - component: {fileID: 439883512}
   - component: {fileID: 439883513}
   m_Layer: 0
-  m_Name: BlueSpot (6)
+  m_Name: GreenSpot (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3682,8 +3682,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 10
-  rightPositionIndex: 24
+  leftPositionIndex: 44
+  rightPositionIndex: 58
 --- !u!1 &449467346
 GameObject:
   m_ObjectHideFlags: 0
@@ -3695,7 +3695,7 @@ GameObject:
   - component: {fileID: 449467347}
   - component: {fileID: 449467348}
   m_Layer: 0
-  m_Name: YellowSpot (3)
+  m_Name: RedSpot (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3728,8 +3728,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 64
-  rightPositionIndex: 4
+  leftPositionIndex: 30
+  rightPositionIndex: 38
 --- !u!1 &458130007
 GameObject:
   m_ObjectHideFlags: 0
@@ -3741,7 +3741,7 @@ GameObject:
   - component: {fileID: 458130008}
   - component: {fileID: 458130009}
   m_Layer: 0
-  m_Name: BlueSpot (4)
+  m_Name: GreenSpot (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3774,8 +3774,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 12
-  rightPositionIndex: 22
+  leftPositionIndex: 46
+  rightPositionIndex: 56
 --- !u!1001 &471752364
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3982,7 +3982,7 @@ GameObject:
   - component: {fileID: 474017734}
   - component: {fileID: 474017735}
   m_Layer: 0
-  m_Name: Posicion (68)
+  m_Name: Posicion (34)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4015,7 +4015,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 68
+  index: 34
   type: 0
   checkpoint: 0
 --- !u!1 &477423966
@@ -4108,7 +4108,7 @@ GameObject:
   - component: {fileID: 483839017}
   - component: {fileID: 483839018}
   m_Layer: 0
-  m_Name: Posicion (27)
+  m_Name: Posicion (61)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4141,7 +4141,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 27
+  index: 61
   type: 0
   checkpoint: 0
 --- !u!1001 &488903975
@@ -4492,7 +4492,7 @@ GameObject:
   - component: {fileID: 522397400}
   - component: {fileID: 522397401}
   m_Layer: 0
-  m_Name: Posicion (60)
+  m_Name: Posicion (26)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4525,7 +4525,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 60
+  index: 26
   type: 0
   checkpoint: 0
 --- !u!1 &525031427
@@ -4539,7 +4539,7 @@ GameObject:
   - component: {fileID: 525031429}
   - component: {fileID: 525031428}
   m_Layer: 0
-  m_Name: Posicion (18)
+  m_Name: Posicion (52)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4557,7 +4557,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 18
+  index: 52
   type: 0
   checkpoint: 0
 --- !u!4 &525031429
@@ -4586,7 +4586,7 @@ GameObject:
   - component: {fileID: 581212384}
   - component: {fileID: 581212385}
   m_Layer: 0
-  m_Name: Posicion (44)
+  m_Name: Posicion (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4619,7 +4619,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 44
+  index: 10
   type: 0
   checkpoint: 0
 --- !u!1001 &581847231
@@ -4735,7 +4735,7 @@ GameObject:
   - component: {fileID: 607847002}
   - component: {fileID: 607847001}
   m_Layer: 0
-  m_Name: Posicion (65)
+  m_Name: Posicion (31)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4753,7 +4753,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 65
+  index: 31
   type: 0
   checkpoint: 0
 --- !u!4 &607847002
@@ -4782,7 +4782,7 @@ GameObject:
   - component: {fileID: 623199490}
   - component: {fileID: 623199491}
   m_Layer: 0
-  m_Name: GreenSpot (4)
+  m_Name: BlueSpot (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4815,8 +4815,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 46
-  rightPositionIndex: 56
+  leftPositionIndex: 12
+  rightPositionIndex: 22
 --- !u!1 &639742456
 GameObject:
   m_ObjectHideFlags: 0
@@ -4828,7 +4828,7 @@ GameObject:
   - component: {fileID: 639742457}
   - component: {fileID: 639742458}
   m_Layer: 0
-  m_Name: Posicion (23)
+  m_Name: Posicion (57)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4861,7 +4861,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 23
+  index: 57
   type: 0
   checkpoint: 0
 --- !u!1 &652871806 stripped
@@ -4885,7 +4885,7 @@ GameObject:
   - component: {fileID: 684832578}
   - component: {fileID: 684832579}
   m_Layer: 0
-  m_Name: Posicion (54)
+  m_Name: Posicion (20)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4918,7 +4918,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 54
+  index: 20
   type: 0
   checkpoint: 0
 --- !u!1 &702331375
@@ -5022,7 +5022,7 @@ GameObject:
   - component: {fileID: 704636926}
   - component: {fileID: 704636927}
   m_Layer: 0
-  m_Name: BlueSpot (3)
+  m_Name: GreenSpot (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5055,8 +5055,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 13
-  rightPositionIndex: 21
+  leftPositionIndex: 47
+  rightPositionIndex: 55
 --- !u!1 &718035464
 GameObject:
   m_ObjectHideFlags: 0
@@ -5068,7 +5068,7 @@ GameObject:
   - component: {fileID: 718035465}
   - component: {fileID: 718035466}
   m_Layer: 0
-  m_Name: Posicion (17)
+  m_Name: Posicion (51)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5101,7 +5101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 17
+  index: 51
   type: 0
   checkpoint: 0
 --- !u!1 &722429080
@@ -5115,7 +5115,7 @@ GameObject:
   - component: {fileID: 722429081}
   - component: {fileID: 722429082}
   m_Layer: 0
-  m_Name: RedSpot (2)
+  m_Name: YellowSpot (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5148,8 +5148,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 31
-  rightPositionIndex: 37
+  leftPositionIndex: 65
+  rightPositionIndex: 3
 --- !u!1 &748917138
 GameObject:
   m_ObjectHideFlags: 0
@@ -5161,7 +5161,7 @@ GameObject:
   - component: {fileID: 748917139}
   - component: {fileID: 748917140}
   m_Layer: 0
-  m_Name: Posicion (61)
+  m_Name: Posicion (27)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5194,7 +5194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 61
+  index: 27
   type: 0
   checkpoint: 0
 --- !u!1001 &766344723
@@ -5326,7 +5326,7 @@ GameObject:
   - component: {fileID: 776644423}
   - component: {fileID: 776644424}
   m_Layer: 0
-  m_Name: Posicion (59)
+  m_Name: Posicion (25)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5359,7 +5359,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 59
+  index: 25
   type: 0
   checkpoint: 0
 --- !u!1 &783547962
@@ -5372,7 +5372,7 @@ GameObject:
   m_Component:
   - component: {fileID: 783547966}
   m_Layer: 0
-  m_Name: Spawn_Green
+  m_Name: Spawn_Blue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5415,7 +5415,7 @@ GameObject:
   - component: {fileID: 801517759}
   - component: {fileID: 801517760}
   m_Layer: 0
-  m_Name: Posicion (24)
+  m_Name: Posicion (58)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5448,9 +5448,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 24
+  index: 58
   type: 0
   checkpoint: 0
+--- !u!114 &801985639 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 766344723}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1 &803790077
 GameObject:
   m_ObjectHideFlags: 0
@@ -5830,7 +5841,7 @@ GameObject:
   - component: {fileID: 819286413}
   - component: {fileID: 819286414}
   m_Layer: 0
-  m_Name: GreenSpot (5)
+  m_Name: BlueSpot (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5863,8 +5874,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 45
-  rightPositionIndex: 57
+  leftPositionIndex: 11
+  rightPositionIndex: 23
 --- !u!1 &822198515
 GameObject:
   m_ObjectHideFlags: 0
@@ -5876,7 +5887,7 @@ GameObject:
   - component: {fileID: 822198516}
   - component: {fileID: 822198517}
   m_Layer: 0
-  m_Name: Posicion (5)
+  m_Name: Posicion (39)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5909,7 +5920,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 5
+  index: 39
   type: 0
   checkpoint: 0
 --- !u!1 &832575517
@@ -5972,7 +5983,7 @@ GameObject:
   - component: {fileID: 832775176}
   - component: {fileID: 832775177}
   m_Layer: 0
-  m_Name: Posicion (41)
+  m_Name: Posicion (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6005,7 +6016,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 41
+  index: 7
   type: 0
   checkpoint: 0
 --- !u!1 &840914298
@@ -6019,7 +6030,7 @@ GameObject:
   - component: {fileID: 840914299}
   - component: {fileID: 840914300}
   m_Layer: 0
-  m_Name: RedSpot (6)
+  m_Name: YellowSpot (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6052,8 +6063,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 27
-  rightPositionIndex: 41
+  leftPositionIndex: 61
+  rightPositionIndex: 7
 --- !u!1 &841464101
 GameObject:
   m_ObjectHideFlags: 0
@@ -6144,7 +6155,7 @@ GameObject:
   - component: {fileID: 844395920}
   - component: {fileID: 844395921}
   m_Layer: 0
-  m_Name: Posicion (2)
+  m_Name: Posicion (36)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6177,7 +6188,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 2
+  index: 36
   type: 0
   checkpoint: 0
 --- !u!1 &847147487
@@ -6191,7 +6202,7 @@ GameObject:
   - component: {fileID: 847147488}
   - component: {fileID: 847147489}
   m_Layer: 0
-  m_Name: Posicion (6)
+  m_Name: Posicion (40)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6224,7 +6235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 6
+  index: 40
   type: 0
   checkpoint: 0
 --- !u!1 &856922461
@@ -6238,7 +6249,7 @@ GameObject:
   - component: {fileID: 856922462}
   - component: {fileID: 856922463}
   m_Layer: 0
-  m_Name: Posicion (48)
+  m_Name: Posicion (14)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6271,7 +6282,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 48
+  index: 14
   type: 0
   checkpoint: 0
 --- !u!1 &861896781
@@ -6360,7 +6371,7 @@ GameObject:
   - component: {fileID: 863259482}
   - component: {fileID: 863259483}
   m_Layer: 0
-  m_Name: Posicion (15)
+  m_Name: Posicion (49)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6393,7 +6404,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 15
+  index: 49
   type: 0
   checkpoint: 0
 --- !u!1 &872142272
@@ -6407,7 +6418,7 @@ GameObject:
   - component: {fileID: 872142273}
   - component: {fileID: 872142274}
   m_Layer: 0
-  m_Name: YellowSpot (6)
+  m_Name: RedSpot (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6440,8 +6451,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 61
-  rightPositionIndex: 7
+  leftPositionIndex: 27
+  rightPositionIndex: 41
 --- !u!1 &881002049
 GameObject:
   m_ObjectHideFlags: 0
@@ -6573,7 +6584,7 @@ GameObject:
   - component: {fileID: 881429546}
   - component: {fileID: 881429547}
   m_Layer: 0
-  m_Name: BlueSpot (5)
+  m_Name: GreenSpot (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6606,8 +6617,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 11
-  rightPositionIndex: 23
+  leftPositionIndex: 45
+  rightPositionIndex: 57
 --- !u!1 &892183029
 GameObject:
   m_ObjectHideFlags: 0
@@ -6694,7 +6705,7 @@ GameObject:
   - component: {fileID: 894381393}
   - component: {fileID: 894381394}
   m_Layer: 0
-  m_Name: YellowSpot (4)
+  m_Name: RedSpot (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6727,8 +6738,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 63
-  rightPositionIndex: 5
+  leftPositionIndex: 29
+  rightPositionIndex: 39
 --- !u!1 &920009671
 GameObject:
   m_ObjectHideFlags: 0
@@ -6882,7 +6893,7 @@ GameObject:
   - component: {fileID: 957882358}
   - component: {fileID: 957882359}
   m_Layer: 0
-  m_Name: Posicion (8)
+  m_Name: Posicion (42)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6915,7 +6926,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 8
+  index: 42
   type: 0
   checkpoint: 0
 --- !u!1 &968606242
@@ -6929,7 +6940,7 @@ GameObject:
   - component: {fileID: 968606244}
   - component: {fileID: 968606243}
   m_Layer: 0
-  m_Name: Posicion (30)
+  m_Name: Posicion (64)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6947,7 +6958,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 30
+  index: 64
   type: 0
   checkpoint: 0
 --- !u!4 &968606244
@@ -6976,7 +6987,7 @@ GameObject:
   - component: {fileID: 1013966686}
   - component: {fileID: 1013966687}
   m_Layer: 0
-  m_Name: GreenSpot (7)
+  m_Name: BlueSpot (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7009,8 +7020,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 43
-  rightPositionIndex: 59
+  leftPositionIndex: 9
+  rightPositionIndex: 25
 --- !u!1 &1027856280
 GameObject:
   m_ObjectHideFlags: 0
@@ -7022,7 +7033,7 @@ GameObject:
   - component: {fileID: 1027856281}
   - component: {fileID: 1027856282}
   m_Layer: 0
-  m_Name: Posicion (26)
+  m_Name: Posicion (60)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7055,7 +7066,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 26
+  index: 60
   type: 0
   checkpoint: 0
 --- !u!1001 &1066689003
@@ -7386,7 +7397,7 @@ GameObject:
   - component: {fileID: 1078663541}
   - component: {fileID: 1078663542}
   m_Layer: 0
-  m_Name: Posicion (12)
+  m_Name: Posicion (46)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7419,7 +7430,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 12
+  index: 46
   type: 0
   checkpoint: 0
 --- !u!1001 &1079882960
@@ -7688,7 +7699,7 @@ GameObject:
   - component: {fileID: 1099706787}
   - component: {fileID: 1099706788}
   m_Layer: 0
-  m_Name: Posicion (34)
+  m_Name: Posicion (68)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7721,7 +7732,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 34
+  index: 68
   type: 0
   checkpoint: 0
 --- !u!1001 &1124789409
@@ -7853,7 +7864,7 @@ GameObject:
   - component: {fileID: 1134290560}
   - component: {fileID: 1134290561}
   m_Layer: 0
-  m_Name: Posicion (56)
+  m_Name: Posicion (22)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7886,7 +7897,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 56
+  index: 22
   type: 0
   checkpoint: 0
 --- !u!1001 &1135132212
@@ -8018,7 +8029,7 @@ GameObject:
   - component: {fileID: 1135432140}
   - component: {fileID: 1135432141}
   m_Layer: 0
-  m_Name: Posicion (45)
+  m_Name: Posicion (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8051,7 +8062,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 45
+  index: 11
   type: 0
   checkpoint: 0
 --- !u!114 &1153972815 stripped
@@ -8320,7 +8331,7 @@ GameObject:
   - component: {fileID: 1170819842}
   - component: {fileID: 1170819843}
   m_Layer: 0
-  m_Name: Posicion (28)
+  m_Name: Posicion (62)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8353,7 +8364,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 28
+  index: 62
   type: 0
   checkpoint: 0
 --- !u!1 &1171833004
@@ -8367,7 +8378,7 @@ GameObject:
   - component: {fileID: 1171833005}
   - component: {fileID: 1171833006}
   m_Layer: 0
-  m_Name: Posicion (4)
+  m_Name: Posicion (38)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8400,7 +8411,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 4
+  index: 38
   type: 0
   checkpoint: 0
 --- !u!1 &1172131970
@@ -8518,7 +8529,7 @@ GameObject:
   - component: {fileID: 1176426363}
   - component: {fileID: 1176426364}
   m_Layer: 0
-  m_Name: Posicion (3)
+  m_Name: Posicion (37)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8551,7 +8562,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 3
+  index: 37
   type: 0
   checkpoint: 0
 --- !u!1001 &1187446260
@@ -8612,7 +8623,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6544432553920818503, guid: cb3b8b6b5bb5d734b895c880bfc5135f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8743,7 +8754,7 @@ GameObject:
   - component: {fileID: 1194179705}
   - component: {fileID: 1194179706}
   m_Layer: 0
-  m_Name: Posicion (33)
+  m_Name: Posicion (67)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8776,7 +8787,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 33
+  index: 67
   type: 0
   checkpoint: 0
 --- !u!1 &1199381241
@@ -8790,7 +8801,7 @@ GameObject:
   - component: {fileID: 1199381242}
   - component: {fileID: 1199381243}
   m_Layer: 0
-  m_Name: YellowSpot (7)
+  m_Name: RedSpot (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8823,8 +8834,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 60
-  rightPositionIndex: 8
+  leftPositionIndex: 26
+  rightPositionIndex: 42
 --- !u!1 &1200025550
 GameObject:
   m_ObjectHideFlags: 0
@@ -8836,7 +8847,7 @@ GameObject:
   - component: {fileID: 1200025551}
   - component: {fileID: 1200025552}
   m_Layer: 0
-  m_Name: Posicion (62)
+  m_Name: Posicion (28)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8869,7 +8880,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 62
+  index: 28
   type: 0
   checkpoint: 0
 --- !u!1 &1200613876
@@ -8883,7 +8894,7 @@ GameObject:
   - component: {fileID: 1200613877}
   - component: {fileID: 1200613878}
   m_Layer: 0
-  m_Name: Posicion (50)
+  m_Name: Posicion (16)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8916,7 +8927,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 50
+  index: 16
   type: 0
   checkpoint: 0
 --- !u!1001 &1203900491
@@ -9021,6 +9032,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8006328703608869097, guid: abc4a277f5e52e94293777ad4477160e, type: 3}
   m_PrefabInstance: {fileID: 1203900491}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1204401329 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 519594353}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1 &1217475236
 GameObject:
   m_ObjectHideFlags: 0
@@ -9032,7 +9054,7 @@ GameObject:
   - component: {fileID: 1217475237}
   - component: {fileID: 1217475238}
   m_Layer: 0
-  m_Name: Posicion (25)
+  m_Name: Posicion (59)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9065,7 +9087,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 25
+  index: 59
   type: 0
   checkpoint: 0
 --- !u!1 &1225340512
@@ -9085,7 +9107,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1225340513
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9412,6 +9434,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84c8af378e7acaf40b29c2ec16b7092b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSlot
+--- !u!114 &1257970410 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 471752364}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1001 &1262623642
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9584,7 +9617,7 @@ GameObject:
   - component: {fileID: 1273149363}
   - component: {fileID: 1273149364}
   m_Layer: 0
-  m_Name: RedSpot (4)
+  m_Name: YellowSpot (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9617,8 +9650,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 29
-  rightPositionIndex: 39
+  leftPositionIndex: 63
+  rightPositionIndex: 5
+--- !u!114 &1293384196 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 232366548}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1001 &1293764056
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9750,6 +9794,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2223947559726556696, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
   m_PrefabInstance: {fileID: 1293764056}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1297435698 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1135132212}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1 &1307462793
 GameObject:
   m_ObjectHideFlags: 0
@@ -9761,7 +9816,7 @@ GameObject:
   - component: {fileID: 1307462795}
   - component: {fileID: 1307462794}
   m_Layer: 0
-  m_Name: Posicion (13)
+  m_Name: Posicion (47)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9779,7 +9834,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 13
+  index: 47
   type: 0
   checkpoint: 0
 --- !u!4 &1307462795
@@ -9808,7 +9863,7 @@ GameObject:
   - component: {fileID: 1317400179}
   - component: {fileID: 1317400180}
   m_Layer: 0
-  m_Name: Posicion (51)
+  m_Name: Posicion (17)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9841,7 +9896,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 51
+  index: 17
   type: 0
   checkpoint: 0
 --- !u!1001 &1325769794
@@ -9962,6 +10017,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2223947559726556696, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
   m_PrefabInstance: {fileID: 1325769794}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1325769796 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1325769794}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1 &1339274110
 GameObject:
   m_ObjectHideFlags: 0
@@ -9972,7 +10038,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1339274114}
   m_Layer: 0
-  m_Name: Spawn_Red
+  m_Name: Spawn_Yellow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10004,7 +10070,7 @@ GameObject:
   - component: {fileID: 1355900187}
   - component: {fileID: 1355900188}
   m_Layer: 0
-  m_Name: Posicion (36)
+  m_Name: Posicion (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10037,7 +10103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 36
+  index: 2
   type: 0
   checkpoint: 0
 --- !u!1001 &1363332473
@@ -10153,6 +10219,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84c8af378e7acaf40b29c2ec16b7092b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSlot
+--- !u!114 &1447351761 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1262623642}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1001 &1450281397
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10277,7 +10354,7 @@ GameObject:
   - component: {fileID: 1458267120}
   - component: {fileID: 1458267121}
   m_Layer: 0
-  m_Name: Posicion (35)
+  m_Name: Posicion (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10310,7 +10387,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 35
+  index: 1
   type: 0
   checkpoint: 0
 --- !u!1001 &1473170804
@@ -10437,7 +10514,7 @@ GameObject:
   - component: {fileID: 1473909244}
   - component: {fileID: 1473909245}
   m_Layer: 0
-  m_Name: YellowSpot (1)
+  m_Name: RedSpot (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10470,8 +10547,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 66
-  rightPositionIndex: 2
+  leftPositionIndex: 32
+  rightPositionIndex: 36
 --- !u!1001 &1479787215
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10607,7 +10684,7 @@ GameObject:
   - component: {fileID: 1508195237}
   - component: {fileID: 1508195238}
   m_Layer: 0
-  m_Name: Posicion (11)
+  m_Name: Posicion (45)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10640,7 +10717,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 11
+  index: 45
   type: 0
   checkpoint: 0
 --- !u!1 &1527168630
@@ -10654,7 +10731,7 @@ GameObject:
   - component: {fileID: 1527168631}
   - component: {fileID: 1527168632}
   m_Layer: 0
-  m_Name: RedSpot (1)
+  m_Name: YellowSpot (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10687,8 +10764,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 32
-  rightPositionIndex: 36
+  leftPositionIndex: 66
+  rightPositionIndex: 2
 --- !u!1 &1537519107
 GameObject:
   m_ObjectHideFlags: 0
@@ -10790,7 +10867,7 @@ GameObject:
   - component: {fileID: 1538970603}
   - component: {fileID: 1538970604}
   m_Layer: 0
-  m_Name: Posicion (49)
+  m_Name: Posicion (15)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10823,7 +10900,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 49
+  index: 15
   type: 0
   checkpoint: 0
 --- !u!1 &1539924097
@@ -11140,6 +11217,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2223947559726556696, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
   m_PrefabInstance: {fileID: 1543382759}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1543382761 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1543382759}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1 &1546370626
 GameObject:
   m_ObjectHideFlags: 0
@@ -11235,6 +11323,8 @@ GameObject:
   - component: {fileID: 1548563266}
   - component: {fileID: 1548563267}
   - component: {fileID: 1548563269}
+  - component: {fileID: 1548563271}
+  - component: {fileID: 1548563270}
   m_Layer: 0
   m_Name: GameManagers
   m_TagString: Untagged
@@ -11358,7 +11448,7 @@ MonoBehaviour:
   boardTransform: {fileID: 1555743862}
   exitRotationZ: 0
   shopRotationZ: 180
-  inShop: 1
+  inShop: 0
   tableroOuijaPuntero: {fileID: 652871806}
 --- !u!114 &1548563264
 MonoBehaviour:
@@ -11426,27 +11516,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
   slots:
     activeDiceSlots:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    - {fileID: 1204401329}
+    - {fileID: 1592769659}
+    - {fileID: 2041802968}
     diceSlots:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    - {fileID: 1447351761}
+    - {fileID: 1293384196}
+    - {fileID: 2142083461}
+    - {fileID: 1297435698}
+    - {fileID: 801985639}
     permanentSlots:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    - {fileID: 1579251542}
+    - {fileID: 1695233622}
+    - {fileID: 1257970410}
+    - {fileID: 1543382761}
+    - {fileID: 1325769796}
     consumableSlots:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    - {fileID: 1658021886}
+    - {fileID: 1707002085}
+    - {fileID: 1636247011}
+    - {fileID: 1627850499}
+    - {fileID: 1976488777}
     itemSOs:
     - {fileID: 11400000, guid: 0cc5767b84b2dbf49b3228f8cf86e141, type: 2}
     - {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}
@@ -11510,6 +11600,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f45cd8e53bfecfd458b6420c798108a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoardHider
+--- !u!114 &1548563270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548563255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b7aaa73289fe0449c3c18fe1235948, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatsUI
+  statsText: {fileID: 1963645625}
+--- !u!114 &1548563271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548563255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80c491e1250978f4aa1cff8b4d2b474d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveDiceUI
+  diceText: {fileID: 151161369}
 --- !u!1 &1555743855 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4898722117463534234, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
@@ -11552,6 +11668,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84c8af378e7acaf40b29c2ec16b7092b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSlot
+--- !u!114 &1579251542 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 122599683}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1 &1581272879
 GameObject:
   m_ObjectHideFlags: 0
@@ -11563,7 +11690,7 @@ GameObject:
   - component: {fileID: 1581272882}
   - component: {fileID: 1581272881}
   m_Layer: 0
-  m_Name: Posicion (40)
+  m_Name: Posicion (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11581,7 +11708,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 40
+  index: 6
   type: 0
   checkpoint: 0
 --- !u!4 &1581272882
@@ -11879,6 +12006,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2223947559726556696, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
   m_PrefabInstance: {fileID: 1592769657}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1592769659 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1592769657}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!114 &1621779771 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8733087956721349511, guid: abc4a277f5e52e94293777ad4477160e, type: 3}
@@ -12008,6 +12146,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2223947559726556696, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
   m_PrefabInstance: {fileID: 1627702384}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1627850499 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1079882960}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1 &1629160517
 GameObject:
   m_ObjectHideFlags: 0
@@ -12019,7 +12168,7 @@ GameObject:
   - component: {fileID: 1629160518}
   - component: {fileID: 1629160519}
   m_Layer: 0
-  m_Name: Posicion (63)
+  m_Name: Posicion (29)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12052,7 +12201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 63
+  index: 29
   type: 0
   checkpoint: 0
 --- !u!1001 &1636184002
@@ -12168,6 +12317,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84c8af378e7acaf40b29c2ec16b7092b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSlot
+--- !u!114 &1636247011 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1124789409}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1 &1643498908
 GameObject:
   m_ObjectHideFlags: 0
@@ -12179,7 +12339,7 @@ GameObject:
   - component: {fileID: 1643498910}
   - component: {fileID: 1643498909}
   m_Layer: 0
-  m_Name: Posicion (39)
+  m_Name: Posicion (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12197,7 +12357,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 39
+  index: 5
   type: 0
   checkpoint: 0
 --- !u!4 &1643498910
@@ -12470,6 +12630,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2223947559726556696, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
   m_PrefabInstance: {fileID: 1658021884}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1658021886 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1658021884}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1001 &1659123273
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12528,7 +12699,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6544432553920818503, guid: cb3b8b6b5bb5d734b895c880bfc5135f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -12658,7 +12829,7 @@ GameObject:
   - component: {fileID: 1668503818}
   - component: {fileID: 1668503819}
   m_Layer: 0
-  m_Name: RedSpot (3)
+  m_Name: YellowSpot (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12691,8 +12862,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 30
-  rightPositionIndex: 38
+  leftPositionIndex: 64
+  rightPositionIndex: 4
 --- !u!1001 &1672676727
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12817,7 +12988,7 @@ GameObject:
   - component: {fileID: 1678345738}
   - component: {fileID: 1678345739}
   m_Layer: 0
-  m_Name: RedSpot (7)
+  m_Name: YellowSpot (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12850,8 +13021,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 26
-  rightPositionIndex: 42
+  leftPositionIndex: 60
+  rightPositionIndex: 8
 --- !u!1 &1680528678
 GameObject:
   m_ObjectHideFlags: 0
@@ -12863,7 +13034,7 @@ GameObject:
   - component: {fileID: 1680528679}
   - component: {fileID: 1680528680}
   m_Layer: 0
-  m_Name: BlueSpot (7)
+  m_Name: GreenSpot (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12896,8 +13067,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 9
-  rightPositionIndex: 25
+  leftPositionIndex: 43
+  rightPositionIndex: 59
 --- !u!1001 &1695233620
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13016,6 +13187,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2223947559726556696, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
   m_PrefabInstance: {fileID: 1695233620}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1695233622 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1695233620}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!114 &1698232514 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8733087956721349511, guid: abc4a277f5e52e94293777ad4477160e, type: 3}
@@ -13038,7 +13220,7 @@ GameObject:
   - component: {fileID: 1701756041}
   - component: {fileID: 1701756042}
   m_Layer: 0
-  m_Name: Posicion (1)
+  m_Name: Posicion (35)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13071,9 +13253,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 1
+  index: 35
   type: 0
   checkpoint: 0
+--- !u!114 &1707002085 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1627702384}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1 &1723014135
 GameObject:
   m_ObjectHideFlags: 0
@@ -13085,7 +13278,7 @@ GameObject:
   - component: {fileID: 1723014136}
   - component: {fileID: 1723014137}
   m_Layer: 0
-  m_Name: GreenSpot (3)
+  m_Name: BlueSpot (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13118,8 +13311,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 47
-  rightPositionIndex: 55
+  leftPositionIndex: 13
+  rightPositionIndex: 21
 --- !u!1 &1735755966
 GameObject:
   m_ObjectHideFlags: 0
@@ -13458,7 +13651,7 @@ GameObject:
   - component: {fileID: 1761605129}
   - component: {fileID: 1761605130}
   m_Layer: 0
-  m_Name: GreenSpot (6)
+  m_Name: BlueSpot (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13491,8 +13684,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 44
-  rightPositionIndex: 58
+  leftPositionIndex: 10
+  rightPositionIndex: 24
 --- !u!1001 &1762322779
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13617,7 +13810,7 @@ GameObject:
   - component: {fileID: 1764205470}
   - component: {fileID: 1764205471}
   m_Layer: 0
-  m_Name: Posicion (55)
+  m_Name: Posicion (21)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13650,7 +13843,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 55
+  index: 21
   type: 0
   checkpoint: 0
 --- !u!1 &1769354254
@@ -13664,7 +13857,7 @@ GameObject:
   - component: {fileID: 1769354255}
   - component: {fileID: 1769354256}
   m_Layer: 0
-  m_Name: Posicion (43)
+  m_Name: Posicion (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13697,7 +13890,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 43
+  index: 9
   type: 0
   checkpoint: 0
 --- !u!1001 &1774812332
@@ -13840,7 +14033,7 @@ GameObject:
   - component: {fileID: 1785326444}
   - component: {fileID: 1785326445}
   m_Layer: 0
-  m_Name: Posicion (42)
+  m_Name: Posicion (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13873,7 +14066,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 42
+  index: 8
   type: 0
   checkpoint: 0
 --- !u!1 &1797822479
@@ -13887,7 +14080,7 @@ GameObject:
   - component: {fileID: 1797822480}
   - component: {fileID: 1797822481}
   m_Layer: 0
-  m_Name: GreenSpot (1)
+  m_Name: BlueSpot (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13920,8 +14113,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 49
-  rightPositionIndex: 53
+  leftPositionIndex: 15
+  rightPositionIndex: 19
 --- !u!1 &1812520946
 GameObject:
   m_ObjectHideFlags: 0
@@ -13933,7 +14126,7 @@ GameObject:
   - component: {fileID: 1812520947}
   - component: {fileID: 1812520948}
   m_Layer: 0
-  m_Name: Posicion (14)
+  m_Name: Posicion (48)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13966,7 +14159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 14
+  index: 48
   type: 0
   checkpoint: 0
 --- !u!1 &1828351421
@@ -13980,7 +14173,7 @@ GameObject:
   - component: {fileID: 1828351422}
   - component: {fileID: 1828351423}
   m_Layer: 0
-  m_Name: Posicion (53)
+  m_Name: Posicion (19)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14013,7 +14206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 53
+  index: 19
   type: 0
   checkpoint: 0
 --- !u!114 &1862270504 stripped
@@ -14069,7 +14262,7 @@ GameObject:
   - component: {fileID: 1902361180}
   - component: {fileID: 1902361181}
   m_Layer: 0
-  m_Name: Posicion (20)
+  m_Name: Posicion (54)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14102,7 +14295,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 20
+  index: 54
   type: 0
   checkpoint: 0
 --- !u!1 &1902902943
@@ -14116,7 +14309,7 @@ GameObject:
   - component: {fileID: 1902902944}
   - component: {fileID: 1902902945}
   m_Layer: 0
-  m_Name: GreenSpot (2)
+  m_Name: BlueSpot (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14149,8 +14342,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 48
-  rightPositionIndex: 54
+  leftPositionIndex: 14
+  rightPositionIndex: 20
 --- !u!1 &1915413510
 GameObject:
   m_ObjectHideFlags: 0
@@ -14168,7 +14361,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1915413512
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14229,7 +14422,7 @@ GameObject:
   - component: {fileID: 1921901081}
   - component: {fileID: 1921901080}
   m_Layer: 0
-  m_Name: Posicion (47)
+  m_Name: Posicion (13)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14247,7 +14440,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 47
+  index: 13
   type: 0
   checkpoint: 0
 --- !u!4 &1921901081
@@ -14276,7 +14469,7 @@ GameObject:
   - component: {fileID: 1931784349}
   - component: {fileID: 1931784350}
   m_Layer: 0
-  m_Name: Posicion (19)
+  m_Name: Posicion (53)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14309,7 +14502,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 19
+  index: 53
   type: 0
   checkpoint: 0
 --- !u!1 &1940571035
@@ -14323,7 +14516,7 @@ GameObject:
   - component: {fileID: 1940571036}
   - component: {fileID: 1940571037}
   m_Layer: 0
-  m_Name: BlueSpot (2)
+  m_Name: GreenSpot (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14356,8 +14549,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 14
-  rightPositionIndex: 20
+  leftPositionIndex: 48
+  rightPositionIndex: 54
 --- !u!1001 &1941972368
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14849,6 +15042,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2223947559726556696, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
   m_PrefabInstance: {fileID: 1976488775}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1976488777 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1976488775}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1001 &2008515812
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14973,7 +15177,7 @@ GameObject:
   - component: {fileID: 2012401823}
   - component: {fileID: 2012401824}
   m_Layer: 0
-  m_Name: YellowSpot (2)
+  m_Name: RedSpot (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15006,8 +15210,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb22862eb377154abcecb333fc70526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColorSpot
-  leftPositionIndex: 65
-  rightPositionIndex: 3
+  leftPositionIndex: 31
+  rightPositionIndex: 37
 --- !u!1001 &2016452483
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15066,7 +15270,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6544432553920818503, guid: cb3b8b6b5bb5d734b895c880bfc5135f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15296,6 +15500,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84c8af378e7acaf40b29c2ec16b7092b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSlot
+--- !u!114 &2041802968 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 1293764056}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!114 &2069445831 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8733087956721349511, guid: abc4a277f5e52e94293777ad4477160e, type: 3}
@@ -15349,7 +15564,7 @@ GameObject:
   - component: {fileID: 2082101805}
   - component: {fileID: 2082101806}
   m_Layer: 0
-  m_Name: Posicion (32)
+  m_Name: Posicion (66)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15382,7 +15597,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 32
+  index: 66
   type: 0
   checkpoint: 0
 --- !u!1001 &2106872844
@@ -15622,7 +15837,7 @@ GameObject:
   - component: {fileID: 2138197975}
   - component: {fileID: 2138197976}
   m_Layer: 0
-  m_Name: Posicion (31)
+  m_Name: Posicion (65)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15655,7 +15870,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8502122a52d3734fb33f8acd186357e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spot
-  index: 31
+  index: 65
   type: 0
   checkpoint: 0
 --- !u!1001 &2142083459
@@ -15776,6 +15991,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2223947559726556696, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
   m_PrefabInstance: {fileID: 2142083459}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2142083461 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3708319331387771589, guid: b145eda0c96ec294e92f21134527c30c, type: 3}
+  m_PrefabInstance: {fileID: 2142083459}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e208c2e8ede64b9a3ba88513619b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlot
 --- !u!1001 &1410132410058433552
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15830,7 +16056,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6623611296740254087, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7451092580568557103, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
       propertyPath: m_Size.x
@@ -15895,7 +16121,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.x
@@ -15907,7 +16133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5237705484243513376, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
