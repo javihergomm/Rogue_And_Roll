@@ -33,23 +33,16 @@ public class RevenantBoss : EnemyBase
 
     private void Update()
     {
-        if (!isActive || movement == null)
+        if (!isActive || movement == null || player == null)
             return;
 
         Movement playerMovement = player.GetComponent<Movement>();
+
+        // Kill if same tile
         if (playerMovement != null && movement.ActualPos == playerMovement.ActualPos)
-        {
-            Debug.Log("Revenant collided directly with player.");
-            KillPlayer();
-        }
+            KillPlayerNow();
     }
 
-    /*
-     * OnPlayerCompletedLap
-     * --------------------
-     * Tracks how many laps the player has completed and activates the revenant
-     * when the required number is reached.
-     */
     public void OnPlayerCompletedLap()
     {
         if (!data.requiresPlayerLap)
@@ -61,11 +54,6 @@ public class RevenantBoss : EnemyBase
             ActivateRevenant();
     }
 
-    /*
-     * ActivateRevenant
-     * ----------------
-     * Starts the revenant activation process.
-     */
     private void ActivateRevenant()
     {
         SpawnEnemy();
@@ -81,16 +69,14 @@ public class RevenantBoss : EnemyBase
 
         PlaceEnemyBehindPlayer(6);
 
+        // Teleport visual to correct tile
+        movement.TeleportToPosition(movement.ActualPos);
+
         isActive = true;
 
         EnemyManager.Instance.ActivateEnemy(this);
     }
 
-    /*
-     * InitializeRevenant
-     * ------------------
-     * Sets up the revenant's movement system using the player's board positions.
-     */
     private void InitializeRevenant()
     {
         if (player == null)
@@ -119,12 +105,6 @@ public class RevenantBoss : EnemyBase
         movement.lastPos = movement.ActualPos;
     }
 
-    /*
-     * StartTurn
-     * ---------
-     * Rolls one dice and moves the revenant accordingly.
-     * After movement, it checks for row-based capture.
-     */
     public override void StartTurn()
     {
         if (!isActive || movement == null || player == null)
@@ -138,12 +118,6 @@ public class RevenantBoss : EnemyBase
         movement.OnMovementFinished += CheckCaptureAfterMove;
     }
 
-    /*
-     * CheckCaptureAfterMove
-     * ---------------------
-     * After movement, checks if the revenant and player share any board row.
-     * If so, the player is killed.
-     */
     private void CheckCaptureAfterMove()
     {
         movement.OnMovementFinished -= CheckCaptureAfterMove;
@@ -156,24 +130,20 @@ public class RevenantBoss : EnemyBase
         int[] revenantRows = GetRowsForSpot(revenantSpot);
         int[] playerRows = GetRowsForSpot(playerSpot);
 
+        // Kill if same row
         foreach (int r in revenantRows)
         {
             foreach (int p in playerRows)
             {
                 if (r == p)
                 {
-                    KillPlayer();
+                    KillPlayerNow();
                     return;
                 }
             }
         }
     }
 
-    /*
-     * IsInRange
-     * ---------
-     * Checks if a board spot is inside a row range.
-     */
     private bool IsInRange(int spot, int start, int end)
     {
         return start <= end
@@ -181,14 +151,9 @@ public class RevenantBoss : EnemyBase
             : spot >= start || spot <= end;
     }
 
-    /*
-     * GetRowsForSpot
-     * --------------
-     * Returns all row indices that contain the given board spot.
-     */
     private int[] GetRowsForSpot(int spot)
     {
-        List<int> result = new();
+        List<int> result = new List<int>();
 
         for (int i = 0; i < rows.Length; i++)
         {
@@ -199,38 +164,8 @@ public class RevenantBoss : EnemyBase
         return result.ToArray();
     }
 
-    /*
-     * KillPlayer
-     * ----------
-     * Called when the revenant catches the player.
-     */
-    private void KillPlayer()
-    {
-        Debug.LogError("PLAYER KILLED BY REVENANT");
-    }
-
-    // ---------------- TEST BUTTONS ----------------
-
-    [ContextMenu("Test: Spawn Revenant")]
-    private void TestSpawn()
+    public override void ActivateForTesting()
     {
         ActivateRevenant();
     }
-
-    [ContextMenu("Test: Start Turn")]
-    private void TestStartTurn()
-    {
-        StartTurn();
-    }
-
-    [ContextMenu("Test: Add 1 Lap")]
-    private void TestAddLap()
-    {
-        OnPlayerCompletedLap();
-    }
-    public override void ActivateForTesting()
-    {
-        TestSpawn(); // uses the same activation flow as normal gameplay
-    }
-
 }

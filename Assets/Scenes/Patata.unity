@@ -827,8 +827,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RevenantBoss
   data: {fileID: 11400000, guid: 8d3123800ef5e6d44819ad45234a149d, type: 2}
-  player: {fileID: 0}
   movement: {fileID: 8580833200976862543, guid: 4725713aefe17a141a811387680fdc66, type: 3}
+  player: {fileID: 0}
 --- !u!4 &78209754
 Transform:
   m_ObjectHideFlags: 0
@@ -10972,7 +10972,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4405e64266c832d4ea67bb26c177c5aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyTester
-  enemyToTest: {fileID: 11400000, guid: 66faf68494507c9448c4bfbdb8be7ba5, type: 2}
+  enemyToTest: {fileID: 11400000, guid: eb65b0e186818794e8cc77c7961725dc, type: 2}
 --- !u!4 &1537526899
 Transform:
   m_ObjectHideFlags: 0

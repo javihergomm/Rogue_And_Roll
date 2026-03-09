@@ -9,6 +9,7 @@ using UnityEngine;
  * - Spawning the enemy logic object
  * - Positioning the enemy on the board
  * - Providing references to Movement and player
+ * - Shared kill logic (KillPlayerNow)
  */
 public abstract class EnemyBase : MonoBehaviour
 {
@@ -23,33 +24,16 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected bool isActive = false;
 
-    /*
-     * SpawnEnemy
-     * ----------
-     * Creates the enemy logic object.
-     * Does NOT register the enemy automatically.
-     */
     public void SpawnEnemy()
     {
         // No auto-registration here.
-        // EnemyManager.ActivateEnemy() must be called explicitly by the enemy.
     }
 
-    /*
-     * RegisterEnemy
-     * -------------
-     * Registers this enemy in the EnemyManager.
-     */
     protected void RegisterEnemy()
     {
         EnemyManager.Instance.ActivateEnemy(this);
     }
 
-    /*
-     * PlaceEnemyBehindPlayer
-     * ----------------------
-     * Places the enemy a fixed number of steps behind the player.
-     */
     protected void PlaceEnemyBehindPlayer(int maxRoll)
     {
         if (player == null)
@@ -87,20 +71,30 @@ public abstract class EnemyBase : MonoBehaviour
 
         movement.ActualPos = enemyPos;
 
-        Debug.Log($"Enemy spawned behind player at spot {enemyPos} (player at {playerPos}, maxRoll {maxRoll})");
+        Debug.Log("Enemy spawned behind player at spot " + enemyPos +
+                  " (player at " + playerPos + ", maxRoll " + maxRoll + ")");
     }
 
     /*
-     * StartTurn
-     * ---------
-     * Must be implemented by each enemy type.
+     * KillPlayerNow
+     * -------------
+     * Shared kill logic for ALL enemies.
+     * Each enemy decides WHEN to call this.
+     * No GameManager required.
      */
+    protected void KillPlayerNow()
+    {
+        Debug.Log("Player killed.");
+
+        if (player != null)
+            Destroy(player.gameObject);
+
+        // No GameManager yet, so we stop here.
+        // Later you can add:
+        // GameManager.Instance.EndGame();
+    }
+
     public abstract void StartTurn();
 
-    /*
-     * ActivateForTesting
-     * ------------------
-     * Allows EnemyTester to activate the enemy manually.
-     */
     public virtual void ActivateForTesting() { }
 }

@@ -19,15 +19,11 @@ public class DemonBoss : EnemyBase
 
         Movement playerMovement = player.GetComponent<Movement>();
 
+        // Kill if demon reaches the same tile as the player
         if (playerMovement != null && movement.ActualPos == playerMovement.ActualPos)
-            KillPlayer();
+            KillPlayerNow();
     }
 
-    /*
-     * InitializeDemon
-     * ---------------
-     * Sets up the demon's movement system using the player's board positions.
-     */
     private void InitializeDemon()
     {
         if (player == null)
@@ -79,19 +75,6 @@ public class DemonBoss : EnemyBase
         StartCoroutine(ActivateDemonRoutine());
     }
 
-    /*
-     * ActivateDemonRoutine
-     * --------------------
-     * FIXED ORDER:
-     * 1. Spawn logic
-     * 2. Wait a frame
-     * 3. Instantiate visual
-     * 4. Assign movement
-     * 5. InitializeDemon
-     * 6. PlaceEnemyBehindPlayer
-     * 7. Teleport visual
-     * 8. Register enemy
-     */
     private System.Collections.IEnumerator ActivateDemonRoutine()
     {
         // 1. Spawn logic object (no visual yet)
@@ -141,18 +124,14 @@ public class DemonBoss : EnemyBase
 
         TurnManager.NotifyEnemyRoll(total);
 
+        // Kill if triple 6
         if (d1 == 6 && d2 == 6 && d3 == 6)
         {
-            KillPlayer();
+            KillPlayerNow();
             return;
         }
 
         movement.StartMovingFixed(total);
-    }
-
-    private void KillPlayer()
-    {
-        Debug.Log("Player killed by the Demon.");
     }
 
     public override void ActivateForTesting()

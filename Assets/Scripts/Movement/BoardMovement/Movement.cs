@@ -47,7 +47,6 @@ public class Movement : MonoBehaviour
         spots = FindObjectsByType<Spot>(FindObjectsSortMode.None);
         Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
-        // Only generate positions if they were not set externally
         if (positions == null || positions.Length == 0)
         {
             positions = new Transform[spots.Length];
@@ -121,7 +120,8 @@ public class Movement : MonoBehaviour
             yield break;
         }
 
-        if (nextCheckpoint > 0)
+        // FIX: checkpoints solo afectan al jugador
+        if (isPlayer && nextCheckpoint > 0)
         {
             int hypotheticalSpot = actualPos + steps;
             if (hypotheticalSpot > nextCheckpoint)
@@ -184,7 +184,6 @@ public class Movement : MonoBehaviour
 
         var type = spots[actualPos - 1].getType();
 
-        // Enemies DO NOT receive effects
         if (isPlayer && !effectAlreadyTriggered)
         {
             if (spots[actualPos - 1].checkpoint)
@@ -284,12 +283,11 @@ public class Movement : MonoBehaviour
 
         if (index < 1 || index > positions.Length)
         {
-            Debug.LogError($"Movement: TeleportToPosition index {index} is out of range.");
+            Debug.LogError("Movement: TeleportToPosition index " + index + " is out of range.");
             return;
         }
 
         actualPos = index;
         transform.position = positions[index - 1].position;
     }
-
 }
