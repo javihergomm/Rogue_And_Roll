@@ -2,20 +2,19 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /*
- * Revenant
- * --------
- * Enemy that activates after a required number of player laps.
- * Once active, it moves using a single d6 roll.
- * After moving, if the Revenant ends up in any row that the player occupies,
- * the player is instantly killed.
- * Direct collision with the player also results in instant kill.
+ * RevenantBoss
+ * ------------
+ * Enemy type that activates after a required number of player laps.
+ * Once active, it moves using a single dice roll.
+ * After moving, it checks if the player is in any matching board row.
+ * If the revenant reaches the same spot or row as the player, the player is killed.
  */
 public class RevenantBoss : EnemyBase
 {
     private GameObject revenantTokenInstance;
     private int playerLaps = 0;
 
-    // Board rows defined by spot index ranges (supports overlapping and wrap-around)
+    // Board rows defined by spot index ranges
     private readonly (int start, int end)[] rows = new (int, int)[]
     {
         (1, 8),
@@ -29,10 +28,10 @@ public class RevenantBoss : EnemyBase
         (50, 53),
         (53, 59),
         (60, 67),
-        (67, 1) // wrap-around
+        (67, 1)
     };
 
-    void Update()
+    private void Update()
     {
         if (!isActive || movement == null)
             return;
@@ -45,64 +44,63 @@ public class RevenantBoss : EnemyBase
         }
     }
 
+    /*
+     * OnPlayerCompletedLap
+     * --------------------
+     * Tracks how many laps the player has completed and activates the revenant
+     * when the required number is reached.
+     */
     public void OnPlayerCompletedLap()
     {
-        Debug.Log("Player completed lap. requiresPlayerLap=" + data.requiresPlayerLap);
-
         if (!data.requiresPlayerLap)
             return;
 
         playerLaps++;
-        Debug.Log("Player laps: " + playerLaps + " / " + data.lapsToActivate);
 
         if (!isActive && playerLaps >= data.lapsToActivate)
             ActivateRevenant();
     }
 
+    /*
+     * ActivateRevenant
+     * ----------------
+     * Starts the revenant activation process.
+     */
     private void ActivateRevenant()
     {
-        Debug.Log("ActivateRevenant() called");
-
         SpawnEnemy();
-        Debug.Log("SpawnEnemy() finished");
-
-        if (data.tilePrefab == null)
-            Debug.LogError("ERROR: tilePrefab is NULL!");
 
         revenantTokenInstance = Instantiate(data.tilePrefab);
-        Debug.Log("Instantiated revenant token: " + revenantTokenInstance);
 
-        // Register revenant token so BoardHider can hide it inside the shop
         if (BoardHider.Instance != null)
             BoardHider.Instance.RegisterObject(revenantTokenInstance);
 
         movement = revenantTokenInstance.GetComponent<Movement>();
-        Debug.Log("Movement component found: " + movement);
 
         InitializeRevenant();
-        Debug.Log("Initialized Revenant");
 
         PlaceEnemyBehindPlayer(6);
-        Debug.Log("Placed Revenant behind player");
 
         isActive = true;
-        Debug.Log("Revenant is now ACTIVE");
+
+        EnemyManager.Instance.ActivateEnemy(this);
     }
 
+    /*
+     * InitializeRevenant
+     * ------------------
+     * Sets up the revenant's movement system using the player's board positions.
+     */
     private void InitializeRevenant()
     {
-        Debug.Log("InitializeRevenant()");
-
         if (player == null)
         {
-            Debug.Log("Player reference missing. Searching...");
             Movement[] all = FindObjectsByType<Movement>(FindObjectsSortMode.None);
             foreach (Movement m in all)
             {
                 if (m.isPlayer)
                 {
                     player = m.transform;
-                    Debug.Log("Player found: " + player.name);
                     break;
                 }
             }
@@ -110,7 +108,7 @@ public class RevenantBoss : EnemyBase
 
         if (player == null)
         {
-            Debug.LogError("ERROR: Player NOT FOUND!");
+            Debug.LogError("RevenantBoss: Player not found.");
             return;
         }
 
@@ -119,27 +117,33 @@ public class RevenantBoss : EnemyBase
 
         movement.startPos = movement.ActualPos;
         movement.lastPos = movement.ActualPos;
-
-        Debug.Log("Revenant movement initialized at pos " + movement.ActualPos);
     }
 
+    /*
+     * StartTurn
+     * ---------
+     * Rolls one dice and moves the revenant accordingly.
+     * After movement, it checks for row-based capture.
+     */
     public override void StartTurn()
     {
-        Debug.Log("StartTurn() called. isActive=" + isActive + " movement=" + movement + " player=" + player);
-
         if (!isActive || movement == null || player == null)
-        {
-            Debug.LogWarning("StartTurn aborted due to missing references.");
             return;
-        }
 
         int roll = EnemyDice.ThrowDice();
-        Debug.Log("Revenant rolled: " + roll);
+
+        TurnManager.NotifyEnemyRoll(roll);
 
         movement.StartMovingFixed(roll);
         movement.OnMovementFinished += CheckCaptureAfterMove;
     }
 
+    /*
+     * CheckCaptureAfterMove
+     * ---------------------
+     * After movement, checks if the revenant and player share any board row.
+     * If so, the player is killed.
+     */
     private void CheckCaptureAfterMove()
     {
         movement.OnMovementFinished -= CheckCaptureAfterMove;
@@ -149,13 +153,8 @@ public class RevenantBoss : EnemyBase
         int revenantSpot = movement.ActualPos;
         int playerSpot = playerMovement.ActualPos;
 
-        Debug.Log("Movement finished. Revenant at " + revenantSpot + ", Player at " + playerSpot);
-
         int[] revenantRows = GetRowsForSpot(revenantSpot);
         int[] playerRows = GetRowsForSpot(playerSpot);
-
-        Debug.Log("Revenant rows: " + string.Join(",", revenantRows));
-        Debug.Log("Player rows: " + string.Join(",", playerRows));
 
         foreach (int r in revenantRows)
         {
@@ -163,7 +162,6 @@ public class RevenantBoss : EnemyBase
             {
                 if (r == p)
                 {
-                    Debug.Log("Revenant captured player by row overlap.");
                     KillPlayer();
                     return;
                 }
@@ -171,6 +169,11 @@ public class RevenantBoss : EnemyBase
         }
     }
 
+    /*
+     * IsInRange
+     * ---------
+     * Checks if a board spot is inside a row range.
+     */
     private bool IsInRange(int spot, int start, int end)
     {
         return start <= end
@@ -178,6 +181,11 @@ public class RevenantBoss : EnemyBase
             : spot >= start || spot <= end;
     }
 
+    /*
+     * GetRowsForSpot
+     * --------------
+     * Returns all row indices that contain the given board spot.
+     */
     private int[] GetRowsForSpot(int spot)
     {
         List<int> result = new();
@@ -191,6 +199,11 @@ public class RevenantBoss : EnemyBase
         return result.ToArray();
     }
 
+    /*
+     * KillPlayer
+     * ----------
+     * Called when the revenant catches the player.
+     */
     private void KillPlayer()
     {
         Debug.LogError("PLAYER KILLED BY REVENANT");
@@ -201,21 +214,23 @@ public class RevenantBoss : EnemyBase
     [ContextMenu("Test: Spawn Revenant")]
     private void TestSpawn()
     {
-        Debug.Log("TEST BUTTON: Spawn Revenant");
         ActivateRevenant();
     }
 
     [ContextMenu("Test: Start Turn")]
     private void TestStartTurn()
     {
-        Debug.Log("TEST BUTTON: Start Turn");
         StartTurn();
     }
 
     [ContextMenu("Test: Add 1 Lap")]
     private void TestAddLap()
     {
-        Debug.Log("TEST BUTTON: Add Lap");
         OnPlayerCompletedLap();
     }
+    public override void ActivateForTesting()
+    {
+        TestSpawn(); // uses the same activation flow as normal gameplay
+    }
+
 }

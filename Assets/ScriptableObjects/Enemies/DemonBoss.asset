@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemySO
   enemyID: demon_boss
   enemyName: Demon Boss
+  enemyPrefab: {fileID: 4559722108389615459, guid: 311e70351be9b51438784ca1a463cc77, type: 3}
   cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
   tilePrefab: {fileID: 9126656830565562572, guid: 4725713aefe17a141a811387680fdc66, type: 3}
   effects: []

@@ -1,33 +1,77 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 /*
  * EnemyManager
  * ------------
- * Holds references to all enemies in the scene.
- * Called after the playerObject finishes moving to trigger enemy turns.
+ * Central registry for all active enemies.
+ * Handles:
+ * - Activating enemies
+ * - Preventing duplicate registrations
+ * - Storing the list of active enemies
  */
 public class EnemyManager : MonoBehaviour
 {
-    public static EnemyManager Instance;
+    public static EnemyManager Instance { get; private set; }
 
-    [Header("Enemies")]
-    public EnemyBase[] enemies;   // All enemies in the scene
+    // List of all active enemies
+    public List<EnemyBase> enemies = new List<EnemyBase>();
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
+        Debug.Log("EnemyManager Awake: INSTANCE SET");
     }
 
     /*
-     * Called after the playerObject finishes their movement.
-     * Each enemy performs its own StartTurn() logic.
+     * ActivateEnemy
+     * -------------
+     * Registers an enemy in the TurnManager and in the local list.
+     * Prevents duplicate registration.
      */
-    public void StartEnemyTurns()
+    public void ActivateEnemy(EnemyBase enemy)
     {
-        foreach (var enemy in enemies)
+        if (enemy == null)
         {
-            if (enemy != null && enemy.gameObject.activeInHierarchy)
-                enemy.StartTurn();
+            Debug.LogError("EnemyManager: Tried to activate a NULL enemy.");
+            return;
         }
+
+        if (TurnManager.Instance == null)
+        {
+            Debug.LogError("EnemyManager: TurnManager not found.");
+            return;
+        }
+
+        // Prevent duplicate registration in local list
+        if (!enemies.Contains(enemy))
+            enemies.Add(enemy);
+
+        // Prevent duplicate registration in TurnManager
+        if (!TurnManager.Instance.IsEnemyRegistered(enemy))
+            TurnManager.Instance.RegisterEnemy(enemy);
+    }
+
+    /*
+     * RemoveEnemy
+     * -----------
+     * Removes an enemy from the manager and TurnManager.
+     */
+    public void RemoveEnemy(EnemyBase enemy)
+    {
+        if (enemy == null)
+            return;
+
+        if (enemies.Contains(enemy))
+            enemies.Remove(enemy);
+
+        if (TurnManager.Instance.IsEnemyRegistered(enemy))
+            TurnManager.Instance.UnregisterEnemy(enemy);
     }
 }

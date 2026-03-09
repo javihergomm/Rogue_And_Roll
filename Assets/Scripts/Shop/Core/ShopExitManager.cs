@@ -2,16 +2,6 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-/*
- * ShopExitManager
- * ----------------
- * Handles entering and exiting the shop.
- * Enables and disables shop pedestals, decision zones, and UI elements.
- * Rotates the board depending on shop state.
- * Restores shop rerolls when entering the shop.
- * Resets pedestal state and global item memory so each shop visit generates new items.
- * Ensures the Ouija pointer always appears at its original position when entering the shop.
- */
 public class ShopExitManager : MonoBehaviour
 {
     [Header("References (assign in Inspector)")]
@@ -29,7 +19,6 @@ public class ShopExitManager : MonoBehaviour
     [Header("Ouija Pointer")]
     [SerializeField] private GameObject tableroOuijaPuntero;
 
-    // Stores the initial local position and rotation of the Ouija pointer
     private Vector3 punteroInitialLocalPos;
     private Quaternion punteroInitialLocalRot;
 
@@ -37,14 +26,12 @@ public class ShopExitManager : MonoBehaviour
 
     private void Start()
     {
-        // Save the initial local position and rotation of the Ouija pointer
         if (tableroOuijaPuntero != null)
         {
             punteroInitialLocalPos = tableroOuijaPuntero.transform.localPosition;
             punteroInitialLocalRot = tableroOuijaPuntero.transform.localRotation;
         }
 
-        // Initial shop state setup
         if (!inShop)
         {
             foreach (var pedestal in shopPedestals)
@@ -65,6 +52,9 @@ public class ShopExitManager : MonoBehaviour
         }
     }
 
+    // -------------------------------------------------------------------------
+    // ENTER SHOP
+    // -------------------------------------------------------------------------
     public void EnterShop()
     {
         if (inShop)
@@ -72,20 +62,26 @@ public class ShopExitManager : MonoBehaviour
 
         inShop = true;
 
-        // Pause all enemies
+        // Pause all enemies + hide their objects
         if (EnemyManager.Instance != null)
         {
             foreach (var enemy in EnemyManager.Instance.enemies)
             {
-                if (enemy != null)
-                    enemy.enabled = false;
+                if (enemy == null) continue;
+
+                enemy.enabled = false;
+
+                if (enemy.CupInstance != null)
+                    enemy.CupInstance.SetActive(false);
+
+                if (enemy.movement != null)
+                    enemy.movement.gameObject.SetActive(false);
             }
         }
 
-        // Notify that the board should hide
         OnShopStateChanged?.Invoke(true);
 
-        // Disable player interaction with the board
+        // Disable player movement
         Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
         if (playerMovement != null)
             playerMovement.enabled = false;
@@ -93,7 +89,7 @@ public class ShopExitManager : MonoBehaviour
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = false;
 
-        // Reset Ouija pointer to its original position and enable it
+        // Reset Ouija pointer
         if (tableroOuijaPuntero != null)
         {
             tableroOuijaPuntero.transform.localPosition = punteroInitialLocalPos;
@@ -101,14 +97,12 @@ public class ShopExitManager : MonoBehaviour
             tableroOuijaPuntero.SetActive(true);
         }
 
-        // Activate shop pedestals and decision zones
         foreach (var pedestal in shopPedestals)
             if (pedestal != null) pedestal.SetActive(true);
 
         foreach (var empty in decisionEmpties)
             if (empty != null) empty.SetActive(true);
 
-        // Rotate board to shop orientation
         if (boardTransform != null)
         {
             Vector3 euler = boardTransform.eulerAngles;
@@ -116,7 +110,6 @@ public class ShopExitManager : MonoBehaviour
             boardTransform.eulerAngles = euler;
         }
 
-        // Reset pedestal state and generate new items
         ShopPedestalRandomizer.PrepareForReroll();
         ShopPedestalRandomizer.ClearVisitMemory();
 
@@ -131,8 +124,68 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
-        // Notify listeners
         OnShopStateChanged?.Invoke(true);
+    }
+
+    // -------------------------------------------------------------------------
+    // EXIT SHOP
+    // -------------------------------------------------------------------------
+    public void ConfirmExit()
+    {
+        if (!inShop)
+            return;
+
+        inShop = false;
+
+        // Re-enable player movement
+        Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
+        if (playerMovement != null)
+            playerMovement.enabled = true;
+
+        if (DiceRollManager.Instance != null)
+            DiceRollManager.Instance.enabled = true;
+
+        // Re-enable enemy objects + scripts
+        if (EnemyManager.Instance != null)
+        {
+            foreach (var enemy in EnemyManager.Instance.enemies)
+            {
+                if (enemy == null) continue;
+
+                enemy.enabled = true;
+
+                if (enemy.CupInstance != null)
+                    enemy.CupInstance.SetActive(true);
+
+                if (enemy.movement != null)
+                    enemy.movement.gameObject.SetActive(true);
+            }
+        }
+
+        if (tableroOuijaPuntero != null)
+            tableroOuijaPuntero.SetActive(false);
+
+        foreach (var pedestal in shopPedestals)
+            if (pedestal != null) pedestal.SetActive(false);
+
+        foreach (var empty in decisionEmpties)
+            if (empty != null) empty.SetActive(false);
+
+        if (StatManager.Instance != null)
+        {
+            int currentRerolls = StatManager.Instance.GetCurrentValue(StatType.ShopRerolls);
+            if (currentRerolls > 0)
+                StatManager.Instance.ChangeStat(StatType.ShopRerolls, -currentRerolls);
+        }
+
+        if (boardTransform != null)
+        {
+            Vector3 euler = boardTransform.eulerAngles;
+            euler.z = exitRotationZ;
+            boardTransform.eulerAngles = euler;
+        }
+
+        OnShopStateChanged?.Invoke(false);
     }
 
     public void TriggerGoodbye()
@@ -146,59 +199,19 @@ public class ShopExitManager : MonoBehaviour
         );
     }
 
-    public void ConfirmExit()
-    {
-        if (!inShop)
-            return;
-
-        inShop = false;
-
-        // Disable Ouija pointer
-        if (tableroOuijaPuntero != null)
-            tableroOuijaPuntero.SetActive(false);
-
-        // Disable pedestals and decision zones
-        foreach (var pedestal in shopPedestals)
-            if (pedestal != null) pedestal.SetActive(false);
-
-        foreach (var empty in decisionEmpties)
-            if (empty != null) empty.SetActive(false);
-
-        // Remove remaining rerolls
-        if (StatManager.Instance != null)
-        {
-            int currentRerolls = StatManager.Instance.GetCurrentValue(StatType.ShopRerolls);
-            if (currentRerolls > 0)
-                StatManager.Instance.ChangeStat(StatType.ShopRerolls, -currentRerolls);
-        }
-
-        // Rotate board back to normal orientation
-        if (boardTransform != null)
-        {
-            Vector3 euler = boardTransform.eulerAngles;
-            euler.z = exitRotationZ;
-            boardTransform.eulerAngles = euler;
-        }
-
-        OnShopStateChanged?.Invoke(false);
-    }
-
     public void CancelExit()
     {
         inShop = true;
 
-        // Re-enable Ouija pointer
         if (tableroOuijaPuntero != null)
             tableroOuijaPuntero.SetActive(true);
 
-        // Re-enable pedestals and decision zones
         foreach (var pedestal in shopPedestals)
             if (pedestal != null) pedestal.SetActive(true);
 
         foreach (var empty in decisionEmpties)
             if (empty != null) empty.SetActive(true);
 
-        // Rotate board to shop orientation
         if (boardTransform != null)
         {
             Vector3 euler = boardTransform.eulerAngles;

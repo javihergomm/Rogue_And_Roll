@@ -4,117 +4,103 @@ using UnityEngine;
  * EnemyBase
  * ---------
  * Base class for all enemies.
+ * Handles:
+ * - Storing enemy data
+ * - Spawning the enemy logic object
+ * - Positioning the enemy on the board
+ * - Providing references to Movement and player
  */
-public class EnemyBase : MonoBehaviour
+public abstract class EnemyBase : MonoBehaviour
 {
     [Header("Enemy Data")]
     public EnemySO data;
 
-    protected GameObject cupInstance;
-    protected GameObject tileInstance;
+    [HideInInspector] public Movement movement;
+    [HideInInspector] public Transform player;
 
-    public Transform player;
-    public Movement movement;
+    // Visual instance for enemies that spawn a token (cup, demon, etc.)
+    public GameObject CupInstance { get; protected set; }
 
-    private Movement cachedPlayerMovement;
     protected bool isActive = false;
 
     /*
      * SpawnEnemy
      * ----------
-     * Spawns the enemy's cup at the spawn point opposite to the player's spawn.
+     * Creates the enemy logic object.
+     * Does NOT register the enemy automatically.
      */
-    public virtual void SpawnEnemy()
+    public void SpawnEnemy()
     {
-        isActive = true;
+        // No auto-registration here.
+        // EnemyManager.ActivateEnemy() must be called explicitly by the enemy.
+    }
 
-        if (player != null)
-            cachedPlayerMovement = player.GetComponent<Movement>();
-
-        string playerSpawnName = CharacterSelectManager.Instance.SelectedCharacter.spawnPointName;
-        string enemyCupSpawnName = GetOppositeSpawn(playerSpawnName);
-
-        Transform cupSpawn = FindSpawnPoint(enemyCupSpawnName);
-
-        if (cupSpawn == null)
-        {
-            Debug.LogError("EnemyBase: Cup spawn point missing for enemy " + data.enemyName +
-                           " (searched for: " + enemyCupSpawnName + ")");
-            return;
-        }
-
-        cupInstance = Instantiate(data.cupPrefab, cupSpawn.position, cupSpawn.rotation);
-
-        if (BoardHider.Instance != null)
-            BoardHider.Instance.RegisterObject(cupInstance);
+    /*
+     * RegisterEnemy
+     * -------------
+     * Registers this enemy in the EnemyManager.
+     */
+    protected void RegisterEnemy()
+    {
+        EnemyManager.Instance.ActivateEnemy(this);
     }
 
     /*
      * PlaceEnemyBehindPlayer
      * ----------------------
-     * Places the enemy token behind the player at a safe distance.
+     * Places the enemy a fixed number of steps behind the player.
      */
     protected void PlaceEnemyBehindPlayer(int maxRoll)
     {
-        if (movement == null || player == null)
+        if (player == null)
         {
-            Debug.LogError("EnemyBase: Missing movement or player reference.");
+            Movement[] allMovements = FindObjectsByType<Movement>(FindObjectsSortMode.None);
+
+            foreach (Movement m in allMovements)
+            {
+                if (m != null && m.isPlayer)
+                {
+                    player = m.transform;
+                    break;
+                }
+            }
+
+            if (player == null)
+            {
+                Debug.LogError("EnemyBase: No player found when placing enemy.");
+                return;
+            }
+        }
+
+        Movement playerMovement = player.GetComponent<Movement>();
+        if (playerMovement == null)
+        {
+            Debug.LogError("EnemyBase: Player has no Movement component.");
             return;
         }
 
-        // Usar el componente cacheado (sin GetComponent)
-        if (cachedPlayerMovement == null)
-            return;
+        int playerPos = playerMovement.ActualPos;
+        int enemyPos = playerPos - maxRoll;
 
-        int playerSpot = cachedPlayerMovement.ActualPos;
+        if (enemyPos < 0)
+            enemyPos += playerMovement.Positions.Length;
 
-        int safeSpot = playerSpot - (maxRoll + 1);
-        safeSpot = Mathf.Max(1, safeSpot);
+        movement.ActualPos = enemyPos;
 
-        movement.ActualPos = safeSpot;
-        movement.transform.position = movement.Positions[safeSpot - 1].position;
-
-        Debug.Log($"Enemy spawned behind player at spot {safeSpot} (player at {playerSpot}, maxRoll {maxRoll})");
-    }
-
-    /*
-     * GetOppositeSpawn
-     * ----------------
-     */
-    private string GetOppositeSpawn(string playerSpawn)
-    {
-        string p = playerSpawn.ToLower();
-
-        if (p.Contains("red")) return "Spawn_Yellow";
-        if (p.Contains("yellow")) return "Spawn_Red";
-        if (p.Contains("blue")) return "Spawn_Green";
-        if (p.Contains("green")) return "Spawn_Blue";
-
-        Debug.LogWarning("EnemyBase: Could not determine opposite spawn for " + playerSpawn);
-        return playerSpawn;
-    }
-
-    /*
-     * FindSpawnPoint
-     * --------------
-     */
-    private Transform FindSpawnPoint(string name)
-    {
-        GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
-
-        foreach (GameObject obj in allObjects)
-        {
-            if (obj.scene.isLoaded &&
-                obj.name.Equals(name, System.StringComparison.OrdinalIgnoreCase))
-                return obj.transform;
-        }
-
-        return null;
+        Debug.Log($"Enemy spawned behind player at spot {enemyPos} (player at {playerPos}, maxRoll {maxRoll})");
     }
 
     /*
      * StartTurn
      * ---------
+     * Must be implemented by each enemy type.
      */
-    public virtual void StartTurn() { }
+    public abstract void StartTurn();
+
+    /*
+     * ActivateForTesting
+     * ------------------
+     * Allows EnemyTester to activate the enemy manually.
+     */
+    public virtual void ActivateForTesting() { }
 }

@@ -128,8 +128,10 @@ public class CharacterSpawner : MonoBehaviour
 
         if (mov != null)
         {
+            // Register movement
             DiceRollManager.Instance.RegisterPlayerMovement(mov);
-
+            
+            // Set initial board position
             mov.ActualPos = lastCharacter.tileSpotIndex;
 
             if (mov.Positions != null &&

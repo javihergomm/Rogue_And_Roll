@@ -90,6 +90,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &8580833200976862543
 MonoBehaviour:
@@ -109,6 +110,8 @@ MonoBehaviour:
   isPlayer: 0
   audioSource: {fileID: 0}
   moveSound: {fileID: 0}
+  startPos: 0
+  lastPos: 0
 --- !u!65 &7502107211952220923
 BoxCollider:
   m_ObjectHideFlags: 0

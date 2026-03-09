@@ -2,89 +2,87 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-/*
- * Movement
- * --------
- * Controls movement for player or enemy tokens on the board.
- * Moves step by step, checks bridge connections, applies spot effects,
- * and supports temporary effects such as hiding the token.
- */
 public class Movement : MonoBehaviour
 {
     private Spot[] spots;
 
     [SerializeField] private Transform[] positions;
     public Transform[] Positions => positions;
+
     private ShopExitManager shopExitManager;
+
     public void SetPositions(Transform[] newPositions)
     {
         positions = newPositions;
     }
 
-    [SerializeField] float speed;
-    [SerializeField] int actualPos = -1;
+    [SerializeField] private float speed = 5f;
+
+    [SerializeField] private int actualPos = 0;
+    public int ActualPos
+    {
+        get => actualPos;
+        set => actualPos = value;
+    }
+
     public bool isPlayer;
-    [SerializeField] AudioSource audioSource;
-    [SerializeField] AudioClip moveSound;
-    private int NextCheckpoint;
+
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip moveSound;
+
+    private int nextCheckpoint;
     public Action OnMovementFinished;
 
     private Renderer cachedRenderer;
     private bool wasHiddenByEffect = false;
-    private int round=1;
+    private int round = 1;
 
-    // Added for lap detection and enemy initialization
     public int startPos;
     public int lastPos;
 
+    private bool effectAlreadyTriggered = false;
+
     private void Start()
     {
-        // Load and sort board spots
         spots = FindObjectsByType<Spot>(FindObjectsSortMode.None);
-        shopExitManager = FindFirstObjectByType<ShopExitManager>();
         Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
-        // Cache positions from spots
-        positions = new Transform[spots.Length];
-        for (int i = 0; i < spots.Length; i++)
-            positions[i] = spots[i].transform;
+        // Only generate positions if they were not set externally
+        if (positions == null || positions.Length == 0)
+        {
+            positions = new Transform[spots.Length];
+            for (int i = 0; i < spots.Length; i++)
+                positions[i] = spots[i].transform;
+        }
 
-        // Cache renderer
+        shopExitManager = FindFirstObjectByType<ShopExitManager>();
         cachedRenderer = GetComponentInChildren<Renderer>();
 
-        // Place token at initial position (index 1..N)
         if (actualPos >= 1 && actualPos <= positions.Length)
             transform.position = positions[actualPos - 1].position;
 
-        // Initialize lap tracking and enemy movement state
         startPos = actualPos;
         lastPos = actualPos;
     }
 
-    /*
-     * Starts movement using the player's dice roll.
-     */
     public void StartMoving()
     {
-        NextCheckpoint = GetNextCheckpoint();
+        nextCheckpoint = GetNextCheckpoint();
+        effectAlreadyTriggered = false;
+
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
             return;
 
         StartCoroutine(MoveWithVisibilityCheck());
     }
 
-    /*
-     * Starts movement with a fixed number of steps.
-     */
     public void StartMovingFixed(int steps)
     {
-
+        nextCheckpoint = int.MaxValue;
+        effectAlreadyTriggered = false;
         StartCoroutine(MoveWithVisibilityCheck(steps));
     }
 
-    /*
-     * Updates visibility before movement.
-     */
     private IEnumerator MoveWithVisibilityCheck(int? fixedSteps = null)
     {
         yield return null;
@@ -104,97 +102,112 @@ public class Movement : MonoBehaviour
         }
 
         int steps = fixedSteps ?? InventoryManager.Instance.GetFinalDiceNumber();
-        int divisor = 1;
 
+        int divisor = 1;
         if (round >= 3)
-        {
             divisor = ((round - 3) / 2) + 2;
-        }
+
         if (isPlayer)
-        {
             steps /= divisor;
-        }
-        
+
         yield return StartCoroutine(Move(steps));
     }
 
-    /*
-     * Performs movement step by step, checks bridges,
-     * and applies spot effects.
-     */
     private IEnumerator Move(int steps)
     {
-        int hipoteticSpot = actualPos + steps;
-        if(hipoteticSpot > NextCheckpoint)
+        if (actualPos <= 0)
         {
-            steps = NextCheckpoint - actualPos;
+            OnMovementFinished?.Invoke();
+            yield break;
+        }
+
+        if (nextCheckpoint > 0)
+        {
+            int hypotheticalSpot = actualPos + steps;
+            if (hypotheticalSpot > nextCheckpoint)
+                steps = nextCheckpoint - actualPos;
         }
 
         if (!isPlayer)
             yield return new WaitForSeconds(1f);
 
-        for (int i = 0; i < steps; i++)
-        {
-            actualPos++;
+        int direction = steps >= 0 ? 1 : -1;
+        int totalSteps = Mathf.Abs(steps);
 
-            // Wrap-around: if we pass the last spot, return to 1
+        for (int i = 0; i < totalSteps; i++)
+        {
+            actualPos += direction;
+
             if (actualPos > positions.Length)
                 actualPos = 1;
+            if (actualPos < 1)
+                actualPos = positions.Length;
 
-            Vector3 destino = positions[actualPos - 1].position;
+            Vector3 target = positions[actualPos - 1].position;
             PlayMovementSound();
 
-            while (Vector3.Distance(transform.position, destino) > 0.0001f)
+            while (Vector3.Distance(transform.position, target) > 0.0001f)
             {
                 transform.position = Vector3.MoveTowards(
                     transform.position,
-                    destino,
+                    target,
                     speed * Time.deltaTime
                 );
                 yield return null;
             }
 
-            transform.position = destino;
+            transform.position = target;
 
-            // Bridge connections
-            var conexiones = SpotConnectionManager.Instance.GetConnections(actualPos);
-            if (conexiones.Count > 0)
+            var connections = SpotConnectionManager.Instance.GetConnections(actualPos);
+            if (connections.Count > 0)
             {
-                int target = conexiones[0];
-                actualPos = target;
+                int targetSpot = connections[0];
+                actualPos = targetSpot;
 
-                Vector3 destinoPuente = positions[target - 1].position;
+                Vector3 bridgeTarget = positions[targetSpot - 1].position;
 
-                while (Vector3.Distance(transform.position, destinoPuente) > 0.0001f)
+                while (Vector3.Distance(transform.position, bridgeTarget) > 0.0001f)
                 {
                     transform.position = Vector3.MoveTowards(
                         transform.position,
-                        destinoPuente,
+                        bridgeTarget,
                         speed * Time.deltaTime
                     );
                     yield return null;
                 }
 
-                transform.position = destinoPuente;
+                transform.position = bridgeTarget;
             }
 
             yield return new WaitForSeconds(0.1f);
         }
 
-        var tipo = spots[actualPos - 1].getType();
-        if (isPlayer)
+        var type = spots[actualPos - 1].getType();
+
+        // Enemies DO NOT receive effects
+        if (isPlayer && !effectAlreadyTriggered)
         {
-            if (spots[actualPos-1].checkpoint == true)
+            if (spots[actualPos - 1].checkpoint)
             {
                 shopExitManager.EnterShop();
                 round++;
+                yield break;
             }
-            else if (tipo == Spot.SpotType.Good)
-                GoodSpotEffect();
-            else if (tipo == Spot.SpotType.Bad)
-                BadSpotEffect();
+            else if (type == Spot.SpotType.Good)
+            {
+                effectAlreadyTriggered = true;
+                int extra = GoodSpotEffect();
+                yield return StartCoroutine(ExtraMovementRoutine(extra));
+                yield break;
+            }
+            else if (type == Spot.SpotType.Bad)
+            {
+                effectAlreadyTriggered = true;
+                int extra = BadSpotEffect();
+                yield return StartCoroutine(ExtraMovementRoutine(extra));
+                yield break;
+            }
         }
-        
 
         SpotConnectionManager.Instance.OnRoundStepCompleted();
 
@@ -207,61 +220,37 @@ public class Movement : MonoBehaviour
         if (isPlayer)
             DiceRollManager.Instance.ResetDiceTurnState();
 
+        lastPos = actualPos;
         OnMovementFinished?.Invoke();
     }
 
-    void GoodSpotEffect()
+    private IEnumerator ExtraMovementRoutine(int extraSteps)
+    {
+        if (extraSteps != 0)
+            yield return StartCoroutine(Move(extraSteps));
+
+        lastPos = actualPos;
+        OnMovementFinished?.Invoke();
+    }
+
+    private int GoodSpotEffect()
     {
         int effectType = SpotController.GoodSpot();
 
         if (effectType == 1)
-        {
-            int extra = UnityEngine.Random.Range(3, 6);
+            return UnityEngine.Random.Range(3, 6);
 
-            Debug.Log((isPlayer ? "Player" : "Enemy") +
-                      " received GOOD effect: extra steps = " + extra);
-
-            StartCoroutine(Move(extra));
-        }
-        else if (effectType == 2)
-        {
-
-            Debug.Log((isPlayer ? "Player" : "Enemy") +
-                      " received GOOD effect: enemy cannot move next turn");
-        }
-        else if (effectType == 3)
-        {
-            Debug.Log((isPlayer ? "Player" : "Enemy") +
-                      " received GOOD effect: lootbox");
-            // Lootbox logic here
-        }
+        return 0;
     }
 
-    void BadSpotEffect()
+    private int BadSpotEffect()
     {
         int effectType = SpotController.BadSpot();
 
         if (effectType == 1)
-        {
-            int extra = UnityEngine.Random.Range(-3, -6);
+            return UnityEngine.Random.Range(-3, -6);
 
-            Debug.Log((isPlayer ? "Player" : "Enemy") +
-                      " received BAD effect: extra steps = " + extra);
-
-            StartCoroutine(Move(extra));
-        }
-        else if (effectType == 2)
-        {
-
-            Debug.Log((isPlayer ? "Player" : "Enemy") +
-                      " received BAD effect: player cannot move next turn");
-        }
-        else if (effectType == 3)
-        {
-            Debug.Log((isPlayer ? "Player" : "Enemy") +
-                      " received BAD effect: other negative effect");
-            // Other negative effect
-        }
+        return 0;
     }
 
     public int GetNextCheckpoint()
@@ -273,22 +262,34 @@ public class Movement : MonoBehaviour
             int nextPos = ((actualPos - 1 + i) % total);
 
             if (spots[nextPos].checkpoint)
-            {
                 return spots[nextPos].index;
-            }
         }
 
         return -1;
     }
 
-    void PlayMovementSound()
+    private void PlayMovementSound()
     {
-        audioSource.PlayOneShot(moveSound);
+        if (audioSource != null && moveSound != null)
+            audioSource.PlayOneShot(moveSound);
     }
 
-    public int ActualPos
+    public void TeleportToPosition(int index)
     {
-        get => actualPos;
-        set => actualPos = value;
+        if (positions == null || positions.Length == 0)
+        {
+            Debug.LogError("Movement: Positions array is not set.");
+            return;
+        }
+
+        if (index < 1 || index > positions.Length)
+        {
+            Debug.LogError($"Movement: TeleportToPosition index {index} is out of range.");
+            return;
+        }
+
+        actualPos = index;
+        transform.position = positions[index - 1].position;
     }
+
 }

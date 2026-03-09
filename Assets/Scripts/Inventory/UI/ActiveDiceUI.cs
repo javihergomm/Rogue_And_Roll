@@ -5,11 +5,25 @@ using System.Collections;
 
 public class ActiveDiceUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI diceText;
+    [SerializeField] private TextMeshProUGUI statusText;
 
     private void OnEnable()
     {
         StartCoroutine(DelayedInit());
+
+        TurnManager.OnPlayerTurnStarted += HandlePlayerTurn;
+        TurnManager.OnEnemyTurnStarted += HandleEnemyTurn;
+        TurnManager.OnEnemyRollCalculated += HandleEnemyRoll;
+    }
+
+    private void OnDisable()
+    {
+        if (InventoryManager.Instance != null)
+            InventoryManager.Instance.OnActiveDiceChanged -= RefreshPlayerDice;
+
+        TurnManager.OnPlayerTurnStarted -= HandlePlayerTurn;
+        TurnManager.OnEnemyTurnStarted -= HandleEnemyTurn;
+        TurnManager.OnEnemyRollCalculated -= HandleEnemyRoll;
     }
 
     private IEnumerator DelayedInit()
@@ -17,26 +31,30 @@ public class ActiveDiceUI : MonoBehaviour
         yield return null;
 
         if (InventoryManager.Instance != null)
-            InventoryManager.Instance.OnActiveDiceChanged += RefreshUI;
+            InventoryManager.Instance.OnActiveDiceChanged += RefreshPlayerDice;
 
-        RefreshUI();
+        RefreshPlayerDice();
     }
 
-    private void OnDisable()
+    // -------------------------------------------------------------------------
+    // PLAYER TURN
+    // -------------------------------------------------------------------------
+    private void HandlePlayerTurn()
     {
-        if (InventoryManager.Instance != null)
-            InventoryManager.Instance.OnActiveDiceChanged -= RefreshUI;
+        RefreshPlayerDice();
     }
 
-    private void RefreshUI()
+    private void RefreshPlayerDice()
     {
-        if (diceText == null || InventoryManager.Instance == null)
+        if (statusText == null || InventoryManager.Instance == null)
             return;
 
         var inv = InventoryManager.Instance;
         var slots = inv.ActiveDice.Slots;
 
-        StringBuilder sb = new();
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("Turno del jugador");
+        sb.AppendLine("Dados activos:");
 
         foreach (var slot in slots)
         {
@@ -45,27 +63,39 @@ public class ActiveDiceUI : MonoBehaviour
 
             var rollInfo = DiceRollManager.Instance.GetRollInfo(slot);
 
-            // Si BrokenMapEffect ha ocultado la tirada
             if (StatManager.Instance.HideRollThisTurn)
             {
-                sb.AppendLine(slot.ItemName + ": ???");
+                sb.AppendLine("- " + slot.ItemName + ": ???");
                 continue;
             }
 
             if (rollInfo.HasValue)
             {
-                sb.AppendLine(slot.ItemName + ": " +
+                sb.AppendLine("- " + slot.ItemName + ": " +
                     rollInfo.Value.baseRoll + " -> " +
                     rollInfo.Value.finalRoll);
             }
             else
             {
-                sb.AppendLine(slot.ItemName + ": sin tirar");
+                sb.AppendLine("- " + slot.ItemName + ": sin tirar");
             }
         }
 
-        diceText.text = sb.Length == 0
-            ? "Dados activos: ninguno"
-            : sb.ToString();
+        statusText.text = sb.ToString();
+    }
+
+    // -------------------------------------------------------------------------
+    // ENEMY TURN
+    // -------------------------------------------------------------------------
+    private void HandleEnemyTurn()
+    {
+        if (statusText != null)
+            statusText.text = "Turno del enemigo...";
+    }
+
+    private void HandleEnemyRoll(int total)
+    {
+        if (statusText != null)
+            statusText.text = "Turno del enemigo: se movera " + total + " casillas";
     }
 }

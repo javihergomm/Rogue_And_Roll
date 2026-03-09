@@ -7016,6 +7016,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1008195276}
+  - component: {fileID: 1008195277}
   m_Layer: 0
   m_Name: PlayerDice
   m_TagString: Untagged
@@ -7032,8 +7033,8 @@ Transform:
   m_GameObject: {fileID: 1008195275}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.2, y: 0.2, z: 0.1}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 3.36, y: -0.095, z: 0.1}
+  m_LocalScale: {x: 2, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 371584076}
@@ -7041,6 +7042,27 @@ Transform:
   - {fileID: 501819748}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1008195277
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1008195275}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 0.01, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1013966685
 GameObject:
   m_ObjectHideFlags: 0
@@ -10921,6 +10943,51 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1537526897
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1537526899}
+  - component: {fileID: 1537526898}
+  m_Layer: 0
+  m_Name: EnemyTester
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1537526898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1537526897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4405e64266c832d4ea67bb26c177c5aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyTester
+  enemyToTest: {fileID: 11400000, guid: 66faf68494507c9448c4bfbdb8be7ba5, type: 2}
+--- !u!4 &1537526899
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1537526897}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.27118, y: -0.09, z: 0.46528}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1538970602
 GameObject:
   m_ObjectHideFlags: 0
@@ -11377,19 +11444,21 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1548563256}
-  - component: {fileID: 1548563259}
-  - component: {fileID: 1548563260}
+  - component: {fileID: 1548563273}
+  - component: {fileID: 1548563272}
+  - component: {fileID: 1548563264}
+  - component: {fileID: 1548563267}
+  - component: {fileID: 1548563265}
   - component: {fileID: 1548563261}
+  - component: {fileID: 1548563266}
+  - component: {fileID: 1548563269}
+  - component: {fileID: 1548563268}
   - component: {fileID: 1548563262}
   - component: {fileID: 1548563263}
-  - component: {fileID: 1548563268}
-  - component: {fileID: 1548563264}
-  - component: {fileID: 1548563265}
-  - component: {fileID: 1548563266}
-  - component: {fileID: 1548563267}
-  - component: {fileID: 1548563269}
   - component: {fileID: 1548563271}
   - component: {fileID: 1548563270}
+  - component: {fileID: 1548563260}
+  - component: {fileID: 1548563259}
   m_Layer: 0
   m_Name: GameManagers
   m_TagString: Untagged
@@ -11690,7 +11759,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80c491e1250978f4aa1cff8b4d2b474d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveDiceUI
-  diceText: {fileID: 151161369}
+  statusText: {fileID: 151161369}
+--- !u!114 &1548563272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548563255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 419ff7cdd11e4bb4786a99804a7e1bba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TurnManager
+--- !u!114 &1548563273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1548563255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e08f5493333868f41934b46ddd6ed127, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyManager
+  enemies:
+  - {fileID: 0}
+  - {fileID: 78209753}
 --- !u!1 &1555743855 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4898722117463534234, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
@@ -11790,53 +11886,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 177110184}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1584179046
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1584179048}
-  - component: {fileID: 1584179047}
-  m_Layer: 0
-  m_Name: DemonBoss
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1584179047
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584179046}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5dd6528040224cd46b98e319172fe1d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DemonBoss
-  data: {fileID: 11400000, guid: 66faf68494507c9448c4bfbdb8be7ba5, type: 2}
-  player: {fileID: 0}
-  movement: {fileID: 8580833200976862543, guid: 4725713aefe17a141a811387680fdc66, type: 3}
---- !u!4 &1584179048
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584179046}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: -0, z: 1}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1587921362
 PrefabInstance:
@@ -16214,7 +16263,6 @@ SceneRoots:
   - {fileID: 783547966}
   - {fileID: 1339274114}
   - {fileID: 276751737}
-  - {fileID: 1584179048}
   - {fileID: 78209754}
   - {fileID: 1659123273}
   - {fileID: 1187446260}
@@ -16223,3 +16271,4 @@ SceneRoots:
   - {fileID: 1539924098}
   - {fileID: 1954619202}
   - {fileID: 1008195276}
+  - {fileID: 1537526899}
