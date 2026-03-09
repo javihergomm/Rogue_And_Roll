@@ -84,14 +84,43 @@ public abstract class EnemyBase : MonoBehaviour
      */
     protected void KillPlayerNow()
     {
+        PassiveContext ctx = StatManager.Instance.PassiveCtx;
+
+        // If the player has more than 1 life, consume one and respawn
+        if (ctx.PlayerLives > 1)
+        {
+            ctx.PlayerLives--;
+            ctx.ExtraLifeUsed = true;
+
+            Debug.Log("Player consumed an extra life!");
+
+            // Respawn player at their starting position
+            Movement playerMovement = player.GetComponent<Movement>();
+            playerMovement.TeleportToPosition(playerMovement.startPos);
+
+            // Determine enemy max roll
+            int maxRoll = 6;
+
+            if (this is DemonBoss)
+                maxRoll = 18;
+
+            // Distance = 2/3 of maxRoll
+            int distance = Mathf.RoundToInt(maxRoll * 0.66f);
+
+            // Place enemy behind player at that distance
+            PlaceEnemyBehindPlayer(distance);
+
+            // Teleport enemy visual to the new position
+            movement.TeleportToPosition(movement.ActualPos);
+
+            return;
+        }
+
+        // No extra lives left -> normal death
         Debug.Log("Player killed.");
 
         if (player != null)
             Destroy(player.gameObject);
-
-        // No GameManager yet, so we stop here.
-        // Later you can add:
-        // GameManager.Instance.EndGame();
     }
 
     public abstract void StartTurn();

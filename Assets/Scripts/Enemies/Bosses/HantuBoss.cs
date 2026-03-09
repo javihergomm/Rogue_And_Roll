@@ -103,8 +103,8 @@ public class HantuBoss : EnemyBase
         if (!isActive || movement == null)
             return;
 
-        // 1. Roll D6
-        int roll = Random.Range(1, 7);
+        // 1. Roll D6 using EnemyDice
+        int roll = EnemyDice.ThrowDice();
 
         // 2. Chance to add +2
         if (Random.value <= chanceToAddTwo)
@@ -119,6 +119,7 @@ public class HantuBoss : EnemyBase
         // 4. Move
         movement.StartMovingFixed(roll);
     }
+
 
     public override void ActivateForTesting()
     {

@@ -2,6 +2,14 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+/*
+ * Movement
+ * --------
+ * Handles board movement for both the player and enemies.
+ * Supports fixed movement, dice-based movement, visibility effects,
+ * checkpoint logic, spot effects, and bridge connections.
+ * Always invokes OnMovementFinished so the turn system can continue.
+ */
 public class Movement : MonoBehaviour
 {
     private Spot[] spots;
@@ -120,7 +128,6 @@ public class Movement : MonoBehaviour
             yield break;
         }
 
-        // FIX: checkpoints solo afectan al jugador
         if (isPlayer && nextCheckpoint > 0)
         {
             int hypotheticalSpot = actualPos + steps;
@@ -184,26 +191,34 @@ public class Movement : MonoBehaviour
 
         var type = spots[actualPos - 1].getType();
 
-        if (isPlayer && !effectAlreadyTriggered)
+        if (isPlayer && TurnManager.Instance.IsPlayerTurn() && !effectAlreadyTriggered)
         {
             if (spots[actualPos - 1].checkpoint)
             {
+                Debug.Log("Player stepped on CHECKPOINT at spot " + actualPos);
                 shopExitManager.EnterShop();
                 round++;
+                OnMovementFinished?.Invoke();
                 yield break;
             }
             else if (type == Spot.SpotType.Good)
             {
+                Debug.Log("Player stepped on GOOD spot at " + actualPos);
                 effectAlreadyTriggered = true;
                 int extra = GoodSpotEffect();
+                Debug.Log("GOOD spot effect: extra steps = " + extra);
                 yield return StartCoroutine(ExtraMovementRoutine(extra));
+                OnMovementFinished?.Invoke();
                 yield break;
             }
             else if (type == Spot.SpotType.Bad)
             {
+                Debug.Log("Player stepped on BAD spot at " + actualPos);
                 effectAlreadyTriggered = true;
                 int extra = BadSpotEffect();
+                Debug.Log("BAD spot effect: extra steps = " + extra);
                 yield return StartCoroutine(ExtraMovementRoutine(extra));
+                OnMovementFinished?.Invoke();
                 yield break;
             }
         }
@@ -235,21 +250,13 @@ public class Movement : MonoBehaviour
     private int GoodSpotEffect()
     {
         int effectType = SpotController.GoodSpot();
-
-        if (effectType == 1)
-            return UnityEngine.Random.Range(3, 6);
-
-        return 0;
+        return effectType == 1 ? UnityEngine.Random.Range(3, 6) : 0;
     }
 
     private int BadSpotEffect()
     {
         int effectType = SpotController.BadSpot();
-
-        if (effectType == 1)
-            return UnityEngine.Random.Range(-3, -6);
-
-        return 0;
+        return effectType == 1 ? UnityEngine.Random.Range(-3, -6) : 0;
     }
 
     public int GetNextCheckpoint()

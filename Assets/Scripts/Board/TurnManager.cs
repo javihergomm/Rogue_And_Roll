@@ -11,12 +11,12 @@ using System.Collections.Generic;
  * - Enemy turn sequence
  * - Enemy registration
  * - UI notifications for turn changes and enemy movement
+ * Ensures enemy movement events are subscribed only once.
  */
 public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance { get; private set; }
 
-    // UI events
     public static event Action OnPlayerTurnStarted;
     public static event Action OnEnemyTurnStarted;
     public static event Action<int> OnEnemyRollCalculated;
@@ -29,7 +29,6 @@ public class TurnManager : MonoBehaviour
 
     private TurnState state = TurnState.PlayerTurn;
 
-    // List of active enemies
     private List<EnemyBase> activeEnemies = new();
     private int currentEnemyIndex = 0;
 
@@ -51,11 +50,11 @@ public class TurnManager : MonoBehaviour
         StartCoroutine(WaitForPlayer());
     }
 
-    /*
-     * WaitForPlayer
-     * -------------
-     * Ensures the player exists before registering movement.
-     */
+    public bool IsPlayerTurn()
+    {
+        return state == TurnState.PlayerTurn;
+    }
+
     private System.Collections.IEnumerator WaitForPlayer()
     {
         while (playerMovement == null)
@@ -80,43 +79,23 @@ public class TurnManager : MonoBehaviour
         StartPlayerTurn();
     }
 
-    /*
-     * IsEnemyRegistered
-     * -----------------
-     * Checks if an enemy is already in the active list.
-     */
     public bool IsEnemyRegistered(EnemyBase enemy)
     {
         return activeEnemies.Contains(enemy);
     }
 
-    /*
-     * RegisterEnemy
-     * -------------
-     * Adds an enemy to the active enemy list.
-     */
     public void RegisterEnemy(EnemyBase enemy)
     {
         if (!activeEnemies.Contains(enemy))
             activeEnemies.Add(enemy);
     }
 
-    /*
-     * UnregisterEnemy
-     * ---------------
-     * Removes an enemy from the active enemy list.
-     */
     public void UnregisterEnemy(EnemyBase enemy)
     {
         if (activeEnemies.Contains(enemy))
             activeEnemies.Remove(enemy);
     }
 
-    /*
-     * StartPlayerTurn
-     * ---------------
-     * Begins the player's turn and notifies the UI.
-     */
     public void StartPlayerTurn()
     {
         state = TurnState.PlayerTurn;
@@ -125,23 +104,15 @@ public class TurnManager : MonoBehaviour
         OnPlayerTurnStarted?.Invoke();
     }
 
-    /*
-     * OnPlayerFinishedMovement
-     * -------------------------
-     * Called when the player finishes moving.
-     * Starts the enemy turn sequence.
-     */
     private void OnPlayerFinishedMovement()
     {
+        if (state != TurnState.PlayerTurn)
+            return;
+
         Debug.Log("Player finished movement.");
         StartEnemyTurns();
     }
 
-    /*
-     * StartEnemyTurns
-     * ---------------
-     * Begins the enemy turn phase.
-     */
     public void StartEnemyTurns()
     {
         Debug.Log("=== ENEMY TURN ===");
@@ -161,11 +132,6 @@ public class TurnManager : MonoBehaviour
         StartNextEnemyTurn();
     }
 
-    /*
-     * StartNextEnemyTurn
-     * ------------------
-     * Starts the turn of the next enemy in the list.
-     */
     private void StartNextEnemyTurn()
     {
         Debug.Log($"Processing enemy index {currentEnemyIndex}/{activeEnemies.Count}");
@@ -189,17 +155,12 @@ public class TurnManager : MonoBehaviour
 
         Debug.Log($"Starting turn for enemy: {enemy.name}");
 
+        enemy.movement.OnMovementFinished -= OnEnemyFinishedMovement;
         enemy.movement.OnMovementFinished += OnEnemyFinishedMovement;
 
         enemy.StartTurn();
     }
 
-    /*
-     * OnEnemyFinishedMovement
-     * ------------------------
-     * Called when an enemy finishes moving.
-     * Moves to the next enemy.
-     */
     private void OnEnemyFinishedMovement()
     {
         Debug.Log("Enemy finished movement.");
@@ -211,11 +172,6 @@ public class TurnManager : MonoBehaviour
         StartNextEnemyTurn();
     }
 
-    /*
-     * NotifyEnemyRoll
-     * ---------------
-     * Sends the enemy's movement value to the UI.
-     */
     public static void NotifyEnemyRoll(int total)
     {
         OnEnemyRollCalculated?.Invoke(total);
