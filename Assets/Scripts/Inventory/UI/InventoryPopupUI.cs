@@ -30,26 +30,4 @@ public class InventoryPopupUI : MonoBehaviour
         fullPopupIcon.sprite = icon;
     }
 
-    public void HideInventoryFull()
-    {
-        fullPopup.SetActive(false);
-    }
-
-    public void ShowRemoveItemPopup(string itemName, Action confirm)
-    {
-        removePopup.SetActive(true);
-        removePopupText.text = $"¿Eliminar {itemName}?";
-        onConfirmRemove = confirm;
-    }
-
-    public void ConfirmRemove()
-    {
-        onConfirmRemove?.Invoke();
-        removePopup.SetActive(false);
-    }
-
-    public void CancelRemove()
-    {
-        removePopup.SetActive(false);
-    }
 }
