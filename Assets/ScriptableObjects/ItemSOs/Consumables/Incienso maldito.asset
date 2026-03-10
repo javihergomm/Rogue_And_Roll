@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bd3dc40917a57e40920014beee12295, type: 3}
+  m_Name: Incienso maldito
+  m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
+  itemName: Incienso Maldito
+  icon: {fileID: 0}
+  itemDescription: 
+  prefab3D: {fileID: 646729421180538869, guid: 19330aff26f4fc54fbb126fe7f905147, type: 3}
+  buyPrice: 0
+  sellPrice: 0
+  polarity: 0
+  StoreRotationOffset: {x: 0, y: 0, z: 0}
+  StoreHeightOffset: 0
+  StoreScaleMultiplier: 1
+  StoreZPositionOffset: 0
+  StoreXPositionOffset: 0
+  CanBeDiscarded: 0
+  ConsumeOnUse: 1
+  AppearsIn3D: 0
+  AutoUseOnPickup: 1
+  canBeUsedOnSpot: 0
+  effects:
+  - {fileID: 11400000, guid: 7555dfb09d0b69b489504983601db4d5, type: 2}
