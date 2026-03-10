@@ -3,38 +3,62 @@ using UnityEngine;
 /*
  * EnemyBase
  * ---------
- * Base class for all enemies.
- * Handles:
- * - Storing enemy data
- * - Spawning the enemy logic object
- * - Positioning the enemy on the board
- * - Providing references to Movement and player
- * - Shared kill logic (KillPlayerNow)
+ * Abstract base class for all enemy types.
+ * Provides:
+ * - Shared enemy data reference
+ * - Spawn logic for logic-only enemy objects
+ * - Positioning helpers for placing enemies on the board
+ * - Cached references to Movement and player
+ * - Shared kill logic used by all enemies
+ * - Movement blocking support through StatManager flags
  */
 public abstract class EnemyBase : MonoBehaviour
 {
     [Header("Enemy Data")]
     public EnemySO data;
 
+    // Movement component for the enemy token
     [HideInInspector] public Movement movement;
+
+    // Reference to the player transform
     [HideInInspector] public Transform player;
 
-    // Visual instance for enemies that spawn a token (cup, demon, etc.)
+    // Cached player movement to avoid repeated GetComponent calls
+    protected Movement playerMovement;
+
+    // Visual instance for enemies that spawn a token
     public GameObject CupInstance { get; protected set; }
 
+    // Whether the enemy is active and should take turns
     protected bool isActive = false;
 
+    /*
+     * SpawnEnemy
+     * ----------
+     * Logic-only spawn point. Visuals are created by each boss.
+     */
     public void SpawnEnemy()
     {
-        // No auto-registration here.
+        // Intentionally empty: visual instantiation is handled by each boss.
     }
 
+    /*
+     * RegisterEnemy
+     * -------------
+     * Registers this enemy in the EnemyManager and TurnManager.
+     */
     protected void RegisterEnemy()
     {
         EnemyManager.Instance.ActivateEnemy(this);
     }
 
-    protected void PlaceEnemyBehindPlayer(int maxRoll)
+    /*
+     * CachePlayerMovement
+     * -------------------
+     * Finds and caches the player Movement component.
+     * Called by all enemies before performing movement or kill logic.
+     */
+    protected void CachePlayerMovement()
     {
         if (player == null)
         {
@@ -51,17 +75,40 @@ public abstract class EnemyBase : MonoBehaviour
 
             if (player == null)
             {
-                Debug.LogError("EnemyBase: No player found when placing enemy.");
+                Debug.LogError("EnemyBase: No player found.");
                 return;
             }
         }
 
-        Movement playerMovement = player.GetComponent<Movement>();
         if (playerMovement == null)
-        {
+            playerMovement = player.GetComponent<Movement>();
+
+        if (playerMovement == null)
             Debug.LogError("EnemyBase: Player has no Movement component.");
+    }
+
+    /*
+     * IsEnemyMovementBlocked
+     * ----------------------
+     * Returns true if enemy movement is blocked this turn.
+     * Used by all enemies before moving or pulling the player.
+     */
+    protected bool IsEnemyMovementBlocked()
+    {
+        return StatManager.Instance.PreventEnemyMovementThisTurn;
+    }
+
+    /*
+     * PlaceEnemyBehindPlayer
+     * ----------------------
+     * Places the enemy behind the player by a given maximum roll distance.
+     */
+    protected void PlaceEnemyBehindPlayer(int maxRoll)
+    {
+        CachePlayerMovement();
+
+        if (playerMovement == null)
             return;
-        }
 
         int playerPos = playerMovement.ActualPos;
         int enemyPos = playerPos - maxRoll;
@@ -71,22 +118,29 @@ public abstract class EnemyBase : MonoBehaviour
 
         movement.ActualPos = enemyPos;
 
-        Debug.Log("Enemy spawned behind player at spot " + enemyPos +
-                  " (player at " + playerPos + ", maxRoll " + maxRoll + ")");
+        Debug.Log(
+            "Enemy spawned behind player at spot " + enemyPos +
+            " (player at " + playerPos + ", maxRoll " + maxRoll + ")"
+        );
     }
 
     /*
      * KillPlayerNow
      * -------------
-     * Shared kill logic for ALL enemies.
-     * Each enemy decides WHEN to call this.
-     * No GameManager required.
+     * Shared kill logic for all enemies.
+     * Handles:
+     * - Extra life consumption
+     * - Respawn logic
+     * - Enemy repositioning after respawn
+     * - Final player death
      */
     protected void KillPlayerNow()
     {
+        CachePlayerMovement();
+
         PassiveContext ctx = StatManager.Instance.PassiveCtx;
 
-        // If the player has more than 1 life, consume one and respawn
+        // Extra life logic
         if (ctx.PlayerLives > 1)
         {
             ctx.PlayerLives--;
@@ -94,35 +148,37 @@ public abstract class EnemyBase : MonoBehaviour
 
             Debug.Log("Player consumed an extra life!");
 
-            // Respawn player at their starting position
-            Movement playerMovement = player.GetComponent<Movement>();
+            // Respawn player at starting position
             playerMovement.TeleportToPosition(playerMovement.startPos);
 
             // Determine enemy max roll
             int maxRoll = 6;
-
             if (this is DemonBoss)
                 maxRoll = 18;
 
-            // Distance = 2/3 of maxRoll
             int distance = Mathf.RoundToInt(maxRoll * 0.66f);
 
-            // Place enemy behind player at that distance
+            // Reposition enemy behind player
             PlaceEnemyBehindPlayer(distance);
 
-            // Teleport enemy visual to the new position
+            // Teleport enemy visual
             movement.TeleportToPosition(movement.ActualPos);
 
             return;
         }
 
-        // No extra lives left -> normal death
         Debug.Log("Player killed.");
 
         if (player != null)
             Destroy(player.gameObject);
     }
 
+    /*
+     * StartTurn
+     * ---------
+     * Called by TurnManager when it is this enemy's turn.
+     * Must be implemented by each enemy type.
+     */
     public abstract void StartTurn();
 
     public virtual void ActivateForTesting() { }

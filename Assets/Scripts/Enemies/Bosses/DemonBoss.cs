@@ -3,10 +3,10 @@ using UnityEngine;
 /*
  * DemonBoss
  * ---------
- * Enemy type that activates after a required number of player laps.
- * Once active, it moves using three dice rolls.
+ * Boss that activates after the player completes a required number of laps.
+ * Once active, it rolls three dice each turn and moves forward by the sum.
  * If all three dice roll a 6, the player is instantly killed.
- * If the demon reaches the same spot as the player, the player is killed.
+ * If the demon reaches the same tile as the player, the player is killed.
  */
 public class DemonBoss : EnemyBase
 {
@@ -14,45 +14,26 @@ public class DemonBoss : EnemyBase
 
     private void Update()
     {
-        if (!isActive || movement == null || player == null)
+        if (!isActive || movement == null || playerMovement == null)
             return;
 
-        Movement playerMovement = player.GetComponent<Movement>();
-
         // Kill if demon reaches the same tile as the player
-        if (playerMovement != null && movement.ActualPos == playerMovement.ActualPos)
+        if (movement.ActualPos == playerMovement.ActualPos)
             KillPlayerNow();
     }
 
     private void InitializeDemon()
     {
-        if (player == null)
-        {
-            Movement[] allMovements = FindObjectsByType<Movement>(FindObjectsSortMode.None);
+        // Cache player + movement using EnemyBase helper
+        CachePlayerMovement();
 
-            foreach (Movement m in allMovements)
-            {
-                if (m != null && m.isPlayer)
-                {
-                    player = m.transform;
-                    break;
-                }
-            }
-
-            if (player == null)
-            {
-                Debug.LogWarning("DemonBoss: InitializeDemon called but no player found.");
-                return;
-            }
-        }
-
-        Movement playerMovement = player.GetComponent<Movement>();
         if (playerMovement == null)
         {
             Debug.LogError("DemonBoss: Player has no Movement component.");
             return;
         }
 
+        // Copy board positions from player
         movement.SetPositions(playerMovement.Positions);
 
         movement.startPos = movement.ActualPos;
@@ -77,10 +58,10 @@ public class DemonBoss : EnemyBase
 
     private System.Collections.IEnumerator ActivateDemonRoutine()
     {
-        // 1. Spawn logic object (no visual yet)
+        // 1. Spawn logic object
         SpawnEnemy();
 
-        // 2. Wait one frame so everything exists
+        // 2. Wait one frame
         yield return null;
 
         // 3. Instantiate visual token
@@ -95,10 +76,10 @@ public class DemonBoss : EnemyBase
             yield break;
         }
 
-        // 5. Initialize movement positions
+        // 5. Initialize movement and player reference
         InitializeDemon();
 
-        // 6. Place demon behind player (sets ActualPos)
+        // 6. Place demon behind player
         PlaceEnemyBehindPlayer(18);
 
         // 7. Teleport visual to correct tile
@@ -107,7 +88,7 @@ public class DemonBoss : EnemyBase
         // 8. Activate demon
         isActive = true;
 
-        // 9. Register enemy only once
+        // 9. Register enemy in TurnManager
         EnemyManager.Instance.ActivateEnemy(this);
     }
 
@@ -116,6 +97,7 @@ public class DemonBoss : EnemyBase
         if (!isActive || movement == null)
             return;
 
+        // Roll three dice
         int d1 = EnemyDice.ThrowDice();
         int d2 = EnemyDice.ThrowDice();
         int d3 = EnemyDice.ThrowDice();
@@ -131,6 +113,7 @@ public class DemonBoss : EnemyBase
             return;
         }
 
+        // Move demon
         movement.StartMovingFixed(total);
     }
 

@@ -43,7 +43,7 @@ public class StressTestShop : MonoBehaviour
                     p.GenerateIfNeeded();
 
                 // Check duplicates
-                HashSet<string> names = new HashSet<string>();
+                HashSet<string> names = new();
 
                 foreach (var p in pedestals)
                 {

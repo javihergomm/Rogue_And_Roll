@@ -2,14 +2,9 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-/*
- * Movement
- * --------
- * Handles board movement for both the player and enemies.
- * Supports fixed movement, dice-based movement, visibility effects,
- * checkpoint logic, spot effects, and bridge connections.
- * Always invokes OnMovementFinished so the turn system can continue.
- */
+// Movement
+// Handles board movement for player and enemies.
+// Ensures OnMovementFinished is always invoked so the turn system continues.
 public class Movement : MonoBehaviour
 {
     private Spot[] spots;
@@ -18,6 +13,8 @@ public class Movement : MonoBehaviour
     public Transform[] Positions => positions;
 
     private ShopExitManager shopExitManager;
+
+    public bool ignoreBridgeThisMove = false;
 
     public void SetPositions(Transform[] newPositions)
     {
@@ -50,6 +47,14 @@ public class Movement : MonoBehaviour
 
     private bool effectAlreadyTriggered = false;
 
+    // GOOD spot probabilities
+    public int probabilityExtraSteps = 50;
+    public int probabilityBlockEnemy = 50;
+
+    // BAD spot probabilities
+    public int probabilityNegativeSteps = 0;
+    public int probabilityBlockPlayer = 100;
+
     private void Start()
     {
         spots = FindObjectsByType<Spot>(FindObjectsSortMode.None);
@@ -77,8 +82,13 @@ public class Movement : MonoBehaviour
         nextCheckpoint = GetNextCheckpoint();
         effectAlreadyTriggered = false;
 
+        // FIX: If player is blocked, still notify turn manager and return
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
+        {
+            Debug.Log("Player movement blocked this turn.");
+            OnMovementFinished?.Invoke();
             return;
+        }
 
         StartCoroutine(MoveWithVisibilityCheck());
     }
@@ -166,7 +176,8 @@ public class Movement : MonoBehaviour
             transform.position = target;
 
             var connections = SpotConnectionManager.Instance.GetConnections(actualPos);
-            if (connections.Count > 0)
+
+            if (!ignoreBridgeThisMove && connections.Count > 0)
             {
                 int targetSpot = connections[0];
                 actualPos = targetSpot;
@@ -189,7 +200,9 @@ public class Movement : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
         }
 
-        var type = spots[actualPos - 1].getType();
+        ignoreBridgeThisMove = false;
+
+        var type = spots[actualPos - 1].GetSpotType();
 
         if (isPlayer && TurnManager.Instance.IsPlayerTurn() && !effectAlreadyTriggered)
         {
@@ -205,9 +218,21 @@ public class Movement : MonoBehaviour
             {
                 Debug.Log("Player stepped on GOOD spot at " + actualPos);
                 effectAlreadyTriggered = true;
-                int extra = GoodSpotEffect();
-                Debug.Log("GOOD spot effect: extra steps = " + extra);
-                yield return StartCoroutine(ExtraMovementRoutine(extra));
+
+                int roll = UnityEngine.Random.Range(0, 100);
+
+                if (roll < probabilityExtraSteps)
+                {
+                    int extra = UnityEngine.Random.Range(3, 6);
+                    Debug.Log("GOOD spot effect: EXTRA STEPS = " + extra);
+                    yield return StartCoroutine(ExtraMovementRoutine(extra));
+                }
+                else
+                {
+                    Debug.Log("GOOD spot effect: BLOCK ENEMY MOVEMENT");
+                    ScriptableObject.CreateInstance<BlockEnemyMovementEffect>().Activate();
+                }
+
                 OnMovementFinished?.Invoke();
                 yield break;
             }
@@ -215,9 +240,21 @@ public class Movement : MonoBehaviour
             {
                 Debug.Log("Player stepped on BAD spot at " + actualPos);
                 effectAlreadyTriggered = true;
-                int extra = BadSpotEffect();
-                Debug.Log("BAD spot effect: extra steps = " + extra);
-                yield return StartCoroutine(ExtraMovementRoutine(extra));
+
+                int roll = UnityEngine.Random.Range(0, 100);
+
+                if (roll < probabilityNegativeSteps)
+                {
+                    int extra = UnityEngine.Random.Range(-3, -6);
+                    Debug.Log("BAD spot effect: NEGATIVE STEPS = " + extra);
+                    yield return StartCoroutine(ExtraMovementRoutine(extra));
+                }
+                else
+                {
+                    Debug.Log("BAD spot effect: BLOCK PLAYER MOVEMENT");
+                    ScriptableObject.CreateInstance<BlockPlayerMovementEffect>().Activate();
+                }
+
                 OnMovementFinished?.Invoke();
                 yield break;
             }
@@ -245,18 +282,6 @@ public class Movement : MonoBehaviour
 
         lastPos = actualPos;
         OnMovementFinished?.Invoke();
-    }
-
-    private int GoodSpotEffect()
-    {
-        int effectType = SpotController.GoodSpot();
-        return effectType == 1 ? UnityEngine.Random.Range(3, 6) : 0;
-    }
-
-    private int BadSpotEffect()
-    {
-        int effectType = SpotController.BadSpot();
-        return effectType == 1 ? UnityEngine.Random.Range(-3, -6) : 0;
     }
 
     public int GetNextCheckpoint()

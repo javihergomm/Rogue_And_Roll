@@ -12,6 +12,7 @@ using System.Collections.Generic;
  * - Enemy registration
  * - UI notifications for turn changes and enemy movement
  * Ensures enemy movement events are subscribed only once.
+ * Supports movement blocking through StatManager flags.
  */
 public class TurnManager : MonoBehaviour
 {
@@ -113,6 +114,17 @@ public class TurnManager : MonoBehaviour
         StartEnemyTurns();
     }
 
+    /*
+     * NotifyEnemyFinishedMovement
+     * ---------------------------
+     * Called by enemies that do not use their own Movement component
+     * (such as Banshee) to signal that their turn has ended.
+     */
+    public void NotifyEnemyFinishedMovement()
+    {
+        OnEnemyFinishedMovement();
+    }
+
     public void StartEnemyTurns()
     {
         Debug.Log("=== ENEMY TURN ===");
@@ -148,6 +160,14 @@ public class TurnManager : MonoBehaviour
         if (enemy == null || !enemy.isActiveAndEnabled)
         {
             Debug.Log("Enemy missing or disabled. Skipping.");
+            currentEnemyIndex++;
+            StartNextEnemyTurn();
+            return;
+        }
+
+        if (StatManager.Instance.PreventEnemyMovementThisTurn)
+        {
+            Debug.Log($"Enemy movement blocked: {enemy.name}");
             currentEnemyIndex++;
             StartNextEnemyTurn();
             return;

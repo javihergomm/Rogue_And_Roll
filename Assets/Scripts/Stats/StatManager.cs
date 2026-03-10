@@ -5,6 +5,12 @@ using System.Collections.Generic;
  * StatManager
  * -----------
  * Central system for managing player stats and turn-based state.
+ * Handles:
+ * - Gold, rolls, shop rerolls
+ * - Consumable and passive effects
+ * - Turn progression and turn-based flags
+ * - Persistent PassiveContext used by all passive effects
+ * - Movement blocking for both player and enemies
  */
 public class StatManager : MonoBehaviour
 {
@@ -18,20 +24,23 @@ public class StatManager : MonoBehaviour
     [SerializeField] private int startingRolls = 1;
 
     [Header("Shop Reroll Settings")]
-    [SerializeField] private int maxShopRerolls = 2;
+    [SerializeField] private int maxShopRerolls = 100;
 
-    private readonly Dictionary<StatType, int> currentValues = new Dictionary<StatType, int>();
-    private readonly Dictionary<StatType, int> maxValues = new Dictionary<StatType, int>();
+    private readonly Dictionary<StatType, int> currentValues = new();
+    private readonly Dictionary<StatType, int> maxValues = new();
 
     public int PreviousRoll { get; private set; }
     public int CurrentTurn { get; private set; } = 1;
 
+    // Active dice effects (consumables)
     public List<BaseDiceEffect> ActiveConsumableEffects { get; private set; }
         = new List<BaseDiceEffect>();
 
+    // Effects that will be applied next turn
     public List<BaseDiceEffect> PendingDiceEffects { get; private set; }
         = new List<BaseDiceEffect>();
 
+    // Active passive effects (ScriptableObjects)
     public List<BasePassiveEffect> ActivePassiveEffects { get; private set; }
         = new List<BasePassiveEffect>();
 
@@ -39,12 +48,16 @@ public class StatManager : MonoBehaviour
 
     public event System.Action OnStatsChanged;
 
+    // Turn flags
     public bool HideRollThisTurn = false;
     public bool HidePieceThisTurn = false;
     public bool HasPlayerRolledThisTurn = false;
-    public bool PreventMovementThisTurn = false;
 
-    // NEW: Persistent passive context
+    // Movement blocking flags
+    public bool PreventMovementThisTurn = false;          // Blocks player movement
+    public bool PreventEnemyMovementThisTurn = false;     // Blocks enemy movement
+
+    // Persistent passive context shared across turns
     public PassiveContext PassiveCtx { get; private set; } = new PassiveContext();
 
     private void Awake()
@@ -54,6 +67,7 @@ public class StatManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
 
         cachedExitManager = FindFirstObjectByType<ShopExitManager>();
@@ -71,6 +85,11 @@ public class StatManager : MonoBehaviour
         NotifyUI();
     }
 
+    /*
+     * InitializeStats
+     * ----------------
+     * Sets initial values for gold, rolls, and shop rerolls.
+     */
     private void InitializeStats()
     {
         currentValues[StatType.Gold] = startingGold;
@@ -83,6 +102,11 @@ public class StatManager : MonoBehaviour
         maxValues[StatType.ShopRerolls] = maxShopRerolls;
     }
 
+    /*
+     * RegisterConsumableEffects
+     * -------------------------
+     * Adds consumable and passive effects from a consumable item.
+     */
     public void RegisterConsumableEffects(ConsumableSO item)
     {
         if (item == null || item.Effects == null)
@@ -102,12 +126,22 @@ public class StatManager : MonoBehaviour
         }
     }
 
+    /*
+     * RegisterPassiveEffect
+     * ---------------------
+     * Adds a passive effect to the active list if not already present.
+     */
     public void RegisterPassiveEffect(BasePassiveEffect effect)
     {
         if (!ActivePassiveEffects.Contains(effect))
             ActivePassiveEffects.Add(effect);
     }
 
+    /*
+     * ChangeStat
+     * ----------
+     * Modifies a stat and clamps it to valid ranges.
+     */
     public void ChangeStat(StatType stat, int amount)
     {
         if (!currentValues.ContainsKey(stat))
@@ -142,6 +176,11 @@ public class StatManager : MonoBehaviour
         ChangeStat(StatType.ShopRerolls, -1);
     }
 
+    /*
+     * OnDiceFinalResult
+     * -----------------
+     * Called when the player finishes rolling.
+     */
     public void OnDiceFinalResult(int finalRoll)
     {
         PreviousRoll = finalRoll;
@@ -150,6 +189,12 @@ public class StatManager : MonoBehaviour
         ActiveConsumableEffects.RemoveAll(e => e.RemoveAfterRoll);
     }
 
+    /*
+     * NextTurn
+     * --------
+     * Advances to the next turn, applies passive effects,
+     * and updates movement blocking flags.
+     */
     public void NextTurn()
     {
         CurrentTurn++;
@@ -160,8 +205,11 @@ public class StatManager : MonoBehaviour
         foreach (var eff in ActivePassiveEffects)
             eff.OnTurnStart(PassiveCtx);
 
+        // Apply movement blocking flags
         PreventMovementThisTurn = PassiveCtx.PreventMovement;
+        PreventEnemyMovementThisTurn = PassiveCtx.PreventEnemyMovement;
 
+        // Apply pending dice effects
         if (PendingDiceEffects.Count > 0)
         {
             ActiveConsumableEffects.AddRange(PendingDiceEffects);
@@ -171,12 +219,19 @@ public class StatManager : MonoBehaviour
         NotifyUI();
     }
 
+    /*
+     * ResetTurnFlags
+     * --------------
+     * Clears all temporary turn flags.
+     */
     public void ResetTurnFlags()
     {
         HideRollThisTurn = false;
         HidePieceThisTurn = false;
         HasPlayerRolledThisTurn = false;
+
         PreventMovementThisTurn = false;
+        PreventEnemyMovementThisTurn = false;
     }
 
     private void HandleShopStateChanged(bool inShop)

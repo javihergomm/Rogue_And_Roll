@@ -9,13 +9,14 @@ using System.Collections.Generic;
  * - Activating enemies
  * - Preventing duplicate registrations
  * - Storing the list of active enemies
+ * - Coordinating with TurnManager
  */
 public class EnemyManager : MonoBehaviour
 {
     public static EnemyManager Instance { get; private set; }
 
     // List of all active enemies
-    public List<EnemyBase> enemies = new List<EnemyBase>();
+    public List<EnemyBase> enemies = new();
 
     private void Awake()
     {

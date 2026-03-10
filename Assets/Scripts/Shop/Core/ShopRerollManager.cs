@@ -17,7 +17,7 @@ public class ShopRerollManager : MonoBehaviour
 
     [Header("Reroll Settings")]
     [Tooltip("Gold cost for rerolling all pedestals at once.")]
-    [SerializeField] private int globalRerollCost = 20;
+    [SerializeField] private int globalRerollCost = 2;
 
     [Header("Shop State")]
     [Tooltip("Flag to indicate if the player is currently inside the shop.")]

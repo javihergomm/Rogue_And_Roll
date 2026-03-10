@@ -1,19 +1,15 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "BlockMovementEffect", menuName = "Effects/Passive/BlockMovement")]
-public class BlockMovementEffect : BasePassiveEffect
+[CreateAssetMenu(fileName = "BlockPlayerMovementEffect", menuName = "Effects/Passive/BlockPlayerMovement")]
+public class BlockPlayerMovementEffect : BasePassiveEffect
 {
-    [SerializeField] private int turnsBlocked = 2;
+    [SerializeField] private int turnsBlocked = 1;
     private int remaining;
 
     public override void Activate()
     {
         remaining = turnsBlocked;
-
-        // Bloquea inmediatamente el turno actual del player
         StatManager.Instance.PreventMovementThisTurn = true;
-
-        // Registrar el efecto para que reciba OnTurnStart
         StatManager.Instance.RegisterPassiveEffect(this);
     }
 
@@ -26,7 +22,6 @@ public class BlockMovementEffect : BasePassiveEffect
         }
         else
         {
-            // Cuando termina, se elimina del sistema
             StatManager.Instance.ActivePassiveEffects.Remove(this);
         }
     }

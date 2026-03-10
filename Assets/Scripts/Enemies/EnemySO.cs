@@ -8,7 +8,7 @@ public class EnemySO : ScriptableObject
     public string enemyName;
 
     [Header("Prefabs")]
-    public GameObject enemyPrefab;   // The EMPTY prefab containing DemonBoss (logic only)
+    public GameObject enemyPrefab;   // Logic-only prefab containing the EnemyBase script
     public GameObject cupPrefab;     // Visual cup prefab
     public GameObject tilePrefab;    // Visual token prefab (Movement + Mesh)
 
@@ -23,30 +23,28 @@ public class EnemySO : ScriptableObject
     public int lapsToActivate = 1;
     public bool requiresPlayerLap = true;
 
-    // ============================================================
-    // UNIVERSAL SPAWNER — FOR TESTING ONLY
-    // Instantiates ONLY the enemy logic prefab (EMPTY)
-    // The enemy itself will spawn its cup and token.
-    // ============================================================
+    /*
+     * SpawnForTesting
+     * ---------------
+     * Instantiates only the logic prefab for testing.
+     * The enemy itself will spawn its own visuals and token.
+     */
     public EnemyBase SpawnForTesting()
     {
-        // 1. Instantiate the enemy logic prefab (EMPTY with DemonBoss)
+        // Instantiate the logic-only enemy prefab
         GameObject enemyObj = Instantiate(enemyPrefab);
 
-        // 2. Get the EnemyBase component
-        EnemyBase enemy = enemyObj.GetComponent<EnemyBase>();
-
-        if (enemy == null)
+        // Use TryGetComponent to avoid allocation warnings
+        if (!enemyObj.TryGetComponent<EnemyBase>(out var enemy))
         {
             Debug.LogError("EnemySO: Enemy prefab has no EnemyBase component!");
             return null;
         }
 
-        // 3. Assign this SO to the enemy
+        // Assign this ScriptableObject to the enemy
         enemy.data = this;
 
-        // 4. Trigger the real activation flow
-        // Each enemy type implements its own TestSpawn() method
+        // Trigger the enemy's testing spawn method
         enemyObj.SendMessage("TestSpawn", SendMessageOptions.DontRequireReceiver);
 
         return enemy;

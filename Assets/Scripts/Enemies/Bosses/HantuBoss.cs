@@ -3,23 +3,23 @@ using UnityEngine;
 /*
  * HantuBoss
  * ---------
- * Enemy that rolls 1D6 and has a probability of adding +2 to its roll.
- * Kills the player if it reaches the same tile.
+ * Enemy that rolls 1D6 each turn and has a chance to add +2 to the result.
+ * Moves forward by the final roll value.
+ * If the Hantu reaches the same tile as the player, the player is killed.
  */
 public class HantuBoss : EnemyBase
 {
     [Header("Hantu Settings")]
     [Range(0f, 1f)]
-    public float chanceToAddTwo = 0.25f; // 25 percent by default
+    public float chanceToAddTwo = 0.25f;
 
     private void Update()
     {
-        if (!isActive || movement == null || player == null)
+        if (!isActive || movement == null || playerMovement == null)
             return;
 
-        Movement playerMovement = player.GetComponent<Movement>();
-
-        if (playerMovement != null && movement.ActualPos == playerMovement.ActualPos)
+        // Kill if Hantu reaches the same tile as the player
+        if (movement.ActualPos == playerMovement.ActualPos)
             KillPlayerNow();
     }
 
@@ -30,13 +30,13 @@ public class HantuBoss : EnemyBase
 
     private System.Collections.IEnumerator ActivateHantuRoutine()
     {
-        // 1. Spawn logic
+        // 1. Spawn logic object
         SpawnEnemy();
 
-        // 2. Wait a frame
+        // 2. Wait one frame
         yield return null;
 
-        // 3. Instantiate visual
+        // 3. Instantiate visual token
         CupInstance = Instantiate(data.tilePrefab);
 
         // 4. Assign movement
@@ -48,52 +48,33 @@ public class HantuBoss : EnemyBase
             yield break;
         }
 
-        // 5. Find player + set positions
+        // 5. Initialize references and board positions
         InitializeHantu();
 
-        // 6. Place behind player (max roll = 6)
+        // 6. Place Hantu behind player (max roll = 6)
         PlaceEnemyBehindPlayer(6);
 
-        // 7. Teleport visual
+        // 7. Teleport visual to correct tile
         movement.TeleportToPosition(movement.ActualPos);
 
-        // 8. Activate
+        // 8. Activate Hantu
         isActive = true;
 
-        // 9. Register
+        // 9. Register enemy in TurnManager
         EnemyManager.Instance.ActivateEnemy(this);
     }
 
     private void InitializeHantu()
     {
-        if (player == null)
-        {
-            Movement[] allMovements = FindObjectsByType<Movement>(FindObjectsSortMode.None);
+        // Cache player transform and movement
+        CachePlayerMovement();
 
-            foreach (Movement m in allMovements)
-            {
-                if (m != null && m.isPlayer)
-                {
-                    player = m.transform;
-                    break;
-                }
-            }
-
-            if (player == null)
-            {
-                Debug.LogWarning("HantuBoss: No player found.");
-                return;
-            }
-        }
-
-        Movement playerMovement = player.GetComponent<Movement>();
         if (playerMovement == null)
-        {
-            Debug.LogError("HantuBoss: Player has no Movement component.");
             return;
-        }
 
+        // Copy board positions from player
         movement.SetPositions(playerMovement.Positions);
+
         movement.startPos = movement.ActualPos;
         movement.lastPos = movement.ActualPos;
     }
@@ -103,7 +84,7 @@ public class HantuBoss : EnemyBase
         if (!isActive || movement == null)
             return;
 
-        // 1. Roll D6 using EnemyDice
+        // 1. Roll D6
         int roll = EnemyDice.ThrowDice();
 
         // 2. Chance to add +2
@@ -116,10 +97,9 @@ public class HantuBoss : EnemyBase
         // 3. Notify UI
         TurnManager.NotifyEnemyRoll(roll);
 
-        // 4. Move
+        // 4. Move Hantu
         movement.StartMovingFixed(roll);
     }
-
 
     public override void ActivateForTesting()
     {

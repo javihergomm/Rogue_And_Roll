@@ -4,9 +4,8 @@ using UnityEngine;
 /*
  * SpotConnectionManager
  * ---------------------
- * Manages shortcut connections between board positions.
- * Bridges created by consumables last for one full round
- * and are removed automatically when their duration expires.
+ * Manages temporary bridges and board shortcuts.
+ * Provides connection lookup and helper methods for movement logic.
  */
 public class SpotConnectionManager : MonoBehaviour
 {
@@ -14,105 +13,56 @@ public class SpotConnectionManager : MonoBehaviour
 
     private Dictionary<int, List<int>> connections = new();
 
-    // Active bridges with their remaining round duration
-    private List<BridgeData> activeBridges = new();
-
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
         Instance = this;
     }
 
-    /*
-     * Adds a one-way connection between two board positions.
-     */
-    public void AddConnection(int from, int to)
+    public void RegisterBridge(int from, int to)
     {
         if (!connections.ContainsKey(from))
             connections[from] = new List<int>();
 
-        if (!connections[from].Contains(to))
-            connections[from].Add(to);
+        connections[from].Add(to);
     }
 
-    /*
-     * Registers a new bridge that lasts for one full round.
-     * Adds both directions of the connection.
-     */
-    public void RegisterBridge(int a, int b)
+    public List<int> GetConnections(int spot)
     {
-        AddConnection(a, b);
-        AddConnection(b, a);
-
-        activeBridges.Add(new BridgeData(a, b));
-    }
-
-    /*
-     * Returns all connections from a given board position.
-     */
-    public List<int> GetConnections(int from)
-    {
-        if (connections.TryGetValue(from, out var list))
-            return list;
+        if (connections.ContainsKey(spot))
+            return connections[spot];
 
         return new List<int>();
     }
 
-    /*
-     * Called when a turn ends (player or enemy).
-     * When a full round is completed, bridge durations decrease.
-     */
     public void OnRoundStepCompleted()
     {
-        foreach (var bridge in activeBridges)
-            bridge.roundsLeft--;
-
-        RemoveExpiredBridges();
+        // Optional cleanup logic
     }
 
-    /*
-     * Removes bridges whose duration has reached zero.
-     */
-    private void RemoveExpiredBridges()
+    public bool WouldBridgeMoveAway(int startPos, int steps, int targetPos)
     {
-        for (int i = activeBridges.Count - 1; i >= 0; i--)
+        Movement anyMovement = FindFirstObjectByType<Movement>();
+
+        if (anyMovement == null || anyMovement.Positions == null || anyMovement.Positions.Length == 0)
         {
-            if (activeBridges[i].roundsLeft <= 0)
-            {
-                RemoveConnection(activeBridges[i].a, activeBridges[i].b);
-                RemoveConnection(activeBridges[i].b, activeBridges[i].a);
-                activeBridges.RemoveAt(i);
-            }
+            Debug.LogError("SpotConnectionManager: Cannot calculate total spots. No Movement found.");
+            return false;
         }
-    }
 
-    /*
-     * Removes a one-way connection.
-     */
-    private void RemoveConnection(int from, int to)
-    {
-        if (connections.ContainsKey(from))
-            connections[from].Remove(to);
-    }
+        int total = anyMovement.Positions.Length;
 
-    /*
-     * Stores data for an active temporary bridge.
-     */
-    private class BridgeData
-    {
-        public int a;
-        public int b;
-        public int roundsLeft = 1;
+        int predicted = (startPos + steps - 1 + total) % total + 1;
 
-        public BridgeData(int a, int b)
-        {
-            this.a = a;
-            this.b = b;
-        }
+        var con = GetConnections(predicted);
+
+        if (con.Count == 0)
+            return false;
+
+        int bridgeTarget = con[0];
+
+        int distBefore = Mathf.Abs(targetPos - predicted);
+        int distAfter = Mathf.Abs(targetPos - bridgeTarget);
+
+        return distAfter > distBefore;
     }
 }

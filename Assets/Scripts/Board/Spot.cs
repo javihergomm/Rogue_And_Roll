@@ -18,7 +18,7 @@ public class Spot : MonoBehaviour
         type = newtype;
     }
 
-    public SpotType getType()
+    public SpotType GetSpotType()
     {
         return type;
     }

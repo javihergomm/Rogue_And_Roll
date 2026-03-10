@@ -23,8 +23,8 @@ public class EnemyTester : MonoBehaviour
         // Instantiate the enemy prefab defined in the EnemySO
         GameObject obj = Instantiate(enemyToTest.enemyPrefab);
 
-        EnemyBase enemy = obj.GetComponent<EnemyBase>();
-        if (enemy == null)
+        // Use TryGetComponent to avoid allocation warnings
+        if (!obj.TryGetComponent<EnemyBase>(out var enemy))
         {
             Debug.LogError("EnemyTester: The prefab does not contain an EnemyBase component!");
             return;

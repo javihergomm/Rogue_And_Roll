@@ -2,6 +2,17 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
+/*
+ * ShopExitManager
+ * ---------------
+ * Handles entering and exiting the shop.
+ * Controls:
+ * - Enabling/disabling shop pedestals and decision objects
+ * - Rotating the board for shop mode
+ * - Pausing and hiding enemies while inside the shop
+ * - Disabling player movement and dice rolling
+ * - Restoring everything when exiting the shop
+ */
 public class ShopExitManager : MonoBehaviour
 {
     [Header("References (assign in Inspector)")]
@@ -62,7 +73,7 @@ public class ShopExitManager : MonoBehaviour
 
         inShop = true;
 
-        // Pause all enemies + hide their objects
+        // Pause enemies and hide visuals
         if (EnemyManager.Instance != null)
         {
             foreach (var enemy in EnemyManager.Instance.enemies)
@@ -89,11 +100,13 @@ public class ShopExitManager : MonoBehaviour
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = false;
 
-        // Reset Ouija pointer
+        // Reset Ouija pointer (optimized)
         if (tableroOuijaPuntero != null)
         {
-            tableroOuijaPuntero.transform.localPosition = punteroInitialLocalPos;
-            tableroOuijaPuntero.transform.localRotation = punteroInitialLocalRot;
+            tableroOuijaPuntero.transform.SetLocalPositionAndRotation(
+                punteroInitialLocalPos,
+                punteroInitialLocalRot
+            );
             tableroOuijaPuntero.SetActive(true);
         }
 
@@ -145,7 +158,7 @@ public class ShopExitManager : MonoBehaviour
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = true;
 
-        // Re-enable enemy objects + scripts
+        // Re-enable enemies
         if (EnemyManager.Instance != null)
         {
             foreach (var enemy in EnemyManager.Instance.enemies)

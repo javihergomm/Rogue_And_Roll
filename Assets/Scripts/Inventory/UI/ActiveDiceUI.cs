@@ -52,7 +52,7 @@ public class ActiveDiceUI : MonoBehaviour
         var inv = InventoryManager.Instance;
         var slots = inv.ActiveDice.Slots;
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
         sb.AppendLine("Turno del jugador");
         sb.AppendLine("Dados activos:");
 
