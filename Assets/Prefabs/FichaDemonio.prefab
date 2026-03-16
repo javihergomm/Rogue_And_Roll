@@ -19,7 +19,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4004417902594537446
 Transform:
   m_ObjectHideFlags: 0
@@ -113,6 +113,10 @@ MonoBehaviour:
   moveSound: {fileID: 0}
   startPos: 0
   lastPos: 0
+  probabilityExtraSteps: 50
+  probabilityBlockEnemy: 50
+  probabilityNegativeSteps: 0
+  probabilityBlockPlayer: 100
 --- !u!65 &7502107211952220923
 BoxCollider:
   m_ObjectHideFlags: 0

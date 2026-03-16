@@ -3,20 +3,23 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "BlockEnemyMovementEffect", menuName = "Effects/Passive/BlockEnemyMovement")]
 public class BlockEnemyMovementEffect : BasePassiveEffect
 {
+    // This effect blocks enemy movement for a number of turns using a cloned instance.
+
     [SerializeField] private int turnsBlocked = 1;
     private int remaining;
 
     public override void Activate()
     {
-        remaining = turnsBlocked;
+        // Clone the effect so each activation has its own state
+        var clone = Instantiate(this);
+        clone.remaining = clone.turnsBlocked;
 
         // Apply immediately for this turn
         StatManager.Instance.PreventEnemyMovementThisTurn = true;
 
-        // Register for future turns
-        StatManager.Instance.RegisterPassiveEffect(this);
+        // Register clone for future turns
+        StatManager.Instance.RegisterPassiveEffect(clone);
     }
-
 
     public override void OnTurnStart(PassiveContext ctx)
     {
