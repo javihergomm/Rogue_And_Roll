@@ -82,7 +82,7 @@ public class Movement : MonoBehaviour
         nextCheckpoint = GetNextCheckpoint();
         effectAlreadyTriggered = false;
 
-        // FIX: If player is blocked, still notify turn manager and return
+        // If player is blocked, still notify turn manager and return
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
         {
             Debug.Log("Player movement blocked this turn.");

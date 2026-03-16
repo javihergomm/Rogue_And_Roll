@@ -7034,7 +7034,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3.36, y: -0.095, z: -0.77}
-  m_LocalScale: {x: 1.43984, y: 1, z: 2}
+  m_LocalScale: {x: 2.5953116, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 371584076}
@@ -11580,11 +11580,10 @@ MonoBehaviour:
   - {fileID: 1915413510}
   - {fileID: 1225340512}
   - {fileID: 409411470}
-  boardTransform: {fileID: 1555743862}
-  exitRotationZ: 0
-  shopRotationZ: 180
+  boardTransform: {fileID: 0}
   inShop: 0
   tableroOuijaPuntero: {fileID: 652871806}
+  animator: {fileID: 1555743866}
 --- !u!114 &1548563264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11819,6 +11818,28 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.9, y: 0.2, z: 3.9634156}
   m_Center: {x: 9.410875e-17, y: -8.127145e-24, z: 0.031707764}
+--- !u!95 &1555743866
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1555743855}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a1cf6419b0d362f47a8f3576e81fdfe2, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &1577283360 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8733087956721349511, guid: abc4a277f5e52e94293777ad4477160e, type: 3}
@@ -16245,6 +16266,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4898722117463534234, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1555743865}
+    - targetCorrespondingSourceObject: {fileID: 4898722117463534234, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1555743866}
   m_SourcePrefab: {fileID: 100100000, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

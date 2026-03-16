@@ -3,16 +3,8 @@ using System;
 using System.Collections.Generic;
 
 /*
- * TurnManager
- * -----------
- * Controls the turn cycle between the player and all active enemies.
- * Handles:
- * - Player turn start and completion
- * - Enemy turn sequence
- * - Enemy registration
- * - UI notifications for turn changes and enemy movement
- * Ensures enemy movement events are subscribed only once.
- * Supports movement blocking through StatManager flags.
+ * Controls the turn cycle between the player and enemies, including player turn start,
+ * enemy sequencing and movement blocking integration with StatManager.
  */
 public class TurnManager : MonoBehaviour
 {
@@ -100,8 +92,11 @@ public class TurnManager : MonoBehaviour
     public void StartPlayerTurn()
     {
         state = TurnState.PlayerTurn;
-        Debug.Log("=== PLAYER TURN ===");
 
+        // Advance global turn state and reset per-turn flags and passive context
+        StatManager.Instance.NextTurn();
+
+        Debug.Log("=== PLAYER TURN ===");
         OnPlayerTurnStarted?.Invoke();
     }
 
@@ -114,12 +109,6 @@ public class TurnManager : MonoBehaviour
         StartEnemyTurns();
     }
 
-    /*
-     * NotifyEnemyFinishedMovement
-     * ---------------------------
-     * Called by enemies that do not use their own Movement component
-     * (such as Banshee) to signal that their turn has ended.
-     */
     public void NotifyEnemyFinishedMovement()
     {
         OnEnemyFinishedMovement();
