@@ -11840,6 +11840,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1555743867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1555743855}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 543a99b65e427584b8a2f4b1cbca8dd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopAnimationRelay
+  shop: {fileID: 1548563263}
 --- !u!114 &1577283360 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8733087956721349511, guid: abc4a277f5e52e94293777ad4477160e, type: 3}
@@ -16266,6 +16279,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4898722117463534234, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1555743865}
+    - targetCorrespondingSourceObject: {fileID: 4898722117463534234, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1555743867}
     - targetCorrespondingSourceObject: {fileID: 4898722117463534234, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1555743866}

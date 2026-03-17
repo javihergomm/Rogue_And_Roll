@@ -2,23 +2,11 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-/*
- * ShopExitManager
- * ----------------
- * This component controls the logic for entering and exiting the shop.
- * It handles:
- * - Enabling/disabling shop pedestals and decision objects
- * - Pausing enemies and hiding their visuals while inside the shop
- * - Disabling player movement and dice rolling
- * - Restoring everything when leaving the shop
- * - Triggering an animation ("Tienda") when entering or exiting
- */
 public class ShopExitManager : MonoBehaviour
 {
     [Header("References (assign in Inspector)")]
     [SerializeField] private List<GameObject> shopPedestals = new();
     [SerializeField] private List<GameObject> decisionEmpties = new();
-    [SerializeField] private Transform boardTransform;
 
     [Header("Shop State")]
     [SerializeField] private bool inShop = false;
@@ -27,7 +15,7 @@ public class ShopExitManager : MonoBehaviour
     [SerializeField] private GameObject tableroOuijaPuntero;
 
     [Header("Animator")]
-    [SerializeField] private Animator animator; 
+    [SerializeField] private Animator animator;
 
     private Vector3 punteroInitialLocalPos;
     private Quaternion punteroInitialLocalRot;
@@ -43,7 +31,7 @@ public class ShopExitManager : MonoBehaviour
             punteroInitialLocalRot = tableroOuijaPuntero.transform.localRotation;
         }
 
-        // If the game starts outside the shop, disable all shop-related objects
+        // If the game starts outside the shop, hide all shop-related objects
         if (!inShop)
         {
             foreach (var pedestal in shopPedestals)
@@ -67,11 +55,11 @@ public class ShopExitManager : MonoBehaviour
 
         inShop = true;
 
-        // Trigger shop enter animation
+        // Trigger enter animation
         if (animator != null)
             animator.SetTrigger("TiendaEntrar");
 
-        // Pause enemies and hide their visuals
+        // Disable enemies and hide their visuals
         if (EnemyManager.Instance != null)
         {
             foreach (var enemy in EnemyManager.Instance.enemies)
@@ -88,8 +76,6 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
-        OnShopStateChanged?.Invoke(true);
-
         // Disable player movement
         Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
         if (playerMovement != null)
@@ -99,24 +85,16 @@ public class ShopExitManager : MonoBehaviour
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = false;
 
-        // Reset Ouija pointer and enable it
+        // Reset Ouija pointer transform
         if (tableroOuijaPuntero != null)
         {
             tableroOuijaPuntero.transform.SetLocalPositionAndRotation(
                 punteroInitialLocalPos,
                 punteroInitialLocalRot
             );
-            tableroOuijaPuntero.SetActive(true);
         }
 
-        // Enable shop pedestals and decision objects
-        foreach (var pedestal in shopPedestals)
-            if (pedestal != null) pedestal.SetActive(true);
-
-        foreach (var empty in decisionEmpties)
-            if (empty != null) empty.SetActive(true);
-
-        // Prepare pedestals for new shop visit
+        // Prepare pedestals for a new shop visit
         ShopPedestalRandomizer.PrepareForReroll();
         ShopPedestalRandomizer.ClearVisitMemory();
 
@@ -142,73 +120,10 @@ public class ShopExitManager : MonoBehaviour
         if (!inShop)
             return;
 
-        inShop = false;
-
-        // Trigger shop exit animation
+        // Trigger exit animation (speed = -1)
         if (animator != null)
             animator.SetTrigger("TiendaSalir");
-            animator.SetTrigger("Permanecer");
-        // Re-enable player movement
-        Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
-        if (playerMovement != null)
-            playerMovement.enabled = true;
 
-        // Re-enable dice rolling
-        if (DiceRollManager.Instance != null)
-            DiceRollManager.Instance.enabled = true;
-
-        // Re-enable enemies and their visuals
-        if (EnemyManager.Instance != null)
-        {
-            foreach (var enemy in EnemyManager.Instance.enemies)
-            {
-                if (enemy == null) continue;
-
-                enemy.enabled = true;
-
-                if (enemy.CupInstance != null)
-                    enemy.CupInstance.SetActive(true);
-
-                if (enemy.movement != null)
-                    enemy.movement.gameObject.SetActive(true);
-            }
-        }
-
-        // Hide Ouija pointer
-        if (tableroOuijaPuntero != null)
-            tableroOuijaPuntero.SetActive(false);
-
-        // Disable shop objects
-        foreach (var pedestal in shopPedestals)
-            if (pedestal != null) pedestal.SetActive(false);
-
-        foreach (var empty in decisionEmpties)
-            if (empty != null) empty.SetActive(false);
-
-        // Reset rerolls
-        if (StatManager.Instance != null)
-        {
-            int currentRerolls = StatManager.Instance.GetCurrentValue(StatType.ShopRerolls);
-            if (currentRerolls > 0)
-                StatManager.Instance.ChangeStat(StatType.ShopRerolls, -currentRerolls);
-        }
-
-        OnShopStateChanged?.Invoke(false);
-    }
-
-    // -------------------------------------------------------------------------
-    // EXIT CONFIRMATION POPUP
-    // -------------------------------------------------------------------------
-    public void TriggerGoodbye()
-    {
-        if (!inShop)
-            return;
-
-        // Show popup with confirm/cancel callbacks
-        PopupHelpers.ShowExitShopPopup(
-            () => ConfirmExit(),
-            () => CancelExit()
-        );
     }
 
     // -------------------------------------------------------------------------
@@ -231,9 +146,115 @@ public class ShopExitManager : MonoBehaviour
         OnShopStateChanged?.Invoke(true);
     }
 
-    // Returns whether the player is currently inside the shop
+    // -------------------------------------------------------------------------
+    // TriggerGoodbye: shows a confirmation popup before exiting the shop
+    // -------------------------------------------------------------------------
+    public void TriggerGoodbye()
+    {
+        if (!inShop)
+            return;
+
+        PopupHelpers.ShowExitShopPopup(
+            () => ConfirmExit(),
+            () => CancelExit()
+        );
+    }
+
     public bool IsInShop()
     {
         return inShop;
+    }
+
+    // -------------------------------------------------------------------------
+    // ANIMATION EVENTS
+    // -------------------------------------------------------------------------
+
+    // Called at frame 0 of the "TiendaEntrar" animation
+    public void OnEnterStart()
+    {
+        // Hide player movement, dice, and enemies
+        Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
+        if (playerMovement != null)
+            playerMovement.enabled = false;
+
+        if (DiceRollManager.Instance != null)
+            DiceRollManager.Instance.enabled = false;
+
+        if (EnemyManager.Instance != null)
+        {
+            foreach (var enemy in EnemyManager.Instance.enemies)
+            {
+                if (enemy == null) continue;
+
+                enemy.enabled = false;
+
+                if (enemy.CupInstance != null)
+                    enemy.CupInstance.SetActive(false);
+
+                if (enemy.movement != null)
+                    enemy.movement.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    // Called at the last frame of the "TiendaEntrar" animation
+    public void OnEnterEnd()
+    {
+        // Show pedestals, decision empties, and pointer
+        foreach (var pedestal in shopPedestals)
+            if (pedestal != null) pedestal.SetActive(true);
+
+        foreach (var empty in decisionEmpties)
+            if (empty != null) empty.SetActive(true);
+
+        if (tableroOuijaPuntero != null)
+            tableroOuijaPuntero.SetActive(true);
+    }
+
+    // Called at frame 0 of the "TiendaSalir" animation (played backwards)
+    public void OnExitStart()
+    {
+        // This runs at the END of the exit animation because speed = -1
+
+        inShop = false;
+        OnShopStateChanged?.Invoke(false);
+
+        Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
+        if (playerMovement != null)
+            playerMovement.enabled = true;
+
+        if (DiceRollManager.Instance != null)
+            DiceRollManager.Instance.enabled = true;
+
+        if (EnemyManager.Instance != null)
+        {
+            foreach (var enemy in EnemyManager.Instance.enemies)
+            {
+                if (enemy == null) continue;
+
+                enemy.enabled = true;
+
+                if (enemy.CupInstance != null)
+                    enemy.CupInstance.SetActive(true);
+
+                if (enemy.movement != null)
+                    enemy.movement.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    // Called at the last frame of the "TiendaSalir" animation (played backwards)
+    public void OnExitEnd()
+    {
+        // This runs at the BEGINNING of the exit animation because speed = -1
+
+        foreach (var pedestal in shopPedestals)
+            if (pedestal != null) pedestal.SetActive(false);
+
+        foreach (var empty in decisionEmpties)
+            if (empty != null) empty.SetActive(false);
+
+        if (tableroOuijaPuntero != null)
+            tableroOuijaPuntero.SetActive(false);
     }
 }
