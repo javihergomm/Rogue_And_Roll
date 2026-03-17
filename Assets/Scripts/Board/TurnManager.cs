@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 /*
  * Controls the turn cycle between the player and enemies, including player turn start,
- * enemy sequencing and movement blocking integration with StatManager.
+ * enemy sequencing, and integration with movement and shop logic. The turn only ends
+ * when the player movement explicitly indicates that the turn should end.
  */
 public class TurnManager : MonoBehaviour
 {
@@ -93,7 +94,6 @@ public class TurnManager : MonoBehaviour
     {
         state = TurnState.PlayerTurn;
 
-        // Advance global turn state and reset per-turn flags and passive context
         StatManager.Instance.NextTurn();
 
         Debug.Log("=== PLAYER TURN ===");
@@ -105,8 +105,19 @@ public class TurnManager : MonoBehaviour
         if (state != TurnState.PlayerTurn)
             return;
 
+        if (!playerMovement.turnShouldEnd)
+        {
+            Debug.Log("Player movement finished but turn should not end.");
+            return;
+        }
+
         Debug.Log("Player finished movement.");
         StartEnemyTurns();
+    }
+
+    public void ForcePlayerTurnEnd()
+    {
+        OnPlayerFinishedMovement();
     }
 
     public void NotifyEnemyFinishedMovement()

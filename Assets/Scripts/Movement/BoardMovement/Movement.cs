@@ -1,10 +1,13 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
-// Movement
-// Handles board movement for player and enemies.
-// Ensures OnMovementFinished is always invoked so the turn system continues.
+/*
+ * Handles all board movement logic, including checkpoints, shop entry,
+ * pending steps, lap counting only on player-controlled forward movement,
+ * and ignoring lap count on enemy-forced movement.
+ */
 public class Movement : MonoBehaviour
 {
     private Spot[] spots;
@@ -40,20 +43,22 @@ public class Movement : MonoBehaviour
 
     private Renderer cachedRenderer;
     private bool wasHiddenByEffect = false;
-    private int round = 1;
+    public int Round { get; private set; } = 1;
 
     public int startPos;
     public int lastPos;
 
     private bool effectAlreadyTriggered = false;
 
-    // GOOD spot probabilities
     public int probabilityExtraSteps = 50;
     public int probabilityBlockEnemy = 50;
 
-    // BAD spot probabilities
     public int probabilityNegativeSteps = 0;
     public int probabilityBlockPlayer = 100;
+
+    public int pendingSteps = 0;
+    public bool turnShouldEnd = true;
+    public bool movementIsPlayerControlled = true;
 
     private void Start()
     {
@@ -81,11 +86,11 @@ public class Movement : MonoBehaviour
     {
         nextCheckpoint = GetNextCheckpoint();
         effectAlreadyTriggered = false;
+        turnShouldEnd = true;
+        movementIsPlayerControlled = true;
 
-        // If player is blocked, still notify turn manager and return
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
         {
-            Debug.Log("Player movement blocked this turn.");
             OnMovementFinished?.Invoke();
             return;
         }
@@ -97,6 +102,7 @@ public class Movement : MonoBehaviour
     {
         nextCheckpoint = int.MaxValue;
         effectAlreadyTriggered = false;
+        turnShouldEnd = true;
         StartCoroutine(MoveWithVisibilityCheck(steps));
     }
 
@@ -121,8 +127,8 @@ public class Movement : MonoBehaviour
         int steps = fixedSteps ?? InventoryManager.Instance.GetFinalDiceNumber();
 
         int divisor = 1;
-        if (round >= 3)
-            divisor = ((round - 3) / 2) + 2;
+        if (Round >= 3)
+            divisor = ((Round - 3) / 2) + 2;
 
         if (isPlayer)
             steps /= divisor;
@@ -153,12 +159,24 @@ public class Movement : MonoBehaviour
 
         for (int i = 0; i < totalSteps; i++)
         {
+            int previousPos = actualPos;
+
             actualPos += direction;
 
             if (actualPos > positions.Length)
                 actualPos = 1;
             if (actualPos < 1)
                 actualPos = positions.Length;
+
+            if (isPlayer && direction > 0 && movementIsPlayerControlled)
+            {
+                bool crossedSpawn = previousPos < startPos && actualPos >= startPos;
+
+                if (crossedSpawn)
+                {
+                    Round++;
+                }
+            }
 
             Vector3 target = positions[actualPos - 1].position;
             PlayMovementSound();
@@ -180,6 +198,7 @@ public class Movement : MonoBehaviour
             if (!ignoreBridgeThisMove && connections.Count > 0)
             {
                 int targetSpot = connections[0];
+                int prev = actualPos;
                 actualPos = targetSpot;
 
                 Vector3 bridgeTarget = positions[targetSpot - 1].position;
@@ -195,6 +214,28 @@ public class Movement : MonoBehaviour
                 }
 
                 transform.position = bridgeTarget;
+
+                if (isPlayer && direction > 0 && movementIsPlayerControlled)
+                {
+                    bool crossedSpawn = prev < startPos && actualPos >= startPos;
+
+                    if (crossedSpawn)
+                    {
+                        Round++;
+                    }
+                }
+            }
+
+            if (spots[actualPos - 1].checkpoint && isPlayer)
+            {
+                int remaining = totalSteps - (i + 1);
+                pendingSteps = remaining;
+                turnShouldEnd = false;
+
+                shopExitManager.EnterShop();
+                Round++;
+
+                yield break;
             }
 
             yield return new WaitForSeconds(0.1f);
@@ -206,17 +247,8 @@ public class Movement : MonoBehaviour
 
         if (isPlayer && TurnManager.Instance.IsPlayerTurn() && !effectAlreadyTriggered)
         {
-            if (spots[actualPos - 1].checkpoint)
+            if (type == Spot.SpotType.Good)
             {
-                Debug.Log("Player stepped on CHECKPOINT at spot " + actualPos);
-                shopExitManager.EnterShop();
-                round++;
-                OnMovementFinished?.Invoke();
-                yield break;
-            }
-            else if (type == Spot.SpotType.Good)
-            {
-                Debug.Log("Player stepped on GOOD spot at " + actualPos);
                 effectAlreadyTriggered = true;
 
                 int roll = UnityEngine.Random.Range(0, 100);
@@ -224,12 +256,10 @@ public class Movement : MonoBehaviour
                 if (roll < probabilityExtraSteps)
                 {
                     int extra = UnityEngine.Random.Range(3, 6);
-                    Debug.Log("GOOD spot effect: EXTRA STEPS = " + extra);
                     yield return StartCoroutine(ExtraMovementRoutine(extra));
                 }
                 else
                 {
-                    Debug.Log("GOOD spot effect: BLOCK ENEMY MOVEMENT");
                     ScriptableObject.CreateInstance<BlockEnemyMovementEffect>().Activate();
                 }
 
@@ -238,7 +268,6 @@ public class Movement : MonoBehaviour
             }
             else if (type == Spot.SpotType.Bad)
             {
-                Debug.Log("Player stepped on BAD spot at " + actualPos);
                 effectAlreadyTriggered = true;
 
                 int roll = UnityEngine.Random.Range(0, 100);
@@ -246,12 +275,10 @@ public class Movement : MonoBehaviour
                 if (roll < probabilityNegativeSteps)
                 {
                     int extra = UnityEngine.Random.Range(-3, -6);
-                    Debug.Log("BAD spot effect: NEGATIVE STEPS = " + extra);
                     yield return StartCoroutine(ExtraMovementRoutine(extra));
                 }
                 else
                 {
-                    Debug.Log("BAD spot effect: BLOCK PLAYER MOVEMENT");
                     ScriptableObject.CreateInstance<BlockPlayerMovementEffect>().Activate();
                 }
 
@@ -308,18 +335,38 @@ public class Movement : MonoBehaviour
     public void TeleportToPosition(int index)
     {
         if (positions == null || positions.Length == 0)
-        {
-            Debug.LogError("Movement: Positions array is not set.");
             return;
-        }
 
         if (index < 1 || index > positions.Length)
-        {
-            Debug.LogError("Movement: TeleportToPosition index " + index + " is out of range.");
             return;
-        }
 
         actualPos = index;
         transform.position = positions[index - 1].position;
     }
+#if UNITY_EDITOR
+    [ContextMenu("Añadir 1 vuelta (TEST)")]
+    private void AddLapForTesting()
+    {
+        if (!isPlayer)
+        {
+            Debug.LogWarning("Este botón solo funciona en el Movement del jugador.");
+            return;
+        }
+
+        // Sumar vuelta
+        Round++;
+
+        Debug.Log("Vueltas del jugador ahora: " + (Round - 1));
+
+        // Refrescar UI
+        if (StatManager.Instance != null)
+            StatManager.Instance.TriggerStatsChanged();
+
+        // Forzar comprobación REAL de spawn
+        if (EnemyManager.Instance != null)
+            EnemyManager.Instance.CheckSpawnConditions();
+    }
+#endif
+
+
 }

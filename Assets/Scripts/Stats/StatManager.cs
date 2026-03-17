@@ -200,4 +200,9 @@ public class StatManager : MonoBehaviour
     {
         OnStatsChanged?.Invoke();
     }
+    public void TriggerStatsChanged()
+    {
+        OnStatsChanged?.Invoke();
+    }
+
 }

@@ -43,6 +43,14 @@ public class StatsUI : MonoBehaviour
         int maxGold = sm.GetMaxValue(StatType.Gold);
         sb.AppendLine("Pesetas: " + gold + "/" + maxGold);
 
+        
+        Movement player = FindFirstObjectByType<Movement>();
+        if (player != null && player.isPlayer)
+        {
+            int laps = player.Round - 1;
+            sb.AppendLine("Vueltas: " + laps);
+        }
+
         if (sm.IsPlayerInShop())
         {
             int rerolls = sm.GetCurrentValue(StatType.ShopRerolls);
@@ -52,4 +60,5 @@ public class StatsUI : MonoBehaviour
 
         statsText.text = sb.ToString();
     }
+
 }

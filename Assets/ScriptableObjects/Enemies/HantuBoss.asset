@@ -20,5 +20,6 @@ MonoBehaviour:
   effects: []
   cupSpawnPointName: 
   tileSpotIndex: 0
-  lapsToActivate: 1
+  lapsToActivate: 3
   requiresPlayerLap: 1
+  spawnOnlyOnce: 1

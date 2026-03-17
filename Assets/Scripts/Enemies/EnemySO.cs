@@ -22,7 +22,7 @@ public class EnemySO : ScriptableObject
     [Header("Behavior")]
     public int lapsToActivate = 1;
     public bool requiresPlayerLap = true;
-
+    public bool spawnOnlyOnce = true;
     /*
      * SpawnForTesting
      * ---------------
