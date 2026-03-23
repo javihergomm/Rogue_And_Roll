@@ -44,6 +44,8 @@ public class Movement : MonoBehaviour
     private Renderer cachedRenderer;
     private bool wasHiddenByEffect = false;
     public int Round { get; private set; } = 1;
+    public float LapProgress { get; private set; } = 0f;
+
 
     public int startPos;
     public int lastPos;
@@ -167,6 +169,14 @@ public class Movement : MonoBehaviour
                 actualPos = 1;
             if (actualPos < 1)
                 actualPos = positions.Length;
+
+            if (isPlayer && direction > 0)
+            {
+                LapProgress += 1f / positions.Length;  
+
+                if (EnemyManager.Instance != null)
+                    EnemyManager.Instance.CheckSpawnConditions();
+            }
 
             // ============================================================
             // SUBIR VUELTA SOLO AL CRUZAR EL SPAWN DEL JUGADOR
@@ -356,26 +366,41 @@ public class Movement : MonoBehaviour
         actualPos = index;
         transform.position = positions[index - 1].position;
     }
-
 #if UNITY_EDITOR
-    [ContextMenu("Añadir 1 vuelta (TEST)")]
-    private void AddLapForTesting()
+
+    [ContextMenu("TEST: +0.05 Lap")]
+    private void TestAddLap005() => AddLapProgressTest(0.05f);
+
+    [ContextMenu("TEST: +0.10 Lap")]
+    private void TestAddLap010() => AddLapProgressTest(0.10f);
+
+    [ContextMenu("TEST: +0.25 Lap")]
+    private void TestAddLap025() => AddLapProgressTest(0.25f);
+
+    [ContextMenu("TEST: +0.50 Lap")]
+    private void TestAddLap050() => AddLapProgressTest(0.50f);
+
+    private void AddLapProgressTest(float amount)
     {
         if (!isPlayer)
         {
-            Debug.LogWarning("Este botón solo funciona en el Movement del jugador.");
+            Debug.LogWarning("Solo funciona en el jugador.");
             return;
         }
 
-        Round++;
+        LapProgress += amount;
 
-        Debug.Log("Vueltas del jugador ahora: " + (Round - 1));
+        Debug.Log("TEST: LapProgress = " + LapProgress);
 
-        if (StatManager.Instance != null)
-            StatManager.Instance.TriggerStatsChanged();
-
+        // Forzar spawn/despawn
         if (EnemyManager.Instance != null)
             EnemyManager.Instance.CheckSpawnConditions();
+
+        // Actualizar UI
+        if (StatManager.Instance != null)
+            StatManager.Instance.TriggerStatsChanged();
     }
+
 #endif
+
 }

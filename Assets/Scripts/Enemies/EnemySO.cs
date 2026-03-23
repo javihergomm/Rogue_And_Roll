@@ -1,5 +1,15 @@
 using UnityEngine;
 
+/*
+ * EnemySO
+ * -------
+ * ScriptableObject that defines all data for an enemy type.
+ * Contains:
+ *  - Identity and prefabs
+ *  - Spawn rules and activation conditions
+ *  - Durability (how many laps the enemy stays alive)
+ *  - Audio and effects
+ */
 [CreateAssetMenu(fileName = "NewEnemy", menuName = "Game/Enemy")]
 public class EnemySO : ScriptableObject
 {
@@ -20,9 +30,13 @@ public class EnemySO : ScriptableObject
     public int tileSpotIndex;
 
     [Header("Behavior")]
-    public int lapsToActivate = 1;
+    public float lapsToActivate = 1f;
     public bool requiresPlayerLap = true;
     public bool spawnOnlyOnce = true;
+    [HideInInspector] public bool hasSpawnedOnce = false;
+
+    [Header("Durability")]
+    public float durabilityLaps = 1f;   // How many laps the enemy stays active after spawning
 
     [Header("Audio")]
     public AudioClip spawnSFX;
@@ -35,20 +49,16 @@ public class EnemySO : ScriptableObject
      */
     public EnemyBase SpawnForTesting()
     {
-        // Instantiate the logic-only enemy prefab
         GameObject enemyObj = Instantiate(enemyPrefab);
 
-        // Use TryGetComponent to avoid allocation warnings
         if (!enemyObj.TryGetComponent<EnemyBase>(out var enemy))
         {
             Debug.LogError("EnemySO: Enemy prefab has no EnemyBase component!");
             return null;
         }
 
-        // Assign this ScriptableObject to the enemy
         enemy.data = this;
 
-        // Trigger the enemy's testing spawn method
         enemyObj.SendMessage("TestSpawn", SendMessageOptions.DontRequireReceiver);
 
         return enemy;

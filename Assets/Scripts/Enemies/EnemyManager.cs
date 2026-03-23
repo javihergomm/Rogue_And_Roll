@@ -59,8 +59,33 @@ public class EnemyManager : MonoBehaviour
         if (playerMovement == null)
             return;
 
-        float currentLap = playerMovement.Round - 1;
+        float currentLap = playerMovement.LapProgress;
 
+        // ============================================================
+        // DESPAWN AUTOMATICO POR DURABILIDAD (excepto Banshee)
+        // ============================================================
+        for (int i = enemies.Count - 1; i >= 0; i--)
+        {
+            EnemyBase e = enemies[i];
+
+            if (e != null && e.isActive && e.ShouldDespawn(currentLap))
+            {
+                Debug.Log("EnemyManager: Despawning enemy " + e.name + " por durabilidad.");
+
+                if (e.CupInstance != null)
+                    Destroy(e.CupInstance);
+
+                if (e.TokenInstance != null)
+                    Destroy(e.TokenInstance);
+
+                Destroy(e.gameObject);
+
+                RemoveEnemy(e);
+
+
+                RemoveEnemy(e);
+            }
+        }
         foreach (var enemySO in enemyDefinitions)
         {
             if (enemySO == null)
@@ -69,10 +94,13 @@ public class EnemyManager : MonoBehaviour
             // Buscar si ya existe una instancia activa de este enemigo
             EnemyBase existing = enemies.Find(e => e.data == enemySO);
             bool alreadySpawned = existing != null && existing.isActive;
+            if (enemySO.spawnOnlyOnce && enemySO.hasSpawnedOnce)
+                continue;
 
             // ====================================================
             // 1. DEMONIO — Spawn por vueltas o por tirada 666
             // ====================================================
+
             if (enemySO.enemyPrefab.TryGetComponent<DemonBoss>(out var demonPrefab))
             {
                 int lastRoll = StatManager.Instance.PreviousRoll;
@@ -82,7 +110,16 @@ public class EnemyManager : MonoBehaviour
                     currentLap >= enemySO.lapsToActivate &&
                     (!enemySO.requiresPlayerLap || playerMovement.Round > 1);
 
-                if (!alreadySpawned && (spawnByRoll || spawnByLaps))
+                // NEW — Buscar instancia previa del demonio
+                EnemyBase existingDemon = enemies.Find(e => e.data == enemySO);
+
+                // NEW — Respetar Spawn Only Once
+                if (enemySO.spawnOnlyOnce && enemySO.hasSpawnedOnce)
+                    continue;
+
+                bool demonIsActive = existingDemon != null && existingDemon.isActive;
+
+                if (!demonIsActive && (spawnByRoll || spawnByLaps))
                 {
                     Debug.Log("EnemyManager: Demonio aparece (vueltas o 666).");
                     SpawnEnemy(enemySO);
@@ -90,6 +127,8 @@ public class EnemyManager : MonoBehaviour
 
                 continue;
             }
+
+
 
             // ====================================================
             // 2. ENEMIGOS NORMALES — Spawn por vueltas
@@ -101,7 +140,7 @@ public class EnemyManager : MonoBehaviour
             if (!canSpawnByLaps)
                 continue;
 
-            if (alreadySpawned && enemySO.spawnOnlyOnce)
+            if (enemySO.spawnOnlyOnce && enemySO.hasSpawnedOnce)
                 continue;
 
             if (!alreadySpawned)

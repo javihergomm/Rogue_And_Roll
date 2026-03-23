@@ -1,5 +1,22 @@
 using UnityEngine;
+using System.Collections.Generic;
 
+/*
+ * EnemyBase
+ * ---------
+ * Base class for all enemy types.
+ * Handles:
+ *  - Opposite-spawn logic based on the player's spawn point
+ *  - Cup and token instantiation
+ *  - Movement setup and positioning
+ *  - Spawn distance based on 2/3 of max roll
+ *  - Automatic registration in EnemyManager
+ *  - Automatic despawn after a durability-lap duration
+ *  - Player kill logic and extra-life handling
+ *  - Shared audio system for spawn SFX
+ *
+ * Individual enemies only need to implement StartTurn().
+ */
 public abstract class EnemyBase : MonoBehaviour
 {
     public EnemySO data;
@@ -14,6 +31,19 @@ public abstract class EnemyBase : MonoBehaviour
 
     public bool isActive;
 
+    // Track if this enemy has already spawned once
+    public bool HasSpawnedOnce { get; private set; } = false;
+
+    public void MarkAsSpawned()
+    {
+        HasSpawnedOnce = true;
+    }
+
+
+    // Durability tracking
+    private float spawnLap;
+    private float despawnLap;
+
     // Audio
     protected AudioSource audioSource;
 
@@ -21,20 +51,16 @@ public abstract class EnemyBase : MonoBehaviour
     {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f; // 2D sound
+        audioSource.spatialBlend = 0f;
     }
 
-    // ============================================================
-    // REGISTER
-    // ============================================================
+    // Registers the enemy in EnemyManager
     protected void RegisterEnemy()
     {
         EnemyManager.Instance.ActivateEnemy(this);
     }
 
-    // ============================================================
-    // CACHE PLAYER
-    // ============================================================
+    // Finds and caches the player's Movement component
     protected void CachePlayerMovement()
     {
         if (player == null)
@@ -55,9 +81,7 @@ public abstract class EnemyBase : MonoBehaviour
             playerMovement = player.GetComponent<Movement>();
     }
 
-    // ============================================================
-    // OPPOSITE SPAWN
-    // ============================================================
+    // Determines the opposite spawn point name
     protected string GetOppositeSpawn(string playerSpawn)
     {
         string p = playerSpawn.ToLower();
@@ -71,6 +95,7 @@ public abstract class EnemyBase : MonoBehaviour
         return playerSpawn;
     }
 
+    // Finds a spawn point in the scene
     protected Transform FindSpawnPoint(string spawnName)
     {
         GameObject obj = GameObject.Find(spawnName);
@@ -82,9 +107,7 @@ public abstract class EnemyBase : MonoBehaviour
         return obj.transform;
     }
 
-    // ============================================================
-    // UNIFIED SPAWN FOR ALL BOSSES
-    // ============================================================
+    // Unified spawn logic for all enemies
     public virtual void SpawnEnemy()
     {
         StartCoroutine(SpawnRoutine());
@@ -102,28 +125,20 @@ public abstract class EnemyBase : MonoBehaviour
             yield break;
         }
 
-        // 1. Get player spawn from CharacterSelectManager
+        // Get player spawn
         string playerSpawnName = CharacterSelectManager.Instance.SelectedCharacter.spawnPointName;
-        Debug.Log("ENEMYBASE PLAYER SPAWN NAME = " + playerSpawnName);
 
-        // 2. Get opposite spawn
+        // Get opposite spawn
         string enemyCupSpawnName = GetOppositeSpawn(playerSpawnName);
-        Debug.Log("ENEMYBASE OPPOSITE SPAWN = " + enemyCupSpawnName);
-
-        // 3. Find opposite spawn
         Transform cupSpawn = FindSpawnPoint(enemyCupSpawnName);
-        Debug.Log("ENEMYBASE FOUND SPAWN TRANSFORM = " + (cupSpawn != null ? cupSpawn.name : "NULL"));
 
         if (cupSpawn == null)
-        {
-            Debug.LogError("EnemyBase: Opposite spawn not found: " + enemyCupSpawnName);
             yield break;
-        }
 
-        // 4. Instantiate CUP at opposite spawn
+        // Instantiate cup
         CupInstance = Instantiate(data.cupPrefab, cupSpawn.position, cupSpawn.rotation);
 
-        // 5. Instantiate TILE
+        // Instantiate token
         TokenInstance = Instantiate(data.tilePrefab);
         movement = TokenInstance.GetComponent<Movement>();
 
@@ -133,28 +148,33 @@ public abstract class EnemyBase : MonoBehaviour
             yield break;
         }
 
-        // 6. Configure Movement
+        // Configure movement
         movement.SetPositions(playerMovement.Positions);
         movement.startPos = movement.ActualPos;
         movement.lastPos = movement.ActualPos;
 
-        // 7. Place behind the player
+        // Spawn distance = 2/3 of max roll
         int maxRoll = this is DemonBoss ? 18 : 6;
-        PlaceEnemyBehindPlayer(maxRoll);
+        int spawnDistance = Mathf.RoundToInt(maxRoll * 0.66f);
+
+        PlaceEnemyBehindPlayer(spawnDistance);
 
         movement.TeleportToPosition(movement.ActualPos);
 
+        // Activate
         isActive = true;
+        data.hasSpawnedOnce = true;
         RegisterEnemy();
+        MarkAsSpawned();
+        // Durability setup
+        spawnLap = playerMovement.Round - 1;
+        despawnLap = spawnLap + data.durabilityLaps;
 
-        // Play spawn sound AFTER everything is placed
         PlaySpawnSound();
     }
 
-    // ============================================================
-    // PLACE BEHIND PLAYER
-    // ============================================================
-    protected void PlaceEnemyBehindPlayer(int maxRoll)
+    // Places the enemy behind the player by a given distance
+    protected void PlaceEnemyBehindPlayer(int distance)
     {
         CachePlayerMovement();
 
@@ -162,7 +182,7 @@ public abstract class EnemyBase : MonoBehaviour
             return;
 
         int playerPos = playerMovement.ActualPos;
-        int enemyPos = playerPos - maxRoll;
+        int enemyPos = playerPos - distance;
 
         if (enemyPos < 0)
             enemyPos += playerMovement.Positions.Length;
@@ -170,9 +190,16 @@ public abstract class EnemyBase : MonoBehaviour
         movement.ActualPos = enemyPos;
     }
 
-    // ============================================================
-    // PLAYER DEATH
-    // ============================================================
+    // Checks if the enemy should despawn based on durability
+    public bool ShouldDespawn(float currentLap)
+    {
+        if (this is BansheeBoss)
+            return false;
+
+        return currentLap >= despawnLap;
+    }
+
+    // Handles player death and extra-life logic
     protected void KillPlayerNow()
     {
         CachePlayerMovement();
@@ -199,17 +226,13 @@ public abstract class EnemyBase : MonoBehaviour
             Destroy(player.gameObject);
     }
 
-    // ============================================================
-    // ENEMY MOVEMENT BLOCK (tile effects)
-    // ============================================================
+    // Checks if enemy movement is blocked by tile effects
     protected bool IsEnemyMovementBlocked()
     {
         return StatManager.Instance.PreventEnemyMovementThisTurn;
     }
 
-    // ============================================================
-    // AUDIO
-    // ============================================================
+    // Plays the spawn sound
     protected void PlaySpawnSound()
     {
         if (data.spawnSFX == null || audioSource == null)
@@ -218,9 +241,11 @@ public abstract class EnemyBase : MonoBehaviour
         audioSource.PlayOneShot(data.spawnSFX);
     }
 
-    // ============================================================
-    // ABSTRACT METHODS
-    // ============================================================
+    // Abstract turn logic for each enemy type
     public abstract void StartTurn();
-    public virtual void ActivateForTesting() { SpawnEnemy(); }
+
+    public virtual void ActivateForTesting()
+    {
+        SpawnEnemy();
+    }
 }
