@@ -103,9 +103,4 @@ public class HantuBoss : EnemyBase
 
         movement.StartMovingFixed(roll);
     }
-
-    public override void ActivateForTesting()
-    {
-        ActivateHantu();
-    }
 }

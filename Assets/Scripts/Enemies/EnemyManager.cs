@@ -1,13 +1,16 @@
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class EnemyManager : MonoBehaviour
 {
     public static EnemyManager Instance { get; private set; }
 
-    public List<EnemyBase> enemies = new();
+    [Header("Enemy Prefabs (SO)")]
     public List<EnemySO> enemyDefinitions = new();
+
+    [Header("Active Enemies")]
+    public List<EnemyBase> enemies = new();
 
     private Movement playerMovement;
 
@@ -48,14 +51,8 @@ public class EnemyManager : MonoBehaviour
         Debug.Log("EnemyManager: PlayerMovement encontrado correctamente.");
     }
 
-
-    private void Update()
-    {
-        CheckSpawnConditions();
-    }
-
     // ============================================================
-    // MÉTODO CORRECTO PARA SPAWNEAR (llamado desde Update y botón)
+    // SPAWN POR VUELTAS + SPAWN ESPECIAL DEL DEMONIO
     // ============================================================
     public void CheckSpawnConditions()
     {
@@ -69,36 +66,34 @@ public class EnemyManager : MonoBehaviour
             if (enemySO == null)
                 continue;
 
-            // Buscar si ya existe una instancia de este enemigo
+            // Buscar si ya existe una instancia activa de este enemigo
             EnemyBase existing = enemies.Find(e => e.data == enemySO);
-
             bool alreadySpawned = existing != null && existing.isActive;
 
-            // -----------------------------------------
-            // 1. DEMONIO — Spawn especial
-            // -----------------------------------------
+            // ====================================================
+            // 1. DEMONIO — Spawn por vueltas o por tirada 666
+            // ====================================================
             if (enemySO.enemyPrefab.TryGetComponent<DemonBoss>(out var demonPrefab))
             {
                 int lastRoll = StatManager.Instance.PreviousRoll;
 
-                bool spawnByRoll = (lastRoll == 18);
-
+                bool spawnByRoll = (lastRoll == 18); // 6+6+6
                 bool spawnByLaps =
                     currentLap >= enemySO.lapsToActivate &&
                     (!enemySO.requiresPlayerLap || playerMovement.Round > 1);
 
                 if (!alreadySpawned && (spawnByRoll || spawnByLaps))
                 {
+                    Debug.Log("EnemyManager: Demonio aparece (vueltas o 666).");
                     SpawnEnemy(enemySO);
                 }
 
                 continue;
             }
 
-            // -----------------------------------------
+            // ====================================================
             // 2. ENEMIGOS NORMALES — Spawn por vueltas
-            // -----------------------------------------
-
+            // ====================================================
             bool canSpawnByLaps =
                 currentLap >= enemySO.lapsToActivate &&
                 (!enemySO.requiresPlayerLap || playerMovement.Round > 1);
@@ -110,7 +105,10 @@ public class EnemyManager : MonoBehaviour
                 continue;
 
             if (!alreadySpawned)
+            {
+                Debug.Log($"EnemyManager: {enemySO.name} aparece por vueltas ({currentLap}).");
                 SpawnEnemy(enemySO);
+            }
         }
     }
 
@@ -137,6 +135,9 @@ public class EnemyManager : MonoBehaviour
         enemy.SpawnEnemy();
     }
 
+    // ============================================================
+    // REGISTRO / DESREGISTRO
+    // ============================================================
     public void ActivateEnemy(EnemyBase enemy)
     {
         if (enemy == null)
@@ -159,13 +160,5 @@ public class EnemyManager : MonoBehaviour
 
         if (TurnManager.Instance.IsEnemyRegistered(enemy))
             TurnManager.Instance.UnregisterEnemy(enemy);
-    }
-
-    // ============================================================
-    // BOTÓN DE TEST — AHORA FUNCIONA
-    // ============================================================
-    public void ForceSpawnCheck()
-    {
-        CheckSpawnConditions();
     }
 }

@@ -53,8 +53,8 @@ public class Movement : MonoBehaviour
     public int probabilityExtraSteps = 50;
     public int probabilityBlockEnemy = 50;
 
-    public int probabilityNegativeSteps = 0;
-    public int probabilityBlockPlayer = 100;
+    public int probabilityNegativeSteps = 50;
+    public int probabilityBlockPlayer = 50;
 
     public int pendingSteps = 0;
     public bool turnShouldEnd = true;
@@ -168,6 +168,9 @@ public class Movement : MonoBehaviour
             if (actualPos < 1)
                 actualPos = positions.Length;
 
+            // ============================================================
+            // SUBIR VUELTA SOLO AL CRUZAR EL SPAWN DEL JUGADOR
+            // ============================================================
             if (isPlayer && direction > 0 && movementIsPlayerControlled)
             {
                 bool crossedSpawn = previousPos < startPos && actualPos >= startPos;
@@ -175,6 +178,10 @@ public class Movement : MonoBehaviour
                 if (crossedSpawn)
                 {
                     Round++;
+
+                    // Avisar al EnemyManager SOLO aquí
+                    if (EnemyManager.Instance != null)
+                        EnemyManager.Instance.CheckSpawnConditions();
                 }
             }
 
@@ -222,10 +229,16 @@ public class Movement : MonoBehaviour
                     if (crossedSpawn)
                     {
                         Round++;
+
+                        if (EnemyManager.Instance != null)
+                            EnemyManager.Instance.CheckSpawnConditions();
                     }
                 }
             }
 
+            // ============================================================
+            // CHECKPOINT
+            // ============================================================
             if (spots[actualPos - 1].checkpoint && isPlayer)
             {
                 int remaining = totalSteps - (i + 1);
@@ -233,8 +246,8 @@ public class Movement : MonoBehaviour
                 turnShouldEnd = false;
 
                 shopExitManager.EnterShop();
-                Round++;
 
+                // NO Round++ aquí
                 yield break;
             }
 
@@ -343,6 +356,7 @@ public class Movement : MonoBehaviour
         actualPos = index;
         transform.position = positions[index - 1].position;
     }
+
 #if UNITY_EDITOR
     [ContextMenu("Añadir 1 vuelta (TEST)")]
     private void AddLapForTesting()
@@ -353,20 +367,15 @@ public class Movement : MonoBehaviour
             return;
         }
 
-        // Sumar vuelta
         Round++;
 
         Debug.Log("Vueltas del jugador ahora: " + (Round - 1));
 
-        // Refrescar UI
         if (StatManager.Instance != null)
             StatManager.Instance.TriggerStatsChanged();
 
-        // Forzar comprobación REAL de spawn
         if (EnemyManager.Instance != null)
             EnemyManager.Instance.CheckSpawnConditions();
     }
 #endif
-
-
 }

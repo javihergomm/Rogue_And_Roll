@@ -22,62 +22,11 @@ public class BansheeBoss : EnemyBase
     }
 
     // ---------------------------------------------------------
-    // NEW: SpawnEnemy override so EnemyManager can activate boss
+    // Usa el sistema de EnemyBase (spawn opuesto, sonido, etc.)
     // ---------------------------------------------------------
     public override void SpawnEnemy()
     {
-        StartCoroutine(SpawnRoutine());
-    }
-
-    private System.Collections.IEnumerator SpawnRoutine()
-    {
-        // Wait one frame so the host prefab is fully initialized
-        yield return null;
-
-        // Instantiate the Banshee token (cup / tile)
-        // Instanciar la cup
-        CupInstance = Instantiate(data.cupPrefab);
-
-        // Instanciar la tile
-        GameObject token = Instantiate(data.tilePrefab);
-        movement = token.GetComponent<Movement>();
-
-
-        if (movement == null)
-        {
-            Debug.LogError("BansheeBoss: Token prefab has no Movement component!");
-            yield break;
-        }
-
-        CachePlayerMovement();
-
-        movement.SetPositions(playerMovement.Positions);
-
-        movement.startPos = movement.ActualPos;
-        movement.lastPos = movement.ActualPos;
-
-        // Place behind player
-        PlaceEnemyBehindPlayer(maxRoll);
-
-        movement.TeleportToPosition(movement.ActualPos);
-
-        isActive = true;
-
-        EnemyManager.Instance.ActivateEnemy(this);
-    }
-
-    // ---------------------------------------------------------
-
-    public void ActivateBanshee()
-    {
-        StartCoroutine(ActivateBansheeRoutine());
-    }
-
-    private System.Collections.IEnumerator ActivateBansheeRoutine()
-    {
-        // Only used for testing
-        SpawnEnemy();
-        yield return null;
+        base.SpawnEnemy();
     }
 
     public override void StartTurn()
@@ -129,10 +78,5 @@ public class BansheeBoss : EnemyBase
         }
 
         TurnManager.Instance.NotifyEnemyFinishedMovement();
-    }
-
-    public override void ActivateForTesting()
-    {
-        ActivateBanshee();
     }
 }

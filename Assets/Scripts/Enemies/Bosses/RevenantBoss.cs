@@ -1,13 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/*
- * RevenantBoss
- * ------------
- * Enemy that activates through the standard lap-based spawn system.
- * Moves using a single dice roll. After moving, it checks if the player
- * is in any matching board row. If they share a tile or row, the player dies.
- */
 public class RevenantBoss : EnemyBase
 {
     private readonly (int start, int end)[] rows = new (int, int)[]
@@ -34,72 +27,9 @@ public class RevenantBoss : EnemyBase
         if (movement.ActualPos == playerMovement.ActualPos)
             KillPlayerNow();
     }
-
-    // ---------------------------------------------------------
-    // NEW: SpawnEnemy override so EnemyManager can activate boss
-    // ---------------------------------------------------------
     public override void SpawnEnemy()
     {
-        StartCoroutine(SpawnRoutine());
-    }
-
-    private System.Collections.IEnumerator SpawnRoutine()
-    {
-        // Wait one frame so the host prefab is fully initialized
-        yield return null;
-
-        
-        // Instanciar la cup
-        CupInstance = Instantiate(data.cupPrefab);
-
-        // Instanciar la tile
-        GameObject token = Instantiate(data.tilePrefab);
-        movement = token.GetComponent<Movement>();
-
-
-        if (movement == null)
-        {
-            Debug.LogError("RevenantBoss: Token prefab has no Movement component!");
-            yield break;
-        }
-
-        InitializeRevenant();
-
-        // Place behind player (Revenant uses max roll 6)
-        PlaceEnemyBehindPlayer(6);
-
-        movement.TeleportToPosition(movement.ActualPos);
-
-        isActive = true;
-
-        EnemyManager.Instance.ActivateEnemy(this);
-    }
-
-    // ---------------------------------------------------------
-
-    private void InitializeRevenant()
-    {
-        CachePlayerMovement();
-
-        if (playerMovement == null)
-            return;
-
-        movement.SetPositions(playerMovement.Positions);
-
-        movement.startPos = movement.ActualPos;
-        movement.lastPos = movement.ActualPos;
-    }
-
-    private System.Collections.IEnumerator ActivateRevenantRoutine()
-    {
-        // Only used for testing
-        SpawnEnemy();
-        yield return null;
-    }
-
-    public void ActivateRevenant()
-    {
-        StartCoroutine(ActivateRevenantRoutine());
+        base.SpawnEnemy();
     }
 
     public override void StartTurn()
@@ -156,10 +86,5 @@ public class RevenantBoss : EnemyBase
         }
 
         return result.ToArray();
-    }
-
-    public override void ActivateForTesting()
-    {
-        ActivateRevenant();
     }
 }

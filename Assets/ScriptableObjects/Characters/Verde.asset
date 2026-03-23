@@ -15,7 +15,7 @@ MonoBehaviour:
   characterID: green
   characterName: Cubilete verde
   description: Cubilete verde normal
-  icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
+  icon: {fileID: 21300000, guid: b046cabf59a4ec34daa59f7d972d1ee5, type: 3}
   characterColor: {r: 0, g: 1, b: 0.059725523, a: 1}
   applyColor: 1
   applyTileColor: 1

@@ -23,6 +23,10 @@ public class EnemySO : ScriptableObject
     public int lapsToActivate = 1;
     public bool requiresPlayerLap = true;
     public bool spawnOnlyOnce = true;
+
+    [Header("Audio")]
+    public AudioClip spawnSFX;
+
     /*
      * SpawnForTesting
      * ---------------

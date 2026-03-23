@@ -130,15 +130,30 @@ public class CharacterSelectManager : MonoBehaviour
     {
         selectedCharacter = character;
 
+        // DEBUGS IMPORTANTES
+        Debug.Log("=== CHARACTER SELECTED ===");
+        Debug.Log("Character ID: " + character.characterID);
+        Debug.Log("Character Name: " + character.characterName);
+        Debug.Log("Character SpawnPointName: " + character.spawnPointName);
+
         PlayerPrefs.SetString("SelectedCharacterID", character.characterID);
         PlayerPrefs.SetInt("HasSelectedCharacter", 1);
 
         selectorPanel.SetActive(false);
         Time.timeScale = 1f;
 
+        // DEBUG: Antes de spawnear
+        Debug.Log("Calling CharacterSpawner.Instance.Spawn() with spawnPointName = " + character.spawnPointName);
+
         CharacterSpawner.Instance.Spawn(selectedCharacter);
 
+        // DEBUG: Después de spawnear
+        Debug.Log("CharacterSpawner finished. Player should now be at: " + character.spawnPointName);
+
         CharacterEffectManager.Instance.ActivateCharacter(selectedCharacter);
+
+        // DEBUG: Confirmación final
+        Debug.Log("=== CHARACTER CONFIRMATION COMPLETE ===");
     }
 
 

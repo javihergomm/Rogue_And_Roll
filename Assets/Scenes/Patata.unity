@@ -10896,51 +10896,6 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!1 &1537526897
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1537526899}
-  - component: {fileID: 1537526898}
-  m_Layer: 0
-  m_Name: EnemyTester
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1537526898
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1537526897}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4405e64266c832d4ea67bb26c177c5aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyTester
-  enemyToTest: {fileID: 11400000, guid: ce4345100e6acb943a6d4743fd13dbb4, type: 2}
---- !u!4 &1537526899
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1537526897}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.27118, y: -0.09, z: 0.46528}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1538970602
 GameObject:
   m_ObjectHideFlags: 0
@@ -11736,12 +11691,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e08f5493333868f41934b46ddd6ed127, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyManager
-  enemies: []
   enemyDefinitions:
   - {fileID: 11400000, guid: eb65b0e186818794e8cc77c7961725dc, type: 2}
   - {fileID: 11400000, guid: ce4345100e6acb943a6d4743fd13dbb4, type: 2}
   - {fileID: 11400000, guid: 66faf68494507c9448c4bfbdb8be7ba5, type: 2}
   - {fileID: 11400000, guid: 8d3123800ef5e6d44819ad45234a149d, type: 2}
+  enemies: []
 --- !u!1 &1555743855 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4898722117463534234, guid: e6d8d88f95a747544a7a6002622965d0, type: 3}
@@ -14105,6 +14060,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8656119023700918777, guid: abc4a277f5e52e94293777ad4477160e, type: 3}
+      propertyPath: m_PreserveAspect
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -16266,4 +16225,3 @@ SceneRoots:
   - {fileID: 1539924098}
   - {fileID: 1954619202}
   - {fileID: 1008195276}
-  - {fileID: 1537526899}

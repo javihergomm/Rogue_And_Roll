@@ -14,8 +14,18 @@ public abstract class EnemyBase : MonoBehaviour
 
     public bool isActive;
 
+    // Audio
+    protected AudioSource audioSource;
+
+    protected virtual void Awake()
+    {
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f; // 2D sound
+    }
+
     // ============================================================
-    // REGISTRO
+    // REGISTER
     // ============================================================
     protected void RegisterEnemy()
     {
@@ -23,7 +33,7 @@ public abstract class EnemyBase : MonoBehaviour
     }
 
     // ============================================================
-    // CACHEO DEL JUGADOR
+    // CACHE PLAYER
     // ============================================================
     protected void CachePlayerMovement()
     {
@@ -46,7 +56,7 @@ public abstract class EnemyBase : MonoBehaviour
     }
 
     // ============================================================
-    // SPAWN OPUESTO
+    // OPPOSITE SPAWN
     // ============================================================
     protected string GetOppositeSpawn(string playerSpawn)
     {
@@ -73,7 +83,7 @@ public abstract class EnemyBase : MonoBehaviour
     }
 
     // ============================================================
-    // SPAWN UNIFICADO PARA TODOS LOS JEFES
+    // UNIFIED SPAWN FOR ALL BOSSES
     // ============================================================
     public virtual void SpawnEnemy()
     {
@@ -92,14 +102,17 @@ public abstract class EnemyBase : MonoBehaviour
             yield break;
         }
 
-        // 1. Obtener spawn del jugador desde CharacterSelectManager
+        // 1. Get player spawn from CharacterSelectManager
         string playerSpawnName = CharacterSelectManager.Instance.SelectedCharacter.spawnPointName;
+        Debug.Log("ENEMYBASE PLAYER SPAWN NAME = " + playerSpawnName);
 
-        // 2. Obtener spawn opuesto
+        // 2. Get opposite spawn
         string enemyCupSpawnName = GetOppositeSpawn(playerSpawnName);
+        Debug.Log("ENEMYBASE OPPOSITE SPAWN = " + enemyCupSpawnName);
 
-        // 3. Buscar spawn opuesto
+        // 3. Find opposite spawn
         Transform cupSpawn = FindSpawnPoint(enemyCupSpawnName);
+        Debug.Log("ENEMYBASE FOUND SPAWN TRANSFORM = " + (cupSpawn != null ? cupSpawn.name : "NULL"));
 
         if (cupSpawn == null)
         {
@@ -107,10 +120,10 @@ public abstract class EnemyBase : MonoBehaviour
             yield break;
         }
 
-        // 4. Instanciar CUP en el spawn opuesto
+        // 4. Instantiate CUP at opposite spawn
         CupInstance = Instantiate(data.cupPrefab, cupSpawn.position, cupSpawn.rotation);
 
-        // 5. Instanciar TILE
+        // 5. Instantiate TILE
         TokenInstance = Instantiate(data.tilePrefab);
         movement = TokenInstance.GetComponent<Movement>();
 
@@ -120,12 +133,12 @@ public abstract class EnemyBase : MonoBehaviour
             yield break;
         }
 
-        // 6. Configurar Movement
+        // 6. Configure Movement
         movement.SetPositions(playerMovement.Positions);
         movement.startPos = movement.ActualPos;
         movement.lastPos = movement.ActualPos;
 
-        // 7. Colocar detrás del jugador
+        // 7. Place behind the player
         int maxRoll = this is DemonBoss ? 18 : 6;
         PlaceEnemyBehindPlayer(maxRoll);
 
@@ -133,10 +146,13 @@ public abstract class EnemyBase : MonoBehaviour
 
         isActive = true;
         RegisterEnemy();
+
+        // Play spawn sound AFTER everything is placed
+        PlaySpawnSound();
     }
 
     // ============================================================
-    // COLOCAR DETRÁS DEL JUGADOR
+    // PLACE BEHIND PLAYER
     // ============================================================
     protected void PlaceEnemyBehindPlayer(int maxRoll)
     {
@@ -155,7 +171,7 @@ public abstract class EnemyBase : MonoBehaviour
     }
 
     // ============================================================
-    // MUERTE DEL JUGADOR
+    // PLAYER DEATH
     // ============================================================
     protected void KillPlayerNow()
     {
@@ -182,8 +198,9 @@ public abstract class EnemyBase : MonoBehaviour
         if (player != null)
             Destroy(player.gameObject);
     }
+
     // ============================================================
-    // BLOQUEO DE MOVIMIENTO ENEMIGO (efectos de casillas)
+    // ENEMY MOVEMENT BLOCK (tile effects)
     // ============================================================
     protected bool IsEnemyMovementBlocked()
     {
@@ -191,8 +208,19 @@ public abstract class EnemyBase : MonoBehaviour
     }
 
     // ============================================================
-    // MÉTODOS ABSTRACTOS
+    // AUDIO
+    // ============================================================
+    protected void PlaySpawnSound()
+    {
+        if (data.spawnSFX == null || audioSource == null)
+            return;
+
+        audioSource.PlayOneShot(data.spawnSFX);
+    }
+
+    // ============================================================
+    // ABSTRACT METHODS
     // ============================================================
     public abstract void StartTurn();
-    public virtual void ActivateForTesting() { }
+    public virtual void ActivateForTesting() { SpawnEnemy(); }
 }

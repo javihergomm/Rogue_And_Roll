@@ -15,7 +15,7 @@ MonoBehaviour:
   characterID: yellow
   characterName: Cubilete amarillo
   description: Cubilete amarillo normal
-  icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
+  icon: {fileID: 21300000, guid: 9f6ec34eea4f64c4eb41a758f70ca3e1, type: 3}
   characterColor: {r: 0.9333179, g: 1, b: 0, a: 1}
   applyColor: 1
   applyTileColor: 1

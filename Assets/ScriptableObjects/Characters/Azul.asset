@@ -15,7 +15,7 @@ MonoBehaviour:
   characterID: blue
   characterName: Cubilete azul
   description: 
-  icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
+  icon: {fileID: 21300000, guid: 6fe8d44fa7d8dfa4bb26ea661b2cf1f1, type: 3}
   characterColor: {r: 0, g: 0.64025813, b: 0.6603774, a: 1}
   applyColor: 1
   applyTileColor: 1
