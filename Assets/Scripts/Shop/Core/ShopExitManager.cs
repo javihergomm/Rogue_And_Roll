@@ -11,6 +11,15 @@ public class ShopExitManager : MonoBehaviour
     [Header("References (assign in Inspector)")]
     [SerializeField] private List<GameObject> shopPedestals = new();
     [SerializeField] private List<GameObject> decisionEmpties = new();
+    [SerializeField] private GameObject ghostSpawnRoot;
+
+    [Header("Ghosts (Shop Decoration)")]
+    [SerializeField] private GameObject ghostPrefab;
+    [SerializeField] private int ghostCount = 5;
+    [SerializeField] private Transform ghostSpawnCenter;
+    [SerializeField] private float ghostSpawnRadius = 3f;
+
+    private List<GameObject> activeGhosts = new();
 
     [Header("Shop State")]
     [SerializeField] private bool inShop = false;
@@ -101,7 +110,7 @@ public class ShopExitManager : MonoBehaviour
                 pedestal.GenerateIfNeeded();
             }
         }
-
+        
         OnShopStateChanged?.Invoke(true);
     }
 
@@ -182,10 +191,19 @@ public class ShopExitManager : MonoBehaviour
 
         if (tableroOuijaPuntero != null)
             tableroOuijaPuntero.SetActive(true);
+       
+        if (ghostSpawnRoot != null)
+            ghostSpawnRoot.SetActive(true);
+
+        SpawnGhosts();
     }
+
 
     public void OnExitStart()
     {
+        ClearGhosts();
+        if (ghostSpawnRoot != null)
+            ghostSpawnRoot.SetActive(false);
         inShop = false;
         OnShopStateChanged?.Invoke(false);
 
@@ -239,4 +257,32 @@ public class ShopExitManager : MonoBehaviour
         if (tableroOuijaPuntero != null)
             tableroOuijaPuntero.SetActive(false);
     }
+
+    private void SpawnGhosts()
+    {
+        ClearGhosts();
+
+        for (int i = 0; i < ghostCount; i++)
+        {
+            GameObject g = Instantiate(ghostPrefab, ghostSpawnCenter.position, Quaternion.identity);
+
+            if (g.TryGetComponent<GhostWander>(out var wander))
+            {
+                wander.center = ghostSpawnCenter;
+                wander.maxDistance = ghostSpawnRadius;
+            }
+
+
+            activeGhosts.Add(g);
+        }
+    }
+
+    private void ClearGhosts()
+    {
+        foreach (var g in activeGhosts)
+            if (g != null) Destroy(g);
+
+        activeGhosts.Clear();
+    }
+
 }
