@@ -137,6 +137,6 @@ MonoBehaviour:
   invisibleMoveTime: 1.5
   isSpecial: 0
   specialColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  rewardA: {fileID: 11400000, guid: dd23d94583cb7a140abf8a4e0765936b, type: 2}
-  rewardB: {fileID: 11400000, guid: de977bcbcdb91584093f07f9f25ef05c, type: 2}
+  rewardA: {fileID: 11400000, guid: a58e1d152483dfb4ab3021b6d3b39d51, type: 2}
+  rewardB: {fileID: 11400000, guid: a58e1d152483dfb4ab3021b6d3b39d51, type: 2}
   rewardChance: 1

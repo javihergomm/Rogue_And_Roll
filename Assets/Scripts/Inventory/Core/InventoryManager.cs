@@ -67,6 +67,7 @@ public class InventoryManager : MonoBehaviour
             if (canvasGroup == null)
                 canvasGroup = inventoryMenu.AddComponent<CanvasGroup>();
         }
+        LootBoxEvents.OnLootBoxOpened += HandleLootBoxReward;
     }
     public void AddStartingDice(DiceSO dice)
     {
@@ -372,4 +373,10 @@ public class InventoryManager : MonoBehaviour
         Debug.Log("Removing item from inventory");
         RemoveItem(slot, 1);
     }
+    private void HandleLootBoxReward(LootBoxSO box, BaseItemSO reward)
+    {
+        Debug.Log("[InventoryManager] LootBox opened. Reward: " + reward.ItemName);
+        AddItem(reward, 1);
+    }
+
 }

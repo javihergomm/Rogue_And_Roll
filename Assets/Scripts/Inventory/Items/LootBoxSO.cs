@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 /*
@@ -27,17 +26,19 @@ public class LootBoxSO : BaseItemSO
 
     public LootType Type { get { return lootType; } }
 
-    // ---------------------------------------------------------
-    // 1. Called when the player obtains the loot box
-    // ---------------------------------------------------------
+    // Called when the player obtains the loot box
     public void RandomizePolarity()
     {
         lootType = (Random.value < 0.5f) ? LootType.Positive : LootType.Negative;
     }
 
-    // ---------------------------------------------------------
-    // 2. Select reward based on polarity
-    // ---------------------------------------------------------
+    // Used by Movement when falling on Good/Bad spots
+    public void ForcePolarity(LootType type)
+    {
+        lootType = type;
+    }
+
+    // Select reward based on polarity (single check)
     public BaseItemSO Open()
     {
         BaseItemSO[] pool = (lootType == LootType.Positive)
@@ -50,13 +51,9 @@ public class LootBoxSO : BaseItemSO
             return null;
         }
 
-        int index = Random.Range(0, pool.Length);
-        return pool[index];
+        return pool[Random.Range(0, pool.Length)];
     }
 
-    // ---------------------------------------------------------
-    // 3. UseItem triggers the event
-    // ---------------------------------------------------------
     public override void UseItem()
     {
         BaseItemSO reward = Open();
@@ -73,6 +70,40 @@ public class LootBoxSO : BaseItemSO
             Debug.LogWarning("[LootBoxSO] No listeners for OnLootBoxOpened.");
     }
 
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        // Enforce correct polarity in Positive list
+        if (positiveItems != null)
+        {
+            for (int i = 0; i < positiveItems.Length; i++)
+            {
+                BaseItemSO item = positiveItems[i];
+                if (item != null && item.Polarity != ItemPolarity.Positive)
+                {
+                    Debug.LogWarning("[LootBoxSO] Removed invalid item '" + item.name +
+                                     "' from Positive list in lootbox '" + name + "'.");
+                    positiveItems[i] = null;
+                }
+            }
+        }
+
+        // Enforce correct polarity in Negative list
+        if (negativeItems != null)
+        {
+            for (int i = 0; i < negativeItems.Length; i++)
+            {
+                BaseItemSO item = negativeItems[i];
+                if (item != null && item.Polarity != ItemPolarity.Negative)
+                {
+                    Debug.LogWarning("[LootBoxSO] Removed invalid item '" + item.name +
+                                     "' from Negative list in lootbox '" + name + "'.");
+                    negativeItems[i] = null;
+                }
+            }
+        }
+    }
+#endif
 }
 
 /*
