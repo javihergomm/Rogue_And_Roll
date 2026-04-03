@@ -126,8 +126,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GhostWander
   speed: 2
-  wanderRadius: 1.5
-  wanderDistance: 2
-  wanderJitter: 0.3
+  noiseScale: 0.5
+  noiseSpeed: 0.5
   center: {fileID: 0}
   maxDistance: 3
+  floatAmplitude: 0.5
+  floatSpeed: 1
+  groupCheckDistance: 1.2
+  maxAllowedNearby: 2
+  invisibleMoveTime: 1.5
+  isSpecial: 0
+  specialColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  rewardA: {fileID: 11400000, guid: dd23d94583cb7a140abf8a4e0765936b, type: 2}
+  rewardB: {fileID: 11400000, guid: de977bcbcdb91584093f07f9f25ef05c, type: 2}
+  rewardChance: 1

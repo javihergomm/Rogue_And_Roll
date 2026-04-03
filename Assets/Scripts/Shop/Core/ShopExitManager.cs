@@ -262,6 +262,9 @@ public class ShopExitManager : MonoBehaviour
     {
         ClearGhosts();
 
+        // Select one ghost at random to be the special one
+        int specialIndex = UnityEngine.Random.Range(0, ghostCount);
+
         for (int i = 0; i < ghostCount; i++)
         {
             GameObject g = Instantiate(ghostPrefab, ghostSpawnCenter.position, Quaternion.identity);
@@ -270,12 +273,15 @@ public class ShopExitManager : MonoBehaviour
             {
                 wander.center = ghostSpawnCenter;
                 wander.maxDistance = ghostSpawnRadius;
-            }
 
+                // Mark this ghost as the special one
+                wander.isSpecial = (i == specialIndex);
+            }
 
             activeGhosts.Add(g);
         }
     }
+
 
     private void ClearGhosts()
     {

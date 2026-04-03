@@ -4,8 +4,8 @@ using UnityEngine;
 /*
  * LootBoxSO
  * ---------
- * Contains a pool of possible rewards.
- * When used, emits an event with the reward.
+ * Loot box with dynamic polarity and separate reward tables.
+ * Includes the event dispatcher inside the same file.
  */
 [CreateAssetMenu(fileName = "LootBox", menuName = "Inventory/LootBox")]
 public class LootBoxSO : BaseItemSO
@@ -16,58 +16,72 @@ public class LootBoxSO : BaseItemSO
         Negative
     }
 
-    [Header("Loot Box Type")]
+    [Header("Loot Box Type (auto-assigned when obtained)")]
     [SerializeField] private LootType lootType;
 
-    [Header("Possible Rewards")]
-    [SerializeField] private BaseItemSO[] possibleItems;
+    [Header("Positive Rewards")]
+    [SerializeField] private BaseItemSO[] positiveItems;
 
-    public LootType Type => lootType;
+    [Header("Negative Rewards")]
+    [SerializeField] private BaseItemSO[] negativeItems;
 
-    public BaseItemSO Open()
+    public LootType Type { get { return lootType; } }
+
+    // ---------------------------------------------------------
+    // 1. Called when the player obtains the loot box
+    // ---------------------------------------------------------
+    public void RandomizePolarity()
     {
-        if (possibleItems == null || possibleItems.Length == 0)
-            return null;
-
-        int index = Random.Range(0, possibleItems.Length);
-        return possibleItems[index];
+        lootType = (Random.value < 0.5f) ? LootType.Positive : LootType.Negative;
     }
 
+    // ---------------------------------------------------------
+    // 2. Select reward based on polarity
+    // ---------------------------------------------------------
+    public BaseItemSO Open()
+    {
+        BaseItemSO[] pool = (lootType == LootType.Positive)
+            ? positiveItems
+            : negativeItems;
+
+        if (pool == null || pool.Length == 0)
+        {
+            Debug.LogWarning("[LootBoxSO] LootBox '" + name + "' has no rewards for polarity " + lootType + ".");
+            return null;
+        }
+
+        int index = Random.Range(0, pool.Length);
+        return pool[index];
+    }
+
+    // ---------------------------------------------------------
+    // 3. UseItem triggers the event
+    // ---------------------------------------------------------
     public override void UseItem()
     {
         BaseItemSO reward = Open();
-        if (reward != null)
-            LootBoxEvents.OnLootBoxOpened?.Invoke(this, reward);
-    }
 
-    public void ToggleType()
-    {
-        lootType = (lootType == LootType.Positive)
-            ? LootType.Negative
-            : LootType.Positive;
-    }
-
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-        if (possibleItems == null)
-            return;
-
-        List<BaseItemSO> valid = new();
-
-        foreach (var item in possibleItems)
+        if (reward == null)
         {
-            if (item == null)
-                continue;
-
-            bool boxPositive = lootType == LootType.Positive;
-            bool itemPositive = item.Polarity == ItemPolarity.Positive;
-
-            if (boxPositive == itemPositive)
-                valid.Add(item);
+            Debug.LogWarning("[LootBoxSO] LootBox '" + name + "' returned NULL reward.");
+            return;
         }
 
-        possibleItems = valid.ToArray();
+        if (LootBoxEvents.OnLootBoxOpened != null)
+            LootBoxEvents.OnLootBoxOpened(this, reward);
+        else
+            Debug.LogWarning("[LootBoxSO] No listeners for OnLootBoxOpened.");
     }
-#endif
+
+}
+
+/*
+ * LootBoxEvents
+ * -------------
+ * Event dispatcher for loot box opening.
+ * InventoryManager listens to this event to add the reward item.
+ */
+public static class LootBoxEvents
+{
+    public static System.Action<LootBoxSO, BaseItemSO> OnLootBoxOpened;
 }
