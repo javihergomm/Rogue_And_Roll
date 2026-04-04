@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 /*
  * InventoryManager
@@ -45,6 +46,7 @@ public class InventoryManager : MonoBehaviour
 
     private CanvasGroup canvasGroup;
 
+    private Dictionary<string, BaseItemSO> itemCatalog = new();
     private void Awake()
     {
         Debug.Log("InventoryManager Awake");
@@ -57,7 +59,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         Instance = this;
-
+        LoadItemCatalog();
         slots.Initialize();
         activeDice.Initialize(slots.ActiveDiceSlots);
 
@@ -69,6 +71,27 @@ public class InventoryManager : MonoBehaviour
         }
         LootBoxEvents.OnLootBoxOpened += HandleLootBoxReward;
     }
+
+    private void LoadItemCatalog()
+    {
+        itemCatalog.Clear();
+
+        string[] folders = { "Dice", "Consumables", "Permanents", "LootBox" };
+
+        foreach (var folder in folders)
+        {
+            var items = Resources.LoadAll<BaseItemSO>("Items/" + folder);
+            foreach (var item in items)
+            {
+                if (item == null) continue;
+                if (!itemCatalog.ContainsKey(item.itemID))
+                    itemCatalog.Add(item.itemID, item);
+            }
+        }
+
+        Debug.Log("[InventoryManager] Catálogo autogenerado con " + itemCatalog.Count + " items.");
+    }
+
     public void AddStartingDice(DiceSO dice)
     {
         ItemSlot slot = activeDice.GetFirstEmptySlot();
@@ -78,7 +101,7 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
-        slot.AddItem(dice.ItemName, 1, dice.Icon, dice.Description);
+        slot.AddItem(dice, 1);
         activeDice.SyncSlot(slot);
         OnActiveDiceChanged?.Invoke();
     }
@@ -86,7 +109,12 @@ public class InventoryManager : MonoBehaviour
     public BaseItemSO GetItemSO(string name)
     {
         Debug.Log("GetItemSO: " + name);
-        return slots.GetItemSO(name);
+
+        if (itemCatalog.TryGetValue(name, out var item))
+            return item;
+
+        Debug.LogWarning("Item no encontrado en catálogo: " + name);
+        return null;
     }
 
     public void AddItem(BaseItemSO item, int qty)
@@ -111,13 +139,11 @@ public class InventoryManager : MonoBehaviour
         OnInventoryChanged?.Invoke();
     }
 
-
-
     public void RemoveItem(ItemSlot slot, int qty)
     {
         Debug.Log("RemoveItem: " + slot.ItemName + " x" + qty);
 
-        BaseItemSO item = slots.GetItemSO(slot.ItemName);
+        BaseItemSO item = slot.ItemSO;
 
         slots.RemoveItem(slot, qty);
         permanentEffects.TryDeactivate(item);
@@ -168,7 +194,7 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
-        BaseItemSO item = GetItemSO(from.ItemName);
+        BaseItemSO item = from.ItemSO;
 
         if (activeDice.Contains(to) && item is not DiceSO)
         {
@@ -331,7 +357,7 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
-        BaseItemSO item = GetItemSO(slot.ItemName);
+        BaseItemSO item = slot.ItemSO;
         if (item is not ConsumableSO consumable)
         {
             Debug.Log("Item is not ConsumableSO");

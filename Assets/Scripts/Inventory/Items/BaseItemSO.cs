@@ -20,8 +20,12 @@ public abstract class BaseItemSO : ScriptableObject
     [Header("Basic Info")]
     [SerializeField] private string itemName;
     [SerializeField] private Sprite icon;
+    public Sprite lockedIcon;
     [SerializeField][TextArea] private string itemDescription;
     [SerializeField] private GameObject prefab3D;
+    
+    [Header("Unlockable ID")]
+    public string itemID; // ASCII-only, único
 
     // Shop-related values
     [Header("Shop Settings")]

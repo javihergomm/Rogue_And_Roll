@@ -22,6 +22,12 @@ public class CharacterSelectionFlow : MonoBehaviour
             return;
         }
 
+        if (!Unlocks.IsUnlocked(slot.characterData.characterID))
+        {
+            Debug.Log("Character locked: " + slot.characterData.characterID);
+            return;
+        }
+
         // First click: highlight and show character information
         if (!clickedOnce)
         {

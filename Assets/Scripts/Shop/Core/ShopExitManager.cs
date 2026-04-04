@@ -23,6 +23,7 @@ public class ShopExitManager : MonoBehaviour
 
     [Header("Shop State")]
     [SerializeField] private bool inShop = false;
+    private bool hasTriggeredFirstShopUnlock = false;
 
     [Header("Ouija Pointer")]
     [SerializeField] private GameObject tableroOuijaPuntero;
@@ -118,7 +119,9 @@ public class ShopExitManager : MonoBehaviour
     {
         if (!inShop)
             return;
-
+        ClearGhosts();
+        if (ghostSpawnRoot != null)
+            ghostSpawnRoot.SetActive(false);
         if (animator != null)
             animator.SetTrigger("TiendaSalir");
     }
@@ -196,6 +199,12 @@ public class ShopExitManager : MonoBehaviour
             ghostSpawnRoot.SetActive(true);
 
         SpawnGhosts();
+        if (!hasTriggeredFirstShopUnlock && !Unlocks.IsUnlocked("item_d4"))
+        {
+            Unlocks.Unlock("item_d4");
+            hasTriggeredFirstShopUnlock = true;
+            Debug.Log("D4 desbloqueado al terminar la animación de entrada");
+        }
     }
 
 

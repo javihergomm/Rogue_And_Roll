@@ -22,6 +22,8 @@ public class ItemSlot : MonoBehaviour,
     [SerializeField] private Sprite itemSprite;
     [SerializeField] private string itemDescription = "";
     [SerializeField] private Sprite emptySprite;
+    private BaseItemSO itemSO;
+    public BaseItemSO ItemSO => itemSO;
 
     public string ItemName => itemName;
     public int Quantity => quantity;
@@ -46,11 +48,12 @@ public class ItemSlot : MonoBehaviour,
         RefreshUI();
     }
 
-    public int AddItem(string name, int qty, Sprite sprite, string description)
+    public int AddItem(BaseItemSO item, int qty)
     {
-        itemName = name;
-        itemSprite = sprite;
-        itemDescription = description;
+        itemSO = item;
+        itemName = item.ItemName;
+        itemSprite = item.Icon;
+        itemDescription = item.Description;
 
         quantity += qty;
         RefreshUI();
@@ -59,6 +62,7 @@ public class ItemSlot : MonoBehaviour,
 
     public void ClearSlot()
     {
+        itemSO = null;
         itemName = "";
         itemSprite = null;
         itemDescription = "";
@@ -111,7 +115,7 @@ public class ItemSlot : MonoBehaviour,
         if (quantity <= 0)
             return;
 
-        BaseItemSO item = InventoryManager.Instance.GetItemSO(itemName);
+        BaseItemSO item = itemSO;
 
         if (item is PermanentSO)
             return;
@@ -160,7 +164,7 @@ public class ItemSlot : MonoBehaviour,
         if (dragIcon != null)
             dragIcon.transform.position = eventData.position;
 
-        BaseItemSO item = InventoryManager.Instance.GetItemSO(itemName);
+        BaseItemSO item = itemSO;
 
         if (item is not ConsumableSO consumable)
             return;
@@ -184,7 +188,7 @@ public class ItemSlot : MonoBehaviour,
         if (dragIcon != null)
             Destroy(dragIcon);
 
-        BaseItemSO item = InventoryManager.Instance.GetItemSO(itemName);
+        BaseItemSO item = itemSO;
 
         if (item is DiceSO)
             return;

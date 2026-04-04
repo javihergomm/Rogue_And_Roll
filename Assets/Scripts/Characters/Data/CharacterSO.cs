@@ -8,6 +8,7 @@ public class CharacterSO : ScriptableObject
     public string characterName;
     [TextArea] public string description;
     public Sprite icon;
+    public Sprite lockedIcon;
 
     [Header("Visuals")]
     public Color characterColor = Color.white;

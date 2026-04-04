@@ -177,4 +177,25 @@ public class OptionPopupManager : MonoBehaviour
         if (sliderLabel != null)
             sliderLabel.gameObject.SetActive(false);
     }
+    public void ShowTimedMessage(string message, float duration)
+    {
+        if (popupPanel != null)
+            popupPanel.SetActive(true);
+
+        if (popupText != null)
+            popupText.text = message;
+
+        ClearButtons();
+        HideSlider();
+
+        // Cerrar automáticamente después de X segundos
+        StartCoroutine(AutoHide(duration));
+    }
+
+    private System.Collections.IEnumerator AutoHide(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        HidePopup();
+    }
+
 }

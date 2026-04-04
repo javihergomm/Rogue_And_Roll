@@ -23,28 +23,40 @@ public class CharacterSlot : MonoBehaviour, IPointerClickHandler
 
     private void Awake()
     {
-        if (iconImage != null && characterIcon != null)
-            iconImage.sprite = characterIcon;
-
         flow = GetComponent<CharacterSelectionFlow>();
     }
 
     public void Setup(CharacterSO data, TMP_Text nameText, TMP_Text descText)
     {
         characterData = data;
-
-        if (data.icon != null)
-        {
-            characterIcon = data.icon;
-            if (iconImage != null)
-                iconImage.sprite = characterIcon;
-        }
-
         selectionUI = new CharacterSelectionUI(nameText, descText);
+
+        UpdateIcon();
+    }
+
+    private void UpdateIcon()
+    {
+        bool unlocked = Unlocks.IsUnlocked(characterData.characterID);
+
+        characterIcon = unlocked ? characterData.icon : characterData.lockedIcon;
+
+        if (iconImage != null)
+            iconImage.sprite = characterIcon;
+    }
+    public void SetFlow(CharacterSelectionFlow f)
+    {
+        flow = f;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
+     
+        if (!Unlocks.IsUnlocked(characterData.characterID))
+        {
+            Debug.Log("Character locked: " + characterData.characterID);
+            return;
+        }
+
         flow.HandleClick(this);
     }
 }

@@ -52,7 +52,7 @@ public class ActiveDiceSlots
             return;
         }
 
-        BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.ItemName);
+        BaseItemSO item = slot.ItemSO;
         if (item is DiceSO dice)
             DiceRollManager.Instance.SpawnDiceInWorld(dice, slot);
     }

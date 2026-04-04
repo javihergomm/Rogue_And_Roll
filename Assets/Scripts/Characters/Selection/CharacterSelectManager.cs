@@ -51,7 +51,7 @@ public class CharacterSelectManager : MonoBehaviour
         }
 
         Instance = this;
-
+        Unlocks.Load();
         selectorPanel.SetActive(false);
         AssignCharactersToSlots();
     }
@@ -72,6 +72,7 @@ public class CharacterSelectManager : MonoBehaviour
         for (int i = 0; i < slots.Count && i < characters.Length; i++)
         {
             slots[i].Setup(characters[i], infoNameText, infoDescText);
+            slots[i].SetFlow(slots[i].GetComponent<CharacterSelectionFlow>());
         }
     }
 

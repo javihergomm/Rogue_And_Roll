@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LootBoxSO
   itemName: LootBox
   icon: {fileID: 0}
+  lockedIcon: {fileID: 0}
   itemDescription: 
   prefab3D: {fileID: 5268606362059046244, guid: 1f164fd9655e6ac48a7e7fddf788f149, type: 3}
+  itemID: item_lootbox
   buyPrice: 0
   sellPrice: 0
   polarity: 0

@@ -103,8 +103,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
     {
         EnsureSingleContainer();
 
-        if (possibleItems == null || possibleItems.Length == 0)
-            return;
+        possibleItems ??= new BaseItemSO[0];
 
         for (int i = itemContainer.childCount - 1; i >= 0; i--)
         {
@@ -121,8 +120,26 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
         foreach (var item in possibleItems)
         {
+            if (!Unlocks.IsUnlocked(item.itemID))
+                continue;
+
             if (!UsedItemsThisVisit.Contains(item) &&
                 !UsedItemsThisReroll.Contains(item))
+            {
+                availableItems.Add(item);
+            }
+        }
+        // AUTOLOAD: cargar todos los items desde Resources/Items
+        var allItems = Resources.LoadAll<BaseItemSO>("Items");
+
+        foreach (var item in allItems)
+        {
+            if (item == null) continue;
+            if (!Unlocks.IsUnlocked(item.itemID)) continue;
+
+            if (!UsedItemsThisVisit.Contains(item) &&
+                !UsedItemsThisReroll.Contains(item) &&
+                !availableItems.Contains(item))
             {
                 availableItems.Add(item);
             }

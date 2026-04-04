@@ -170,4 +170,12 @@ public static class PopupHelpers
             options
         );
     }
+    public static void ShowUnlockPopup(string itemName)
+    {
+        OptionPopupManager.Instance.ShowTimedMessage(
+            "¡Nuevo objeto desbloqueado!\n" + itemName,
+            10f // segundos
+        );
+    }
+
 }

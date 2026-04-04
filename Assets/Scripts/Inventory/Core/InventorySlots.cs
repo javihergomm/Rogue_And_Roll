@@ -45,16 +45,11 @@ public class InventorySlots
 
     /*
      * Returns the ScriptableObject for an item by name.
+     * (Now delegated to InventoryManager’s catalog)
      */
     public BaseItemSO GetItemSO(string name)
     {
-        if (string.IsNullOrEmpty(name))
-            return null;
-
-        if (lookup.TryGetValue(name, out var so))
-            return so;
-
-        return null;
+        return InventoryManager.Instance.GetItemSO(name);
     }
 
     /*
@@ -69,7 +64,7 @@ public class InventorySlots
         {
             if (slot.Quantity == 0 || slot.ItemName == item.ItemName)
             {
-                qty = slot.AddItem(item.ItemName, qty, item.Icon, item.Description);
+                qty = slot.AddItem(item, qty);
                 if (qty == 0)
                     return;
             }
@@ -95,18 +90,18 @@ public class InventorySlots
         }
         else
         {
-            slot.AddItem(slot.ItemName, -qty, slot.ItemSprite, slot.ItemDescription);
+            slot.AddItem(slot.ItemSO, -qty);
         }
     }
 
     /*
-     * NEW: Removes an item by name (used for auto-use consumables)
+     * Removes an item by name (used for auto-use consumables)
      */
     public void RemoveItemByName(string itemName, int qty)
     {
         foreach (var slot in allSlots)
         {
-            if (slot.ItemName == itemName)
+            if (slot.ItemSO != null && slot.ItemSO.ItemName == itemName)
             {
                 RemoveItem(slot, qty);
                 return;
@@ -138,7 +133,7 @@ public class InventorySlots
      */
     public void HandleSlotClick(ItemSlot slot)
     {
-        BaseItemSO item = GetItemSO(slot.ItemName);
+        BaseItemSO item = slot.ItemSO;
 
         if (item is DiceSO || item is PermanentSO)
         {
@@ -178,24 +173,20 @@ public class InventorySlots
      */
     public void SwapSlots(ItemSlot a, ItemSlot b)
     {
-        string nameA = a.ItemName;
+        BaseItemSO soA = a.ItemSO;
         int qtyA = a.Quantity;
-        Sprite spriteA = a.ItemSprite;
-        string descA = a.ItemDescription;
 
-        string nameB = b.ItemName;
+        BaseItemSO soB = b.ItemSO;
         int qtyB = b.Quantity;
-        Sprite spriteB = b.ItemSprite;
-        string descB = b.ItemDescription;
 
         a.ClearSlot();
         b.ClearSlot();
 
-        if (!string.IsNullOrEmpty(nameB))
-            a.AddItem(nameB, qtyB, spriteB, descB);
+        if (soB != null)
+            a.AddItem(soB, qtyB);
 
-        if (!string.IsNullOrEmpty(nameA))
-            b.AddItem(nameA, qtyA, spriteA, descA);
+        if (soA != null)
+            b.AddItem(soA, qtyA);
 
         a.RefreshUI();
         b.RefreshUI();
@@ -226,13 +217,7 @@ public class InventorySlots
             return;
 
         slot.ClearSlot();
-
-        slot.AddItem(
-            pendingItem.ItemName,
-            pendingQuantity,
-            pendingItem.Icon,
-            pendingItem.Description
-        );
+        slot.AddItem(pendingItem, pendingQuantity);
 
         waitingForReplace = false;
         pendingItem = null;

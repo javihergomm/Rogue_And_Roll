@@ -46,7 +46,6 @@ public class Movement : MonoBehaviour
     public int Round { get; private set; } = 1;
     public float LapProgress { get; private set; } = 0f;
 
-
     public int startPos;
     public int lastPos;
 
@@ -172,15 +171,13 @@ public class Movement : MonoBehaviour
 
             if (isPlayer && direction > 0)
             {
-                LapProgress += 1f / positions.Length;  
+                LapProgress += 1f / positions.Length;
 
                 if (EnemyManager.Instance != null)
                     EnemyManager.Instance.CheckSpawnConditions();
             }
 
-            // ============================================================
-            // SUBIR VUELTA SOLO AL CRUZAR EL SPAWN DEL JUGADOR
-            // ============================================================
+            // LAP COUNTING AND UNLOCK
             if (isPlayer && direction > 0 && movementIsPlayerControlled)
             {
                 bool crossedSpawn = previousPos < startPos && actualPos >= startPos;
@@ -189,7 +186,12 @@ public class Movement : MonoBehaviour
                 {
                     Round++;
 
-                    // Avisar al EnemyManager SOLO aquí
+                    if (Round == 2)
+                    {
+                        Unlocks.Unlock("ID_DEL_OBJETO");
+                        Debug.Log("Objeto desbloqueado por completar 1 vuelta");
+                    }
+
                     if (EnemyManager.Instance != null)
                         EnemyManager.Instance.CheckSpawnConditions();
                 }
@@ -246,9 +248,6 @@ public class Movement : MonoBehaviour
                 }
             }
 
-            // ============================================================
-            // CHECKPOINT
-            // ============================================================
             if (spots[actualPos - 1].checkpoint && isPlayer)
             {
                 int remaining = totalSteps - (i + 1);
@@ -257,7 +256,6 @@ public class Movement : MonoBehaviour
 
                 shopExitManager.EnterShop();
 
-                // NO Round++ aquí
                 yield break;
             }
 
@@ -366,6 +364,7 @@ public class Movement : MonoBehaviour
         actualPos = index;
         transform.position = positions[index - 1].position;
     }
+
 #if UNITY_EDITOR
 
     [ContextMenu("TEST: +0.05 Lap")]
@@ -392,13 +391,25 @@ public class Movement : MonoBehaviour
 
         Debug.Log("TEST: LapProgress = " + LapProgress);
 
-        // Forzar spawn/despawn
-        if (EnemyManager.Instance != null)
-            EnemyManager.Instance.CheckSpawnConditions();
+        if (LapProgress >= 1f)
+        {
+            LapProgress -= 1f;
+            Round++;
 
-        // Actualizar UI
-        if (StatManager.Instance != null)
-            StatManager.Instance.TriggerStatsChanged();
+            Debug.Log("TEST: Vuelta completada! Round = " + Round);
+
+            if (Round == 2)
+            {
+                Unlocks.Unlock("ID_DEL_OBJETO");
+                Debug.Log("TEST: Objeto desbloqueado por completar 1 vuelta");
+            }
+
+            if (EnemyManager.Instance != null)
+                EnemyManager.Instance.CheckSpawnConditions();
+
+            if (StatManager.Instance != null)
+                StatManager.Instance.TriggerStatsChanged();
+        }
     }
 
 #endif
