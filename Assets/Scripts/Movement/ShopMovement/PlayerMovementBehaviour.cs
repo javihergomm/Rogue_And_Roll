@@ -45,17 +45,26 @@ public class PlayerMovementBehaviour : MonoBehaviour
     void FixedUpdate()
     {
         MoveWithPhysics();
+        if (moveDirection.sqrMagnitude < 0.01f)
+            rb.linearVelocity = Vector3.zero;
         ClampInsideBoard_Local_WithOffset();
         StickToBoardSurface();
     }
 
+
     void MoveWithPhysics()
     {
+        if (moveDirection.sqrMagnitude < 0.01f)
+        {
+            rb.linearVelocity = Vector3.zero;
+            return;
+        }
+
         rb.linearVelocity = moveDirection * movementSpeed;
 
-        if (moveDirection.sqrMagnitude > 0.01f)
-            RotateTowards(moveDirection);
+        RotateTowards(moveDirection);
     }
+
 
     void RotateTowards(Vector3 direction)
     {

@@ -174,7 +174,7 @@ public static class PopupHelpers
     {
         OptionPopupManager.Instance.ShowTimedMessage(
             "¡Nuevo objeto desbloqueado!\n" + itemName,
-            10f // segundos
+            5f // segundos
         );
     }
 

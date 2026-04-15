@@ -28,6 +28,10 @@ public class ShopExitManager : MonoBehaviour
     [Header("Ouija Pointer")]
     [SerializeField] private GameObject tableroOuijaPuntero;
 
+    [Header("Fixed Pointer Position")]
+    [SerializeField] private Vector3 punteroFixedLocalPos;
+    [SerializeField] private Vector3 punteroFixedLocalRot;
+
     [Header("Animator")]
     [SerializeField] private Animator animator;
 
@@ -193,8 +197,12 @@ public class ShopExitManager : MonoBehaviour
             if (empty != null) empty.SetActive(true);
 
         if (tableroOuijaPuntero != null)
+        {
             tableroOuijaPuntero.SetActive(true);
-       
+            tableroOuijaPuntero.transform.localPosition = punteroFixedLocalPos;
+            tableroOuijaPuntero.transform.localEulerAngles = punteroFixedLocalRot;
+        }
+
         if (ghostSpawnRoot != null)
             ghostSpawnRoot.SetActive(true);
 

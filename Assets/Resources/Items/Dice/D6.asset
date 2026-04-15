@@ -17,7 +17,7 @@ MonoBehaviour:
   lockedIcon: {fileID: 0}
   itemDescription: 
   prefab3D: {fileID: 3941340506404730363, guid: caa77843c8f2f414889458cb1a5c6cd7, type: 3}
-  itemID: item_d6
+  itemID: item_dice_d6
   buyPrice: 8
   sellPrice: 4
   polarity: 0

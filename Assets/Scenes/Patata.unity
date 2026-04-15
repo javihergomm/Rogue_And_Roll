@@ -1290,10 +1290,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 841464102}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 300, y: -350}
-  m_SizeDelta: {x: 500, y: 50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -625.5, y: 357}
+  m_SizeDelta: {x: -1421, y: -1640}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &151161369
 MonoBehaviour:
@@ -7606,7 +7606,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1085795493
 Transform:
   m_ObjectHideFlags: 0
@@ -11521,6 +11521,8 @@ MonoBehaviour:
   ghostSpawnRadius: 3
   inShop: 0
   tableroOuijaPuntero: {fileID: 652871806}
+  punteroFixedLocalPos: {x: 0, y: -0.15, z: 0.8}
+  punteroFixedLocalRot: {x: 0, y: 0, z: 180}
   animator: {fileID: 1555743866}
 --- !u!114 &1548563264
 MonoBehaviour:
@@ -11686,6 +11688,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatsUI
   statsText: {fileID: 1963645625}
+  rollDiceButton: {fileID: 178300367}
+  localOffset: {x: 200, y: 0}
 --- !u!114 &1548563271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11699,6 +11703,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveDiceUI
   statusText: {fileID: 151161369}
+  inventoryButton: {fileID: 803790078}
+  localOffset: {x: 0, y: -80}
 --- !u!114 &1548563272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14884,7 +14890,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -300, y: -270}
+  m_AnchoredPosition: {x: -300, y: -470}
   m_SizeDelta: {x: 500, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1963645625
@@ -16075,19 +16081,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5809674086905281341, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5809674086905281341, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.074
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5809674086905281341, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.884
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5809674086905281341, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5809674086905281341, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
       propertyPath: m_LocalRotation.x
@@ -16099,7 +16105,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5809674086905281341, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5809674086905281341, guid: 3f4cae09a6b60084fa3be1f82a768c69, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

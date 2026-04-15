@@ -17,7 +17,7 @@ MonoBehaviour:
   lockedIcon: {fileID: 0}
   itemDescription: 
   prefab3D: {fileID: 2482351552050127348, guid: 0c76393c675edb0428a8a0bd29465484, type: 3}
-  itemID: item_precision_amulet
+  itemID: item_permanents_precision_amulet
   buyPrice: 0
   sellPrice: 0
   polarity: 0

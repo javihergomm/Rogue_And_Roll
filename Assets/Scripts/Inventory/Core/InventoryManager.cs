@@ -1,18 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Progress;
 
-/*
- * InventoryManager
- * ----------------
- * Manages the inventory system:
- *  - Holds and manages item slots and active dice slots
- *  - Adds, removes and swaps items
- *  - Controls inventory UI visibility and soft-hide during drags
- *  - Applies permanent effects when items are added/removed
- *  - Places consumable items on Spots and ColorSpots (3D)
- */
 public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance { get; private set; }
@@ -47,18 +36,17 @@ public class InventoryManager : MonoBehaviour
     private CanvasGroup canvasGroup;
 
     private Dictionary<string, BaseItemSO> itemCatalog = new();
+
     private void Awake()
     {
-        Debug.Log("InventoryManager Awake");
-
         if (Instance != null && Instance != this)
         {
-            Debug.Log("Duplicate InventoryManager destroyed");
             Destroy(gameObject);
             return;
         }
 
         Instance = this;
+
         LoadItemCatalog();
         slots.Initialize();
         activeDice.Initialize(slots.ActiveDiceSlots);
@@ -69,6 +57,7 @@ public class InventoryManager : MonoBehaviour
             if (canvasGroup == null)
                 canvasGroup = inventoryMenu.AddComponent<CanvasGroup>();
         }
+
         LootBoxEvents.OnLootBoxOpened += HandleLootBoxReward;
     }
 
@@ -81,25 +70,20 @@ public class InventoryManager : MonoBehaviour
         foreach (var folder in folders)
         {
             var items = Resources.LoadAll<BaseItemSO>("Items/" + folder);
+
             foreach (var item in items)
             {
-                if (item == null) continue;
-                if (!itemCatalog.ContainsKey(item.itemID))
-                    itemCatalog.Add(item.itemID, item);
+                if (item != null)
+                    itemCatalog[item.itemID] = item;
             }
         }
-
-        Debug.Log("[InventoryManager] Catálogo autogenerado con " + itemCatalog.Count + " items.");
     }
 
     public void AddStartingDice(DiceSO dice)
     {
         ItemSlot slot = activeDice.GetFirstEmptySlot();
         if (slot == null)
-        {
-            Debug.Log("No empty active dice slot for starting dice");
             return;
-        }
 
         slot.AddItem(dice, 1);
         activeDice.SyncSlot(slot);
@@ -108,12 +92,9 @@ public class InventoryManager : MonoBehaviour
 
     public BaseItemSO GetItemSO(string name)
     {
-        Debug.Log("GetItemSO: " + name);
-
         if (itemCatalog.TryGetValue(name, out var item))
             return item;
 
-        Debug.LogWarning("Item no encontrado en catálogo: " + name);
         return null;
     }
 
@@ -122,18 +103,13 @@ public class InventoryManager : MonoBehaviour
         slots.AddItem(item, qty);
         permanentEffects.TryActivate(item);
 
-        // Auto-use consumables
         if (item is ConsumableSO consumable && consumable.AutoUseOnPickup)
         {
             var ctx = new ConsumableContext();
             consumable.UseItem(ctx);
 
             if (ctx.WasUsed)
-            {
-                // Remove the item from inventory
                 slots.RemoveItemByName(consumable.ItemName, 1);
-
-            }
         }
 
         OnInventoryChanged?.Invoke();
@@ -141,8 +117,6 @@ public class InventoryManager : MonoBehaviour
 
     public void RemoveItem(ItemSlot slot, int qty)
     {
-        Debug.Log("RemoveItem: " + slot.ItemName + " x" + qty);
-
         BaseItemSO item = slot.ItemSO;
 
         slots.RemoveItem(slot, qty);
@@ -156,8 +130,6 @@ public class InventoryManager : MonoBehaviour
 
     public void HandleSlotClick(ItemSlot slot)
     {
-        Debug.Log("HandleSlotClick: " + slot.ItemName);
-
         if (sellMode.IsActive)
         {
             sellMode.HandleClick(slot);
@@ -176,31 +148,19 @@ public class InventoryManager : MonoBehaviour
 
     public void HandleSlotDrop(ItemSlot from, ItemSlot to)
     {
-        Debug.Log("HandleSlotDrop: " + from.ItemName + " -> " + to.ItemName);
-
         if (from == null || to == null)
             return;
 
-        // Prevent swapping dice that have already been rolled this turn
         if (DiceRollManager.Instance.HasSlotRolledThisTurn(from))
-        {
-            Debug.Log("Cannot move a dice that has already been rolled this turn");
             return;
-        }
 
         if (DiceRollManager.Instance.HasSlotRolledThisTurn(to))
-        {
-            Debug.Log("Cannot replace a dice that has already been rolled this turn");
             return;
-        }
 
         BaseItemSO item = from.ItemSO;
 
         if (activeDice.Contains(to) && item is not DiceSO)
-        {
-            Debug.Log("Cannot drop non-dice into active dice slot");
             return;
-        }
 
         slots.SwapSlots(from, to);
 
@@ -217,7 +177,6 @@ public class InventoryManager : MonoBehaviour
 
     public void DeselectAllSlots()
     {
-        Debug.Log("DeselectAllSlots");
         slots.DeselectAll();
     }
 
@@ -228,20 +187,16 @@ public class InventoryManager : MonoBehaviour
 
     public void SetActiveSellPedestal(SellPedestal pedestal)
     {
-        Debug.Log("SetActiveSellPedestal");
         sellMode.Enable(pedestal);
     }
 
     public void ClearActiveSellPedestal()
     {
-        Debug.Log("ClearActiveSellPedestal");
         sellMode.Disable();
     }
 
     public void TryRemoveActiveDice(ItemSlot slot)
     {
-        Debug.Log("TryRemoveActiveDice");
-
         if (activeDice.Contains(slot))
         {
             DiceRollManager.Instance.RemoveDiceFromWorld(slot);
@@ -251,21 +206,17 @@ public class InventoryManager : MonoBehaviour
 
     public void RefreshActiveDiceUI()
     {
-        Debug.Log("RefreshActiveDiceUI");
         OnActiveDiceChanged?.Invoke();
     }
 
     public void PrepareReplace(BaseItemSO item, int quantity)
     {
-        Debug.Log("PrepareReplace: " + item.ItemName);
         slots.PrepareReplace(item, quantity);
         OpenInventory();
     }
 
     public void ToggleInventory()
     {
-        Debug.Log("ToggleInventory");
-
         if (CharacterSelectManager.Instance != null &&
             CharacterSelectManager.Instance.IsAnySelectorUIOpen())
             return;
@@ -278,8 +229,6 @@ public class InventoryManager : MonoBehaviour
 
     public void OpenInventory()
     {
-        Debug.Log("OpenInventory");
-
         if (CharacterSelectManager.Instance != null &&
             CharacterSelectManager.Instance.IsAnySelectorUIOpen())
             return;
@@ -307,8 +256,6 @@ public class InventoryManager : MonoBehaviour
 
     public void CloseInventory()
     {
-        Debug.Log("CloseInventory");
-
         if (!menuOpen)
             return;
 
@@ -325,8 +272,6 @@ public class InventoryManager : MonoBehaviour
 
     public void HideInventorySoft()
     {
-        Debug.Log("HideInventorySoft");
-
         if (canvasGroup == null)
             return;
 
@@ -337,72 +282,42 @@ public class InventoryManager : MonoBehaviour
 
     public void PlaceConsumableOnSpot(ItemSlot slot, Spot spot)
     {
-        Debug.Log("PlaceConsumableOnSpot: " + slot.ItemName);
         PlaceConsumableInternal(slot, spot);
     }
 
     public void PlaceConsumableOnColorSpot(ItemSlot slot, ColorSpot colorSpot)
     {
-        Debug.Log("PlaceConsumableOnColorSpot: " + slot.ItemName);
         PlaceConsumableInternal(slot, colorSpot);
     }
 
     private void PlaceConsumableInternal(ItemSlot slot, MonoBehaviour target)
     {
-        Debug.Log("PlaceConsumableInternal target=" + target);
-
         if (slot == null || target == null)
-        {
-            Debug.Log("Null slot or target");
             return;
-        }
 
         BaseItemSO item = slot.ItemSO;
         if (item is not ConsumableSO consumable)
-        {
-            Debug.Log("Item is not ConsumableSO");
             return;
-        }
-
-        Debug.Log("Consumable detected: " + consumable.ItemName);
 
         ConsumableContext ctx = new();
 
         if (target is ColorSpot colorSpot)
-        {
-            Debug.Log("Target is ColorSpot");
             ctx.TargetColorSpot = colorSpot;
-        }
         else if (target is Spot spot)
-        {
-            Debug.Log("Target is Spot");
             ctx.TargetSpot = spot;
-        }
         else
-        {
-            Debug.Log("Unsupported target type");
             return;
-        }
 
-        Debug.Log("Calling UseItem...");
         consumable.UseItem(ctx);
-        Debug.Log("UseItem finished. WasUsed=" + ctx.WasUsed);
 
         if (!ctx.WasUsed)
-        {
-            Debug.Log("Consumable was NOT used. Aborting.");
             return;
-        }
 
-        Debug.Log("ColorSpot target confirmed (no prefab instantiation)");
-
-        Debug.Log("Removing item from inventory");
         RemoveItem(slot, 1);
     }
+
     private void HandleLootBoxReward(LootBoxSO box, BaseItemSO reward)
     {
-        Debug.Log("[InventoryManager] LootBox opened. Reward: " + reward.ItemName);
         AddItem(reward, 1);
     }
-
 }

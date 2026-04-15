@@ -17,7 +17,7 @@ MonoBehaviour:
   lockedIcon: {fileID: 0}
   itemDescription: 
   prefab3D: {fileID: 5268606362059046244, guid: 1f164fd9655e6ac48a7e7fddf788f149, type: 3}
-  itemID: item_lootbox
+  itemID: item_lootbox_lootbox
   buyPrice: 0
   sellPrice: 0
   polarity: 0

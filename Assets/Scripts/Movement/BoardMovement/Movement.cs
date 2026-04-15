@@ -308,8 +308,6 @@ public class Movement : MonoBehaviour
             }
         }
 
-        SpotConnectionManager.Instance.OnRoundStepCompleted();
-
         if (isPlayer && cachedRenderer != null && wasHiddenByEffect)
         {
             cachedRenderer.enabled = true;

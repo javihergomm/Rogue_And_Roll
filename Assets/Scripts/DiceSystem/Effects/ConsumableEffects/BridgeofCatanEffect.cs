@@ -5,6 +5,11 @@ using UnityEngine;
  * -------------------
  * Creates a temporary shortcut between two board positions,
  * but only when used on a ColorSpot.
+ *
+ * Now lasts exactly 1 full round:
+ * - Player turn (when placed)
+ * - Enemy turn (if any)
+ * - Removed automatically at the next Player turn
  */
 [CreateAssetMenu(
     fileName = "BridgeOfCatanEffect",
@@ -14,12 +19,19 @@ public class BridgeOfCatanEffect : BaseConsumableEffect
 {
     [SerializeField] private GameObject bridgePrefab;
 
+    // Internal state
+    private bool active = false;
+    private int leftIndex;
+    private int rightIndex;
+
+    private bool playerTurnPassed = false;
+    private bool enemyTurnPassed = false;
+
     public override void Activate(ConsumableContext ctx)
     {
         if (ctx == null)
             return;
 
-        // Must be used on a ColorSpot
         ColorSpot colorSpot = ctx.TargetColorSpot;
         if (colorSpot == null)
         {
@@ -28,10 +40,9 @@ public class BridgeOfCatanEffect : BaseConsumableEffect
             return;
         }
 
-        int left = colorSpot.LeftPositionIndex;
-        int right = colorSpot.RightPositionIndex;
+        leftIndex = colorSpot.LeftPositionIndex;
+        rightIndex = colorSpot.RightPositionIndex;
 
-        // Register bridge
         if (SpotConnectionManager.Instance == null)
         {
             Debug.LogError("SpotConnectionManager.Instance is NULL. Add it to the scene.");
@@ -39,9 +50,11 @@ public class BridgeOfCatanEffect : BaseConsumableEffect
             return;
         }
 
-        SpotConnectionManager.Instance.RegisterBridge(left, right);
+        // Register bridge
+        SpotConnectionManager.Instance.RegisterBridge(leftIndex, rightIndex);
+        active = true;
 
-        // Instantiate visual prefab
+        // Visual
         if (bridgePrefab != null)
         {
             Object.Instantiate(
@@ -51,7 +64,54 @@ public class BridgeOfCatanEffect : BaseConsumableEffect
             );
         }
 
+        // Subscribe to turn events
+        TurnManager.OnPlayerTurnStarted -= OnPlayerTurnStarted;
+        TurnManager.OnPlayerTurnStarted += OnPlayerTurnStarted;
+
+        TurnManager.OnEnemyTurnStarted -= OnEnemyTurnStarted;
+        TurnManager.OnEnemyTurnStarted += OnEnemyTurnStarted;
+
         ctx.WasUsed = true;
     }
 
+    private void OnPlayerTurnStarted()
+    {
+        if (!active)
+            return;
+
+        // If both turns already passed -> remove bridge
+        if (playerTurnPassed && enemyTurnPassed)
+        {
+            RemoveBridge();
+            return;
+        }
+
+        // First time player turn is detected after placement
+        if (!playerTurnPassed)
+            playerTurnPassed = true;
+    }
+
+    private void OnEnemyTurnStarted()
+    {
+        if (!active)
+            return;
+
+        if (playerTurnPassed)
+            enemyTurnPassed = true;
+    }
+
+    private void RemoveBridge()
+    {
+        active = false;
+
+        SpotConnectionManager.Instance.UnregisterBridge(leftIndex, rightIndex);
+
+        TurnManager.OnPlayerTurnStarted -= OnPlayerTurnStarted;
+        TurnManager.OnEnemyTurnStarted -= OnEnemyTurnStarted;
+
+        playerTurnPassed = false;
+        enemyTurnPassed = false;
+
+        Debug.Log("Bridge of Catan expired after 1 round.");
+    }
 }

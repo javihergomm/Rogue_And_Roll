@@ -17,7 +17,7 @@ MonoBehaviour:
   lockedIcon: {fileID: 0}
   itemDescription: 
   prefab3D: {fileID: 2272190440689176511, guid: 31742afae4788744689e2a5657122293, type: 3}
-  itemID: item_d20
+  itemID: item_dice_d20
   buyPrice: 1
   sellPrice: 0
   polarity: 0

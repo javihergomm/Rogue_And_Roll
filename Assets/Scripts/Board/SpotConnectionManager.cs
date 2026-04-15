@@ -23,7 +23,19 @@ public class SpotConnectionManager : MonoBehaviour
         if (!connections.ContainsKey(from))
             connections[from] = new List<int>();
 
-        connections[from].Add(to);
+        if (!connections[from].Contains(to))
+            connections[from].Add(to);
+    }
+
+    public void UnregisterBridge(int from, int to)
+    {
+        if (!connections.ContainsKey(from))
+            return;
+
+        connections[from].Remove(to);
+
+        if (connections[from].Count == 0)
+            connections.Remove(from);
     }
 
     public List<int> GetConnections(int spot)
@@ -32,11 +44,6 @@ public class SpotConnectionManager : MonoBehaviour
             return connections[spot];
 
         return new List<int>();
-    }
-
-    public void OnRoundStepCompleted()
-    {
-        // Optional cleanup logic
     }
 
     public bool WouldBridgeMoveAway(int startPos, int steps, int targetPos)
