@@ -30,11 +30,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 823ccf9f999cde146a54165244191a49, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 823ccf9f999cde146a54165244191a49, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 823ccf9f999cde146a54165244191a49, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -137,4 +137,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DiceRoller
   diceType: 2
-  faceMapSO: {fileID: 11400000, guid: eaeb0430a1e761742bcaeb421431909e, type: 2}
+  serializedFaceMap:
+  - normal: {x: -0.8164966, y: 0, z: -0.5773503}
+    value: 3
+    debugColor: {r: 1, g: 0, b: 0, a: 1}
+  - normal: {x: 0.8164966, y: 0, z: -0.5773503}
+    value: 4
+    debugColor: {r: 1, g: 0.75, b: 0, a: 1}
+  - normal: {x: 0, y: -0.8944272, z: -0.4472136}
+    value: 1
+    debugColor: {r: 0.5, g: 1, b: 0, a: 1}
+  - normal: {x: 0, y: 0.8944272, z: -0.4472136}
+    value: 2
+    debugColor: {r: 0, g: 1, b: 0.25, a: 1}
+  - normal: {x: -0.8164966, y: 0, z: 0.5773503}
+    value: 5
+    debugColor: {r: 0, g: 1, b: 1, a: 1}
+  - normal: {x: 0.8164966, y: 0, z: 0.5773503}
+    value: 6
+    debugColor: {r: 0, g: 0.25, b: 1, a: 1}
+  - normal: {x: 0, y: -0.8944272, z: 0.4472136}
+    value: 7
+    debugColor: {r: 0.5, g: 0, b: 1, a: 1}
+  - normal: {x: 0, y: 0.8944272, z: 0.4472136}
+    value: 8
+    debugColor: {r: 1, g: 0, b: 0.75, a: 1}

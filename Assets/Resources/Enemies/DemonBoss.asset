@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35009e75f76b2f84eae703a57de8400d, type: 3}
+  m_Name: DemonBoss
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySO
+  enemyID: demon_boss
+  enemyName: Demon Boss
+  enemyPrefab: {fileID: 4559722108389615459, guid: 311e70351be9b51438784ca1a463cc77, type: 3}
+  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
+  tilePrefab: {fileID: 9126656830565562572, guid: 4725713aefe17a141a811387680fdc66, type: 3}
+  effects: []
+  cupSpawnPointName: 
+  tileSpotIndex: 0
+  lapsToActivate: 0.25
+  requiresPlayerLap: 0
+  spawnOnlyOnce: 1
+  durabilityLaps: 0.25
+  spawnSFX: {fileID: 8300000, guid: 3671924a0716c724d900d37216e83475, type: 3}
