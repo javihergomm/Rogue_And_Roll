@@ -164,8 +164,22 @@ public class ActiveDiceUI : MonoBehaviour
 
         CreateLastTurnSummary();
 
-        float diceHeight = GetBlockHeight(diceBlock);
-        summaryBlock.anchoredPosition = new Vector2(0, -diceHeight - 2);
+        // Encontrar el ultimo hijo del bloque de dados
+        if (diceBlock.childCount > 0)
+        {
+            RectTransform lastRow = diceBlock.GetChild(diceBlock.childCount - 1).GetComponent<RectTransform>();
+
+            // Posicion Y real del ultimo row
+            float lastRowBottom = lastRow.anchoredPosition.y - lastRow.rect.height;
+
+            // Colocar el resumen justo debajo
+            summaryBlock.anchoredPosition = new Vector2(0, lastRowBottom - 20);
+        }
+        else
+        {
+            summaryBlock.anchoredPosition = new Vector2(0, -20);
+        }
+
     }
 
     private float GetBlockHeight(RectTransform block)
@@ -253,10 +267,10 @@ public class ActiveDiceUI : MonoBehaviour
         if (rolled)
         {
             imgRT.sizeDelta = new Vector2(50, 50);
-            imgRT.anchoredPosition = new Vector2(0, -18);
+            imgRT.anchoredPosition = new Vector2(0, -26);
 
-            nameRT.anchoredPosition = new Vector2(60, -4);
-            effRT.anchoredPosition = new Vector2(60, -34);
+            nameRT.anchoredPosition = new Vector2(60, -10);
+            effRT.anchoredPosition = new Vector2(60, -42);
         }
         else
         {

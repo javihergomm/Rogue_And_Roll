@@ -11795,7 +11795,8 @@ MonoBehaviour:
   inventoryButton: {fileID: 803790078}
   resultsRoot: {fileID: 487961021}
   rowPrefab: {fileID: 1207443075648547964, guid: 6f8526df77cddef409fc8ffb0f4902f9, type: 3}
-  verticalOffset: 20
+  extraRight: 18
+  extraDown: 22
 --- !u!114 &1548563272
 MonoBehaviour:
   m_ObjectHideFlags: 0
