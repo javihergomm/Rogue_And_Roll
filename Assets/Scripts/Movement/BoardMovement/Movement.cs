@@ -61,6 +61,9 @@ public class Movement : MonoBehaviour
     public bool turnShouldEnd = true;
     public bool movementIsPlayerControlled = true;
 
+    // NUEVO: total de movimiento del turno
+    public int lastTotalMovement = 0;
+
     private void Start()
     {
         spots = FindObjectsByType<Spot>(FindObjectsSortMode.None);
@@ -90,6 +93,9 @@ public class Movement : MonoBehaviour
         turnShouldEnd = true;
         movementIsPlayerControlled = true;
 
+        // Reiniciar el total del movimiento del turno
+        lastTotalMovement = 0;
+
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
         {
             OnMovementFinished?.Invoke();
@@ -104,6 +110,10 @@ public class Movement : MonoBehaviour
         nextCheckpoint = int.MaxValue;
         effectAlreadyTriggered = false;
         turnShouldEnd = true;
+
+        // Reiniciar el total del movimiento del turno
+        lastTotalMovement = 0;
+
         StartCoroutine(MoveWithVisibilityCheck(steps));
     }
 
@@ -145,6 +155,9 @@ public class Movement : MonoBehaviour
             yield break;
         }
 
+        // Guardar movimiento base
+        lastTotalMovement += Mathf.Abs(steps);
+
         if (isPlayer && nextCheckpoint > 0)
         {
             int hypotheticalSpot = actualPos + steps;
@@ -177,7 +190,6 @@ public class Movement : MonoBehaviour
                     EnemyManager.Instance.CheckSpawnConditions();
             }
 
-            // LAP COUNTING AND UNLOCK
             if (isPlayer && direction > 0 && movementIsPlayerControlled)
             {
                 bool crossedSpawn = previousPos < startPos && actualPos >= startPos;
@@ -277,6 +289,10 @@ public class Movement : MonoBehaviour
                 if (roll < probabilityExtraSteps)
                 {
                     int extra = UnityEngine.Random.Range(3, 6);
+
+                    // Acumular movimiento extra
+                    lastTotalMovement += Mathf.Abs(extra);
+
                     yield return StartCoroutine(ExtraMovementRoutine(extra));
                 }
                 else
@@ -296,6 +312,10 @@ public class Movement : MonoBehaviour
                 if (roll < probabilityNegativeSteps)
                 {
                     int extra = UnityEngine.Random.Range(-3, -6);
+
+                    // Acumular movimiento extra
+                    lastTotalMovement += Mathf.Abs(extra);
+
                     yield return StartCoroutine(ExtraMovementRoutine(extra));
                 }
                 else

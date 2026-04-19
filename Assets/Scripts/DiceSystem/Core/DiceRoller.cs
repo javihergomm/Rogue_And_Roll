@@ -11,10 +11,6 @@ using UnityEngine;
  *  - Detects the upward face
  *  - Applies mid-air correction and snapping if needed
  *  - Reports the final result to DiceRollManager
- *
- * IMPORTANT:
- * This version does NOT react to mouse clicks anymore.
- * Dice rolls must be triggered externally (for example, from a UI button).
  */
 public class DiceRoller : MonoBehaviour
 {
@@ -110,9 +106,7 @@ public class DiceRoller : MonoBehaviour
         if (rb == null)
             return;
 
-        if (DiceRollManager.Instance.HasSlotRolledThisTurn(linkedSlot))
-            return;
-
+        // No need for HasSlotRolledThisTurn anymore.
         if (isRolling)
             return;
 
@@ -140,9 +134,11 @@ public class DiceRoller : MonoBehaviour
 
         yield return new WaitForFixedUpdate();
 
+        // Wait until the dice is spinning fast enough
         while (rb.angularVelocity.magnitude < 2f)
             yield return null;
 
+        // Wait until the dice slows down
         while (rb.angularVelocity.magnitude > 0.5f)
             yield return null;
 
@@ -155,16 +151,19 @@ public class DiceRoller : MonoBehaviour
             slot = linkedSlot
         };
 
+        // Ask DiceRollManager if this face should be corrected
         int? targetFace = DiceRollManager.Instance.GetTargetFaceForRoll(linkedSlot, physicalRoll, ctx);
 
         if (targetFace.HasValue && targetFace.Value != physicalRoll)
             StartCoroutine(ApplyMidAirCorrection(targetFace.Value));
 
+        // Wait until the dice fully stops
         while (!rb.IsSleeping())
             yield return null;
 
         int finalFace = GetFaceUp();
 
+        // Snap to allowed face if needed
         if (!DiceRollManager.Instance.IsFaceAllowed(linkedSlot, finalFace))
         {
             int? snapTarget = DiceRollManager.Instance.GetTargetFaceForRoll(linkedSlot, finalFace, ctx);
@@ -176,6 +175,7 @@ public class DiceRoller : MonoBehaviour
 
         isRolling = false;
 
+        // Report final result
         DiceRollManager.Instance.OnDiceResult(linkedSlot, finalFace);
         InventoryManager.Instance.RefreshActiveDiceUI();
     }

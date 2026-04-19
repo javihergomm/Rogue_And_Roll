@@ -151,12 +151,6 @@ public class InventoryManager : MonoBehaviour
         if (from == null || to == null)
             return;
 
-        if (DiceRollManager.Instance.HasSlotRolledThisTurn(from))
-            return;
-
-        if (DiceRollManager.Instance.HasSlotRolledThisTurn(to))
-            return;
-
         BaseItemSO item = from.ItemSO;
 
         if (activeDice.Contains(to) && item is not DiceSO)
@@ -169,6 +163,7 @@ public class InventoryManager : MonoBehaviour
 
         OnActiveDiceChanged?.Invoke();
     }
+
 
     public int GetFinalDiceNumber()
     {

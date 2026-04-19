@@ -15,6 +15,9 @@ public class TurnManager : MonoBehaviour
     public static event Action OnEnemyTurnStarted;
     public static event Action<int> OnEnemyRollCalculated;
 
+    // NUEVO: notificar el movimiento total del jugador
+    public static event Action<int, List<string>> OnPlayerRollCalculated;
+
     private enum TurnState
     {
         PlayerTurn,
@@ -112,6 +115,13 @@ public class TurnManager : MonoBehaviour
         }
 
         Debug.Log("Player finished movement.");
+
+        // NUEVO: notificar el movimiento total del jugador
+        int totalMovement = playerMovement.lastTotalMovement;
+        List<string> efectos = DiceRollManager.Instance.GetLastAppliedEffects();
+
+        OnPlayerRollCalculated?.Invoke(totalMovement, efectos);
+
         StartEnemyTurns();
     }
 

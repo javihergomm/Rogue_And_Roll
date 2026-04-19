@@ -5,6 +5,7 @@ using System.Collections.Generic;
  * DiceRollManager
  * ----------------
  * Handles dice spawning, rolling, result processing and final roll calculation.
+ * Tracks applied effects (sync + async) for UI display.
  */
 public class DiceRollManager : MonoBehaviour
 {
@@ -26,7 +27,10 @@ public class DiceRollManager : MonoBehaviour
     private readonly Dictionary<ItemSlot, GameObject> worldDice = new();
     private readonly Dictionary<ItemSlot, DiceCached> cachedDice = new();
     private readonly Dictionary<ItemSlot, (int baseRoll, int finalRoll)> rollHistory = new();
-    private readonly HashSet<ItemSlot> rolledThisTurn = new();
+    private readonly Dictionary<ItemSlot, List<string>> appliedEffects = new();
+
+    // Efectos globales del turno
+    private List<string> lastTurnEffects = new();
 
     private struct DiceCached
     {
@@ -115,6 +119,7 @@ public class DiceRollManager : MonoBehaviour
         worldDice.Remove(slot);
         cachedDice.Remove(slot);
         rollHistory.Remove(slot);
+        appliedEffects.Remove(slot);
     }
 
     private void AdjustSpawnHeight(GameObject instance, Collider col)
@@ -155,6 +160,8 @@ public class DiceRollManager : MonoBehaviour
 
     public void RollAllActiveDice()
     {
+        lastTurnEffects.Clear();
+
         foreach (ItemSlot slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
         {
             if (!worldDice.ContainsKey(slot))
@@ -171,80 +178,13 @@ public class DiceRollManager : MonoBehaviour
     }
 
     // -------------------------------------------------------------------------
-    // ALLOWED FACES
-    // -------------------------------------------------------------------------
-
-    public List<int> GetAllowedFacesForSlot(ItemSlot slot)
-    {
-        List<int> allowed = new();
-
-        if (slot == null || InventoryManager.Instance == null || string.IsNullOrEmpty(slot.ItemName))
-            return allowed;
-
-        BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.ItemName);
-        DiceSO dice = item as DiceSO;
-        if (dice == null)
-            return allowed;
-
-        int minAllowed = 1;
-        int maxAllowed = dice.GetMaxFaceValue();
-
-        DiceContext ctx = new()
-        {
-            turnNumber = StatManager.Instance.CurrentTurn,
-            previousRoll = StatManager.Instance.PreviousRoll,
-            slot = slot
-        };
-
-        ApplyEffectsToRange(dice.Effects, ref minAllowed, ref maxAllowed, ctx);
-        ApplyCharacterEffectsToRange(ref minAllowed, ref maxAllowed, ctx);
-        ApplyConsumableEffectsToRange(ref minAllowed, ref maxAllowed, ctx);
-
-        for (int face = 1; face <= dice.GetMaxFaceValue(); face++)
-            if (face >= minAllowed && face <= maxAllowed)
-                allowed.Add(face);
-
-        return allowed;
-    }
-
-    public bool IsFaceAllowed(ItemSlot slot, int face)
-    {
-        return GetAllowedFacesForSlot(slot).Contains(face);
-    }
-
-    private void ApplyEffectsToRange(BaseEffect[] effects, ref int min, ref int max, DiceContext ctx)
-    {
-        if (effects == null)
-            return;
-
-        foreach (BaseEffect eff in effects)
-        {
-            if (eff is BaseDiceEffect diceEff)
-                diceEff.ApplyToRange(ref min, ref max, ctx);
-        }
-    }
-
-    private void ApplyCharacterEffectsToRange(ref int min, ref int max, DiceContext ctx)
-    {
-        foreach (BaseDiceEffect eff in CharacterEffectManager.Instance.ActiveDiceEffects)
-            eff.ApplyToRange(ref min, ref max, ctx);
-    }
-
-    private void ApplyConsumableEffectsToRange(ref int min, ref int max, DiceContext ctx)
-    {
-        foreach (BaseEffect eff in StatManager.Instance.ActiveConsumableEffects)
-        {
-            if (eff is BaseDiceEffect diceEff)
-                diceEff.ApplyToRange(ref min, ref max, ctx);
-        }
-    }
-
-    // -------------------------------------------------------------------------
     // ROLL PROCESSING
     // -------------------------------------------------------------------------
 
     public void OnDiceResult(ItemSlot slot, int baseRoll)
     {
+        appliedEffects[slot] = new List<string>();
+
         DiceContext ctx = new()
         {
             turnNumber = StatManager.Instance.CurrentTurn,
@@ -258,7 +198,6 @@ public class DiceRollManager : MonoBehaviour
         if (TryResolveAsyncEffects(slot, baseRoll, finalRoll, ctx))
             return;
 
-        rolledThisTurn.Add(slot);
         rollHistory[slot] = (baseRoll, finalRoll);
         FinalizeRoll(finalRoll);
     }
@@ -274,13 +213,35 @@ public class DiceRollManager : MonoBehaviour
             result = ApplySyncList(dice.Effects, result, ctx);
 
         foreach (BaseDiceEffect eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+        {
             if (!eff.RequiresAsyncResolution)
+            {
+                int before = result;
                 result = eff.ModifyRoll(result, ctx);
+
+                if (result != before)
+                {
+                    string text = $"{eff.name}: {result - before:+#;-#;0}";
+                    appliedEffects[slot].Add(text);
+                    lastTurnEffects.Add(text);
+                }
+            }
+        }
 
         foreach (BaseEffect eff in StatManager.Instance.ActiveConsumableEffects)
         {
             if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
+            {
+                int before = result;
                 result = diceEff.ModifyRoll(result, ctx);
+
+                if (result != before)
+                {
+                    string text = $"{diceEff.name}: {result - before:+#;-#;0}";
+                    appliedEffects[slot].Add(text);
+                    lastTurnEffects.Add(text);
+                }
+            }
         }
 
         return result;
@@ -293,7 +254,17 @@ public class DiceRollManager : MonoBehaviour
         foreach (BaseEffect eff in effects)
         {
             if (eff is BaseDiceEffect diceEff && !diceEff.RequiresAsyncResolution)
+            {
+                int before = result;
                 result = diceEff.ModifyRoll(result, ctx);
+
+                if (result != before)
+                {
+                    string text = $"{diceEff.name}: {result - before:+#;-#;0}";
+                    appliedEffects[ctx.slot].Add(text);
+                    lastTurnEffects.Add(text);
+                }
+            }
         }
 
         return result;
@@ -336,6 +307,12 @@ public class DiceRollManager : MonoBehaviour
     {
         eff.ModifyRollAsync(finalRoll, ctx, resolvedValue =>
         {
+            int delta = resolvedValue - finalRoll;
+            string text = $"{eff.name}: {delta:+#;-#;0}";
+
+            appliedEffects[slot].Add(text);
+            lastTurnEffects.Add(text);
+
             rollHistory[slot] = (baseRoll, resolvedValue);
             FinalizeRoll(resolvedValue);
             InventoryManager.Instance.RefreshActiveDiceUI();
@@ -345,8 +322,109 @@ public class DiceRollManager : MonoBehaviour
     }
 
     // -------------------------------------------------------------------------
-    // PREVIEW (RESTORED)
+    // RANGE MODIFICATION HELPERS
+    // These apply min/max range modifications from dice, character and consumables
     // -------------------------------------------------------------------------
+
+    private void ApplyEffectsToRange(BaseEffect[] effects, ref int min, ref int max, DiceContext ctx)
+    {
+        if (effects == null)
+            return;
+
+        foreach (BaseEffect eff in effects)
+        {
+            if (eff is BaseDiceEffect diceEff)
+                diceEff.ApplyToRange(ref min, ref max, ctx);
+        }
+    }
+
+    private void ApplyCharacterEffectsToRange(ref int min, ref int max, DiceContext ctx)
+    {
+        foreach (BaseDiceEffect eff in CharacterEffectManager.Instance.ActiveDiceEffects)
+            eff.ApplyToRange(ref min, ref max, ctx);
+    }
+
+    private void ApplyConsumableEffectsToRange(ref int min, ref int max, DiceContext ctx)
+    {
+        foreach (BaseEffect eff in StatManager.Instance.ActiveConsumableEffects)
+        {
+            if (eff is BaseDiceEffect diceEff)
+                diceEff.ApplyToRange(ref min, ref max, ctx);
+        }
+    }
+
+
+    // -------------------------------------------------------------------------
+    // FACE CORRECTION HELPERS
+    // -------------------------------------------------------------------------
+
+    public int? GetTargetFaceForRoll(ItemSlot slot, int physicalRoll, DiceContext ctx)
+    {
+        if (slot == null || InventoryManager.Instance == null || string.IsNullOrEmpty(slot.ItemName))
+            return null;
+
+        List<int> allowed = GetAllowedFacesForSlot(slot);
+        if (allowed == null || allowed.Count == 0)
+            return null;
+
+        int preview = GetFinalRollPreview(physicalRoll, ctx, slot);
+
+        if (allowed.Contains(preview))
+            return preview;
+
+        int closest = allowed[0];
+        int bestDist = Mathf.Abs(preview - closest);
+
+        for (int i = 1; i < allowed.Count; i++)
+        {
+            int dist = Mathf.Abs(preview - allowed[i]);
+            if (dist < bestDist)
+            {
+                bestDist = dist;
+                closest = allowed[i];
+            }
+        }
+
+        return closest;
+    }
+
+    public bool IsFaceAllowed(ItemSlot slot, int face)
+    {
+        return GetAllowedFacesForSlot(slot).Contains(face);
+    }
+
+    public List<int> GetAllowedFacesForSlot(ItemSlot slot)
+    {
+        List<int> allowed = new();
+
+        if (slot == null || InventoryManager.Instance == null || string.IsNullOrEmpty(slot.ItemName))
+            return allowed;
+
+        BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.ItemName);
+        DiceSO dice = item as DiceSO;
+        if (dice == null)
+            return allowed;
+
+        int minAllowed = 1;
+        int maxAllowed = dice.GetMaxFaceValue();
+
+        DiceContext ctx = new()
+        {
+            turnNumber = StatManager.Instance.CurrentTurn,
+            previousRoll = StatManager.Instance.PreviousRoll,
+            slot = slot
+        };
+
+        ApplyEffectsToRange(dice.Effects, ref minAllowed, ref maxAllowed, ctx);
+        ApplyCharacterEffectsToRange(ref minAllowed, ref maxAllowed, ctx);
+        ApplyConsumableEffectsToRange(ref minAllowed, ref maxAllowed, ctx);
+
+        for (int face = 1; face <= dice.GetMaxFaceValue(); face++)
+            if (face >= minAllowed && face <= maxAllowed)
+                allowed.Add(face);
+
+        return allowed;
+    }
 
     public int GetFinalRollPreview(int rawRoll, DiceContext ctx, ItemSlot slot)
     {
@@ -387,17 +465,34 @@ public class DiceRollManager : MonoBehaviour
 
     public void ResetDiceTurnState()
     {
-        rolledThisTurn.Clear();
         rollHistory.Clear();
+        appliedEffects.Clear();
+        lastTurnEffects.Clear();
     }
 
     // -------------------------------------------------------------------------
     // PUBLIC ACCESS
     // -------------------------------------------------------------------------
 
-    public bool HasSlotRolledThisTurn(ItemSlot slot)
+    public (int baseRoll, int finalRoll)? GetRollInfo(ItemSlot slot)
     {
-        return rolledThisTurn.Contains(slot);
+        if (rollHistory.TryGetValue(slot, out (int baseRoll, int finalRoll) info))
+            return info;
+
+        return null;
+    }
+
+    public List<string> GetAppliedEffects(ItemSlot slot)
+    {
+        if (appliedEffects.TryGetValue(slot, out var list))
+            return list;
+
+        return new List<string>();
+    }
+
+    public List<string> GetLastAppliedEffects()
+    {
+        return new List<string>(lastTurnEffects);
     }
 
     public int GetTotalRoll()
@@ -413,41 +508,4 @@ public class DiceRollManager : MonoBehaviour
         return total;
     }
 
-    public int? GetTargetFaceForRoll(ItemSlot slot, int physicalRoll, DiceContext ctx)
-    {
-        if (slot == null || InventoryManager.Instance == null || string.IsNullOrEmpty(slot.ItemName))
-            return null;
-
-        List<int> allowed = GetAllowedFacesForSlot(slot);
-        if (allowed == null || allowed.Count == 0)
-            return null;
-
-        int preview = GetFinalRollPreview(physicalRoll, ctx, slot);
-
-        if (allowed.Contains(preview))
-            return preview;
-
-        int closest = allowed[0];
-        int bestDist = Mathf.Abs(preview - closest);
-
-        for (int i = 1; i < allowed.Count; i++)
-        {
-            int dist = Mathf.Abs(preview - allowed[i]);
-            if (dist < bestDist)
-            {
-                bestDist = dist;
-                closest = allowed[i];
-            }
-        }
-
-        return closest;
-    }
-
-    public (int baseRoll, int finalRoll)? GetRollInfo(ItemSlot slot)
-    {
-        if (rollHistory.TryGetValue(slot, out (int baseRoll, int finalRoll) info))
-            return info;
-
-        return null;
-    }
 }

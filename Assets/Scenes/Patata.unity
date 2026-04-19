@@ -1275,7 +1275,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &151161368
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4097,6 +4097,41 @@ MonoBehaviour:
   index: 61
   type: 0
   checkpoint: 0
+--- !u!1 &487961020
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 487961021}
+  m_Layer: 5
+  m_Name: DiceResultsRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &487961021
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487961020}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 803790078}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: -75.04698, y: -111.706055}
+  m_SizeDelta: {x: 100, y: 0}
+  m_Pivot: {x: 0, y: 1}
 --- !u!1001 &488903975
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4267,7 +4302,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.08483334, y: 0}
   m_AnchorMax: {x: 0.919646, y: 1}
-  m_AnchoredPosition: {x: -4.5, y: 0}
+  m_AnchoredPosition: {x: -4.499878, y: 0}
   m_SizeDelta: {x: -3, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &508159846
@@ -5478,12 +5513,13 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2020669}
+  - {fileID: 487961021}
   m_Father: {fileID: 841464102}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.06658876, y: 0.75388235}
+  m_AnchorMin: {x: 0, y: 0.75388235}
   m_AnchorMax: {x: 0.24315149, y: 0.81000006}
-  m_AnchoredPosition: {x: 2.5, y: 4.5}
-  m_SizeDelta: {x: -189, y: -65}
+  m_AnchoredPosition: {x: 66.5, y: 4.5}
+  m_SizeDelta: {x: -317, y: -65}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &803790079
 MonoBehaviour:
@@ -8522,7 +8558,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.08483334, y: 0}
   m_AnchorMax: {x: 0.919646, y: 1}
-  m_AnchoredPosition: {x: -4.5, y: 0}
+  m_AnchoredPosition: {x: -4.499878, y: 0}
   m_SizeDelta: {x: -3, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1172131972
@@ -10125,6 +10161,62 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1347338823
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1347338825}
+  - component: {fileID: 1347338824}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1347338824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1347338823}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58c3a115dce069840ab519bedb3cfb14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoUIAligner
+  inventoryButton: {fileID: 803790078}
+  diceResultsRoot: {fileID: 487961021}
+  rowPrefab: {fileID: 1207443075648547964, guid: 6f8526df77cddef409fc8ffb0f4902f9, type: 3}
+  verticalOffset: 20
+  rowSpacing: 90
+  numberOfDice: 3
+  simulatedMaxRolls: 060000000600000004000000
+  simulatedResults: 030000000500000004000000
+  simulatedEffects:
+  - veneno
+  - stun
+  - fuego
+--- !u!4 &1347338825
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1347338823}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 194.80598, y: 591.97125, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1355900186
 GameObject:
   m_ObjectHideFlags: 0
@@ -11688,8 +11780,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatsUI
   statsText: {fileID: 1963645625}
-  rollDiceButton: {fileID: 178300367}
-  localOffset: {x: 200, y: 0}
 --- !u!114 &1548563271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11702,9 +11792,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80c491e1250978f4aa1cff8b4d2b474d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveDiceUI
-  statusText: {fileID: 151161369}
   inventoryButton: {fileID: 803790078}
-  localOffset: {x: 0, y: -80}
+  resultsRoot: {fileID: 487961021}
+  rowPrefab: {fileID: 1207443075648547964, guid: 6f8526df77cddef409fc8ffb0f4902f9, type: 3}
+  verticalOffset: 20
 --- !u!114 &1548563272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16293,3 +16384,4 @@ SceneRoots:
   - {fileID: 1954619202}
   - {fileID: 1008195276}
   - {fileID: 1085795493}
+  - {fileID: 1347338825}
