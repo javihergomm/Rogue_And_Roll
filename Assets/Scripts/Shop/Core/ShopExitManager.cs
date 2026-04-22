@@ -207,14 +207,13 @@ public class ShopExitManager : MonoBehaviour
             ghostSpawnRoot.SetActive(true);
 
         SpawnGhosts();
-        if (!hasTriggeredFirstShopUnlock && !Unlocks.IsUnlocked("item_d4"))
+        if (!hasTriggeredFirstShopUnlock && !Unlocks.IsUnlocked("item_dice_d4"))
         {
-            Unlocks.Unlock("item_d4");
+            Unlocks.Unlock("item_dice_d4");
             hasTriggeredFirstShopUnlock = true;
             Debug.Log("D4 desbloqueado al terminar la animación de entrada");
         }
     }
-
 
     public void OnExitStart()
     {

@@ -20,7 +20,7 @@ MonoBehaviour:
   itemID: item_dice_d4
   buyPrice: 2
   sellPrice: 1
-  polarity: 1
+  polarity: 0
   StoreRotationOffset: {x: 0, y: -15, z: 0}
   StoreHeightOffset: 0.2
   StoreScaleMultiplier: 1

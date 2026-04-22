@@ -98,7 +98,6 @@ public class ShopPedestalRandomizer : MonoBehaviour
         isAwaitingDecision = false;
     }
 
-
     public void RefreshItem()
     {
         EnsureSingleContainer();
@@ -108,42 +107,45 @@ public class ShopPedestalRandomizer : MonoBehaviour
         for (int i = itemContainer.childCount - 1; i >= 0; i--)
         {
             var child = itemContainer.GetChild(i);
-            if (Application.isPlaying)
-                Destroy(child.gameObject);
-            else
-                DestroyImmediate(child.gameObject);
+            if (Application.isPlaying) Destroy(child.gameObject);
+            else DestroyImmediate(child.gameObject);
         }
 
         spawnedModel = null;
 
         List<BaseItemSO> availableItems = new();
 
+        // 1) Manual items
         foreach (var item in possibleItems)
-        {
-            if (!Unlocks.IsUnlocked(item.itemID))
-                continue;
-
-            if (!UsedItemsThisVisit.Contains(item) &&
-                !UsedItemsThisReroll.Contains(item))
-            {
-                availableItems.Add(item);
-            }
-        }
-        // AUTOLOAD: cargar todos los items desde Resources/Items
-        var allItems = Resources.LoadAll<BaseItemSO>("Items");
-
-        foreach (var item in allItems)
         {
             if (item == null) continue;
             if (!Unlocks.IsUnlocked(item.itemID)) continue;
+            if (UsedItemsThisVisit.Contains(item)) continue;
+            if (UsedItemsThisReroll.Contains(item)) continue;
 
-            if (!UsedItemsThisVisit.Contains(item) &&
-                !UsedItemsThisReroll.Contains(item) &&
-                !availableItems.Contains(item))
+            availableItems.Add(item);
+        }
+
+        // 2) Autoload from Resources
+        string[] folders = { "Dice", "Consumables", "Permanents", "LootBox" };
+
+        foreach (var folder in folders)
+        {
+            var items = Resources.LoadAll<BaseItemSO>("Items/" + folder);
+
+            foreach (var item in items)
             {
+                if (item == null) continue;
+                if (!Unlocks.IsUnlocked(item.itemID)) continue;
+                if (UsedItemsThisVisit.Contains(item)) continue;
+                if (UsedItemsThisReroll.Contains(item)) continue;
+                if (availableItems.Contains(item)) continue;
+
                 availableItems.Add(item);
             }
         }
+
+        Debug.Log("[Pedestal] " + name + " availableItems = " + availableItems.Count);
 
         if (availableItems.Count == 0)
         {
@@ -151,14 +153,13 @@ public class ShopPedestalRandomizer : MonoBehaviour
             return;
         }
 
-        int index = Random.Range(0, availableItems.Count);
-        chosenItem = availableItems[index];
+        chosenItem = availableItems[Random.Range(0, availableItems.Count)];
+        Debug.Log("[Pedestal] " + name + " chose: " + chosenItem.itemID);
 
         UsedItemsThisReroll.Add(chosenItem);
 
         SpawnModel();
     }
-
 
     private void SpawnModel()
     {

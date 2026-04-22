@@ -13,9 +13,9 @@ public static class Unlocks
         "char_basic_2",
         "char_basic_3",
         "char_basic_4",
-        "item_d6",
-        "item_lootbox",
-        "item_precision_amulet"
+        "item_dice_d6",
+        "item_lootbox_lootbox",
+        "item_permanents_precision_amulet"
     };
 
     public static bool IsUnlocked(string id)
@@ -101,13 +101,12 @@ public static class Unlocks
                 return cache[item.name] = "Especial";
 #endif
 
-            // BUILD: buscar por carpeta en Resources
+            // BUILD: buscar por carpeta en Resources usando itemID (no ItemName)
             string[] folders = { "Dice", "Consumables", "Permanents", "LootBox" };
 
             foreach (var folder in folders)
             {
-                // Intentamos cargar por nombre de archivo real
-                var loaded = Resources.Load<BaseItemSO>("Items/" + folder + "/" + item.ItemName);
+                var loaded = Resources.Load<BaseItemSO>("Items/" + folder + "/" + item.itemID);
                 if (loaded != null)
                 {
                     string result = folder switch
@@ -126,6 +125,11 @@ public static class Unlocks
 
             return "???";
         }
+
+    }
+    public static IEnumerable<string> GetAllUnlockedIDs()
+    {
+        return unlocked;
     }
 
 

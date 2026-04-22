@@ -48,6 +48,11 @@ public class InventoryManager : MonoBehaviour
         Instance = this;
 
         LoadItemCatalog();
+        Debug.Log("Catalog count = " + itemCatalog.Count);
+
+        Unlocks.Load();
+        Debug.Log("Unlocks loaded: " + string.Join(",", Unlocks.GetAllUnlockedIDs()));
+
         slots.Initialize();
         activeDice.Initialize(slots.ActiveDiceSlots);
 
@@ -73,11 +78,19 @@ public class InventoryManager : MonoBehaviour
 
             foreach (var item in items)
             {
-                if (item != null)
-                    itemCatalog[item.itemID] = item;
+                if (item == null)
+                    continue;
+
+                // DEBUG: print the real itemID of every ScriptableObject
+                Debug.Log("[Catalog] Loaded item: " + item.itemID + " from folder " + folder);
+
+                itemCatalog[item.itemID] = item;
             }
         }
+
+        Debug.Log("[Catalog] Total items loaded = " + itemCatalog.Count);
     }
+
 
     public void AddStartingDice(DiceSO dice)
     {
