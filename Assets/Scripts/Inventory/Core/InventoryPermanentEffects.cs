@@ -15,11 +15,20 @@ public class InventoryPermanentEffects
 
         foreach (var eff in perm.Effects)
         {
+            // Dice effects (these go to CharacterEffectManager)
             if (eff is BaseDiceEffect diceEff)
+            {
                 CharacterEffectManager.Instance.AddDiceEffect(diceEff);
-
+            }
+            // Passive effects (these MUST go to StatManager)
             else if (eff is BasePassiveEffect passiveEff)
-                CharacterEffectManager.Instance.AddPassiveEffect(passiveEff);
+            {
+                if (!StatManager.Instance.ActivePassiveEffects.Contains(passiveEff))
+                {
+                    StatManager.Instance.ActivePassiveEffects.Add(passiveEff);
+                    Debug.Log("[PermanentEffects] Activado efecto pasivo: " + passiveEff.name);
+                }
+            }
         }
     }
 
@@ -30,12 +39,20 @@ public class InventoryPermanentEffects
 
         foreach (var eff in perm.Effects)
         {
+            // Dice effects
             if (eff is BaseDiceEffect diceEff)
+            {
                 CharacterEffectManager.Instance.RemoveDiceEffect(diceEff);
-
+            }
+            // Passive effects
             else if (eff is BasePassiveEffect passiveEff)
-                CharacterEffectManager.Instance.RemovePassiveEffect(passiveEff);
+            {
+                if (StatManager.Instance.ActivePassiveEffects.Contains(passiveEff))
+                {
+                    StatManager.Instance.ActivePassiveEffects.Remove(passiveEff);
+                    Debug.Log("[PermanentEffects] Desactivado efecto pasivo: " + passiveEff.name);
+                }
+            }
         }
     }
 }
-

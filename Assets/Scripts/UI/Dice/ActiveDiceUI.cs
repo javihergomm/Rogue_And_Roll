@@ -31,7 +31,6 @@ public class ActiveDiceUI : MonoBehaviour
         TurnManager.OnPlayerTurnStarted += HandlePlayerTurn;
         TurnManager.OnEnemyTurnStarted += HandleEnemyTurn;
         TurnManager.OnEnemyRollCalculated += HandleEnemyRoll;
-        TurnManager.OnPlayerRollCalculated += HandlePlayerRoll;
     }
 
     private void OnDisable()
@@ -42,7 +41,6 @@ public class ActiveDiceUI : MonoBehaviour
         TurnManager.OnPlayerTurnStarted -= HandlePlayerTurn;
         TurnManager.OnEnemyTurnStarted -= HandleEnemyTurn;
         TurnManager.OnEnemyRollCalculated -= HandleEnemyRoll;
-        TurnManager.OnPlayerRollCalculated -= HandlePlayerRoll;
     }
 
     private IEnumerator DelayedInit()
@@ -117,14 +115,6 @@ public class ActiveDiceUI : MonoBehaviour
         RefreshUI();
     }
 
-    private void HandlePlayerRoll(int total, List<string> efectos)
-    {
-        lastWasEnemy = false;
-        lastMovement = total;
-        lastEffects = efectos == null || efectos.Count == 0 ? "" : string.Join(", ", efectos);
-        RefreshUI();
-    }
-
     private void HandleEnemyRoll(int total)
     {
         lastWasEnemy = true;
@@ -133,10 +123,24 @@ public class ActiveDiceUI : MonoBehaviour
         RefreshUI();
     }
 
+    // Llamado desde Movement para mostrar el resumen real del turno
+    public void SetLastTurnSummary(int movement, string effects, bool wasEnemy)
+    {
+        lastMovement = movement;
+        lastEffects = effects;
+        lastWasEnemy = wasEnemy;
+        RefreshUI();
+    }
+
     private void RefreshUI()
     {
-        foreach (Transform t in diceBlock) Destroy(t.gameObject);
-        foreach (Transform t in summaryBlock) Destroy(t.gameObject);
+        if (diceBlock == null || summaryBlock == null)
+            return;
+
+        foreach (Transform t in diceBlock)
+            Destroy(t.gameObject);
+        foreach (Transform t in summaryBlock)
+            Destroy(t.gameObject);
 
         CreateHeader(isPlayerTurn ? "Jugador" : "Enemigo");
 
@@ -164,30 +168,16 @@ public class ActiveDiceUI : MonoBehaviour
 
         CreateLastTurnSummary();
 
-        // Encontrar el ultimo hijo del bloque de dados
         if (diceBlock.childCount > 0)
         {
             RectTransform lastRow = diceBlock.GetChild(diceBlock.childCount - 1).GetComponent<RectTransform>();
-
-            // Posicion Y real del ultimo row
             float lastRowBottom = lastRow.anchoredPosition.y - lastRow.rect.height;
-
-            // Colocar el resumen justo debajo
             summaryBlock.anchoredPosition = new Vector2(0, lastRowBottom - 20);
         }
         else
         {
             summaryBlock.anchoredPosition = new Vector2(0, -20);
         }
-
-    }
-
-    private float GetBlockHeight(RectTransform block)
-    {
-        float h = 0f;
-        foreach (RectTransform child in block)
-            h += child.rect.height;
-        return h;
     }
 
     private void CreateHeader(string text)
@@ -231,7 +221,8 @@ public class ActiveDiceUI : MonoBehaviour
         var effects = DiceRollManager.Instance.GetAppliedEffects(slot);
 
         string effText = effects.Count == 0 ? "- ninguno" : "";
-        foreach (var e in effects) effText += "- " + e + "\n";
+        foreach (var e in effects)
+            effText += "- " + e + "\n";
 
         SetupRow(row, "", effText, true);
     }

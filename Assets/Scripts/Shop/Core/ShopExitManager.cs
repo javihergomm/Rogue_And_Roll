@@ -252,11 +252,17 @@ public class ShopExitManager : MonoBehaviour
             {
                 int steps = playerMovement.pendingSteps;
                 playerMovement.pendingSteps = 0;
+
+                // Reset movement state after exiting the shop
+                playerMovement.ResetAfterShop();
+
                 playerMovement.turnShouldEnd = true;
                 playerMovement.StartMovingFixed(steps);
             }
+
             else
             {
+                playerMovement.turnShouldEnd = true;
                 TurnManager.Instance.ForcePlayerTurnEnd();
             }
         }

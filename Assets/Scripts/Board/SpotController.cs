@@ -43,7 +43,7 @@ public class SpotController : MonoBehaviour
     {
         foreach (Spot s in spots)
         {
-            s.AssignType(Spot.SpotType.Normal);
+            s.AssignType(Spot.SpotType.Bad);
         }
     }
 

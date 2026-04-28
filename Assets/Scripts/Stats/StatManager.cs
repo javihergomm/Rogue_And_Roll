@@ -157,12 +157,15 @@ public class StatManager : MonoBehaviour
 
         ResetTurnFlags();
 
-        // Reset persistent passive context so old values never leak into new turns
+        // Reset passive context
         PassiveCtx.PreventMovement = false;
         PassiveCtx.PreventEnemyMovement = false;
 
-        foreach (var eff in ActivePassiveEffects)
+        // Recorrer copia para evitar InvalidOperationException
+        foreach (var eff in new List<BasePassiveEffect>(ActivePassiveEffects))
+        {
             eff.OnTurnStart(PassiveCtx);
+        }
 
         PreventMovementThisTurn = PassiveCtx.PreventMovement;
         PreventEnemyMovementThisTurn = PassiveCtx.PreventEnemyMovement;
@@ -175,6 +178,7 @@ public class StatManager : MonoBehaviour
 
         NotifyUI();
     }
+
 
     public void ResetTurnFlags()
     {

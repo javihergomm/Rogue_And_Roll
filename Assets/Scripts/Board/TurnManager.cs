@@ -2,11 +2,6 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-/*
- * Controls the turn cycle between the player and enemies, including player turn start,
- * enemy sequencing, and integration with movement and shop logic. The turn only ends
- * when the player movement explicitly indicates that the turn should end.
- */
 public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance { get; private set; }
@@ -14,9 +9,6 @@ public class TurnManager : MonoBehaviour
     public static event Action OnPlayerTurnStarted;
     public static event Action OnEnemyTurnStarted;
     public static event Action<int> OnEnemyRollCalculated;
-
-    // NUEVO: notificar el movimiento total del jugador
-    public static event Action<int, List<string>> OnPlayerRollCalculated;
 
     private enum TurnState
     {
@@ -99,7 +91,6 @@ public class TurnManager : MonoBehaviour
 
         StatManager.Instance.NextTurn();
 
-        Debug.Log("=== PLAYER TURN ===");
         OnPlayerTurnStarted?.Invoke();
     }
 
@@ -109,18 +100,7 @@ public class TurnManager : MonoBehaviour
             return;
 
         if (!playerMovement.turnShouldEnd)
-        {
-            Debug.Log("Player movement finished but turn should not end.");
             return;
-        }
-
-        Debug.Log("Player finished movement.");
-
-        // NUEVO: notificar el movimiento total del jugador
-        int totalMovement = playerMovement.lastTotalMovement;
-        List<string> efectos = DiceRollManager.Instance.GetLastAppliedEffects();
-
-        OnPlayerRollCalculated?.Invoke(totalMovement, efectos);
 
         StartEnemyTurns();
     }
@@ -137,11 +117,8 @@ public class TurnManager : MonoBehaviour
 
     public void StartEnemyTurns()
     {
-        Debug.Log("=== ENEMY TURN ===");
-
         if (activeEnemies.Count == 0)
         {
-            Debug.Log("No enemies available. Returning to player.");
             StartPlayerTurn();
             return;
         }
@@ -156,11 +133,8 @@ public class TurnManager : MonoBehaviour
 
     private void StartNextEnemyTurn()
     {
-        Debug.Log($"Processing enemy index {currentEnemyIndex}/{activeEnemies.Count}");
-
         if (currentEnemyIndex >= activeEnemies.Count)
         {
-            Debug.Log("All enemies completed their actions.");
             StartPlayerTurn();
             return;
         }
@@ -169,7 +143,6 @@ public class TurnManager : MonoBehaviour
 
         if (enemy == null || !enemy.isActiveAndEnabled)
         {
-            Debug.Log("Enemy missing or disabled. Skipping.");
             currentEnemyIndex++;
             StartNextEnemyTurn();
             return;
@@ -177,13 +150,10 @@ public class TurnManager : MonoBehaviour
 
         if (StatManager.Instance.PreventEnemyMovementThisTurn)
         {
-            Debug.Log($"Enemy movement blocked: {enemy.name}");
             currentEnemyIndex++;
             StartNextEnemyTurn();
             return;
         }
-
-        Debug.Log($"Starting turn for enemy: {enemy.name}");
 
         enemy.movement.OnMovementFinished -= OnEnemyFinishedMovement;
         enemy.movement.OnMovementFinished += OnEnemyFinishedMovement;
@@ -193,8 +163,6 @@ public class TurnManager : MonoBehaviour
 
     private void OnEnemyFinishedMovement()
     {
-        Debug.Log("Enemy finished movement.");
-
         EnemyBase enemy = activeEnemies[currentEnemyIndex];
         enemy.movement.OnMovementFinished -= OnEnemyFinishedMovement;
 

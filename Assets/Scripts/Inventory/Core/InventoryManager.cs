@@ -47,15 +47,19 @@ public class InventoryManager : MonoBehaviour
 
         Instance = this;
 
+        // 1. Cargar catálogo
         LoadItemCatalog();
         Debug.Log("Catalog count = " + itemCatalog.Count);
 
+        // 2. Cargar unlocks
         Unlocks.Load();
         Debug.Log("Unlocks loaded: " + string.Join(",", Unlocks.GetAllUnlockedIDs()));
 
+        // 3. Inicializar slots e inventario
         slots.Initialize();
         activeDice.Initialize(slots.ActiveDiceSlots);
 
+        // 4. Inicializar CanvasGroup del menú
         if (inventoryMenu != null)
         {
             canvasGroup = inventoryMenu.GetComponent<CanvasGroup>();
@@ -63,7 +67,21 @@ public class InventoryManager : MonoBehaviour
                 canvasGroup = inventoryMenu.AddComponent<CanvasGroup>();
         }
 
+        // 5. Suscribirse a eventos
         LootBoxEvents.OnLootBoxOpened += HandleLootBoxReward;
+    }
+    private void Start()
+    {
+        // Añadir gafas destruidas cuando TODO está inicializado
+        if (itemCatalog.TryGetValue("item_permanent_gafas_destruidas", out BaseItemSO testItem))
+        {
+            Debug.Log("[DEBUG] Añadiendo Gafas Destruidas al inventario en Start.");
+            AddItem(testItem, 1);
+        }
+        else
+        {
+            Debug.LogError("[DEBUG] ERROR: No se encontró 'item_permanent_gafas_destruidas' en el catálogo.");
+        }
     }
 
     private void LoadItemCatalog()

@@ -3,11 +3,6 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
-/*
- * Handles all board movement logic, including checkpoints, shop entry,
- * pending steps, lap counting only on player-controlled forward movement,
- * and ignoring lap count on enemy-forced movement.
- */
 public class Movement : MonoBehaviour
 {
     private Spot[] spots;
@@ -43,6 +38,9 @@ public class Movement : MonoBehaviour
 
     private Renderer cachedRenderer;
     private bool wasHiddenByEffect = false;
+
+    private bool isExtraMovement = false;
+
     public int Round { get; private set; } = 1;
     public float LapProgress { get; private set; } = 0f;
 
@@ -61,7 +59,6 @@ public class Movement : MonoBehaviour
     public bool turnShouldEnd = true;
     public bool movementIsPlayerControlled = true;
 
-    // NUEVO: total de movimiento del turno
     public int lastTotalMovement = 0;
 
     private void Start()
@@ -88,17 +85,17 @@ public class Movement : MonoBehaviour
 
     public void StartMoving()
     {
+        startPos = actualPos;
         nextCheckpoint = GetNextCheckpoint();
         effectAlreadyTriggered = false;
         turnShouldEnd = true;
         movementIsPlayerControlled = true;
-
-        // Reiniciar el total del movimiento del turno
         lastTotalMovement = 0;
 
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
         {
             OnMovementFinished?.Invoke();
+            SendRealMovementToUI("Movimiento bloqueado");
             return;
         }
 
@@ -107,11 +104,10 @@ public class Movement : MonoBehaviour
 
     public void StartMovingFixed(int steps)
     {
+        startPos = actualPos;
         nextCheckpoint = int.MaxValue;
         effectAlreadyTriggered = false;
         turnShouldEnd = true;
-
-        // Reiniciar el total del movimiento del turno
         lastTotalMovement = 0;
 
         StartCoroutine(MoveWithVisibilityCheck(steps));
@@ -152,11 +148,12 @@ public class Movement : MonoBehaviour
         if (actualPos <= 0)
         {
             OnMovementFinished?.Invoke();
+            SendRealMovementToUI();
             yield break;
         }
 
-        // Guardar movimiento base
-        lastTotalMovement += Mathf.Abs(steps);
+        if (!isExtraMovement)
+            lastTotalMovement += steps;
 
         if (isPlayer && nextCheckpoint > 0)
         {
@@ -199,10 +196,7 @@ public class Movement : MonoBehaviour
                     Round++;
 
                     if (Round == 2)
-                    {
                         Unlocks.Unlock("ID_DEL_OBJETO");
-                        Debug.Log("Objeto desbloqueado por completar 1 vuelta");
-                    }
 
                     if (EnemyManager.Instance != null)
                         EnemyManager.Instance.CheckSpawnConditions();
@@ -260,14 +254,14 @@ public class Movement : MonoBehaviour
                 }
             }
 
-            if (spots[actualPos - 1].checkpoint && isPlayer)
+            // NO entrar en tienda si direction < 0
+            if (direction > 0 && spots[actualPos - 1].checkpoint && isPlayer && movementIsPlayerControlled)
             {
                 int remaining = totalSteps - (i + 1);
                 pendingSteps = remaining;
                 turnShouldEnd = false;
 
                 shopExitManager.EnterShop();
-
                 yield break;
             }
 
@@ -290,8 +284,7 @@ public class Movement : MonoBehaviour
                 {
                     int extra = UnityEngine.Random.Range(3, 6);
 
-                    // Acumular movimiento extra
-                    lastTotalMovement += Mathf.Abs(extra);
+                    lastTotalMovement += extra;
 
                     yield return StartCoroutine(ExtraMovementRoutine(extra));
                 }
@@ -301,6 +294,7 @@ public class Movement : MonoBehaviour
                 }
 
                 OnMovementFinished?.Invoke();
+                SendRealMovementToUI();
                 yield break;
             }
             else if (type == Spot.SpotType.Bad)
@@ -313,27 +307,24 @@ public class Movement : MonoBehaviour
                 {
                     int extra = UnityEngine.Random.Range(-3, -6);
 
-                    lastTotalMovement += Mathf.Abs(extra);
-
-                    // Duplicar si Gafas Destruidas esta activo
+                    // Duplicate REAL effect
                     if (StatManager.Instance.PassiveCtx.DoubleBadSpotEffects)
-                        yield return StartCoroutine(ExtraMovementRoutine(extra));
+                        extra *= 2;
+
+                    lastTotalMovement += extra;
 
                     yield return StartCoroutine(ExtraMovementRoutine(extra));
                 }
                 else
                 {
+                    // Only activate once. Effect handles duplication internally.
                     ScriptableObject.CreateInstance<BlockPlayerMovementEffect>().Activate();
-
-                    // Duplicar bloqueo si Gafas Destruidas esta activo
-                    if (StatManager.Instance.PassiveCtx.DoubleBadSpotEffects)
-                        ScriptableObject.CreateInstance<BlockPlayerMovementEffect>().Activate();
                 }
 
                 OnMovementFinished?.Invoke();
+                SendRealMovementToUI();
                 yield break;
             }
-
         }
 
         if (isPlayer && cachedRenderer != null && wasHiddenByEffect)
@@ -346,16 +337,39 @@ public class Movement : MonoBehaviour
             DiceRollManager.Instance.ResetDiceTurnState();
 
         lastPos = actualPos;
+
         OnMovementFinished?.Invoke();
+        SendRealMovementToUI();
     }
 
     private IEnumerator ExtraMovementRoutine(int extraSteps)
     {
         if (extraSteps != 0)
+        {
+            isExtraMovement = true;
             yield return StartCoroutine(Move(extraSteps));
+            isExtraMovement = false;
+        }
 
         lastPos = actualPos;
+
         OnMovementFinished?.Invoke();
+        SendRealMovementToUI();
+    }
+
+    private void SendRealMovementToUI(string effectText = "")
+    {
+        int total = positions.Length;
+        int realMovement = actualPos - startPos;
+
+        if (realMovement > total / 2)
+            realMovement -= total;
+        if (realMovement < -total / 2)
+            realMovement += total;
+
+        var ui = FindFirstObjectByType<ActiveDiceUI>();
+        if (ui != null)
+            ui.SetLastTurnSummary(realMovement, effectText, false);
     }
 
     public int GetNextCheckpoint()
@@ -390,6 +404,14 @@ public class Movement : MonoBehaviour
         actualPos = index;
         transform.position = positions[index - 1].position;
     }
+    // Reset used when exiting the shop and resuming pending movement
+    public void ResetAfterShop()
+    {
+        startPos = actualPos;
+        lastTotalMovement = 0;
+        effectAlreadyTriggered = false;
+        movementIsPlayerControlled = true;
+    }
 
 #if UNITY_EDITOR
 
@@ -408,27 +430,17 @@ public class Movement : MonoBehaviour
     private void AddLapProgressTest(float amount)
     {
         if (!isPlayer)
-        {
-            Debug.LogWarning("Solo funciona en el jugador.");
             return;
-        }
 
         LapProgress += amount;
-
-        Debug.Log("TEST: LapProgress = " + LapProgress);
 
         if (LapProgress >= 1f)
         {
             LapProgress -= 1f;
             Round++;
 
-            Debug.Log("TEST: Vuelta completada! Round = " + Round);
-
             if (Round == 2)
-            {
                 Unlocks.Unlock("ID_DEL_OBJETO");
-                Debug.Log("TEST: Objeto desbloqueado por completar 1 vuelta");
-            }
 
             if (EnemyManager.Instance != null)
                 EnemyManager.Instance.CheckSpawnConditions();
@@ -439,5 +451,4 @@ public class Movement : MonoBehaviour
     }
 
 #endif
-
 }
