@@ -11641,7 +11641,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7b7aaa73289fe0449c3c18fe1235948, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatsUI
-  rowPrefab: {fileID: 1207443075648547964, guid: 6f8526df77cddef409fc8ffb0f4902f9, type: 3}
+  rowPrefab: {fileID: 1207443075648547964, guid: 9d8258c8b5d503d4c85ead732167a4d1, type: 3}
   statsRoot: {fileID: 1963645624}
   rollsIcon: {fileID: 21300000, guid: 558eee05861e79543adce2b62daf619a, type: 3}
   goldIcon: {fileID: 0}
