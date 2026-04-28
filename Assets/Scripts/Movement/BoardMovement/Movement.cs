@@ -313,19 +313,27 @@ public class Movement : MonoBehaviour
                 {
                     int extra = UnityEngine.Random.Range(-3, -6);
 
-                    // Acumular movimiento extra
                     lastTotalMovement += Mathf.Abs(extra);
+
+                    // Duplicar si Gafas Destruidas esta activo
+                    if (StatManager.Instance.PassiveCtx.DoubleBadSpotEffects)
+                        yield return StartCoroutine(ExtraMovementRoutine(extra));
 
                     yield return StartCoroutine(ExtraMovementRoutine(extra));
                 }
                 else
                 {
                     ScriptableObject.CreateInstance<BlockPlayerMovementEffect>().Activate();
+
+                    // Duplicar bloqueo si Gafas Destruidas esta activo
+                    if (StatManager.Instance.PassiveCtx.DoubleBadSpotEffects)
+                        ScriptableObject.CreateInstance<BlockPlayerMovementEffect>().Activate();
                 }
 
                 OnMovementFinished?.Invoke();
                 yield break;
             }
+
         }
 
         if (isPlayer && cachedRenderer != null && wasHiddenByEffect)

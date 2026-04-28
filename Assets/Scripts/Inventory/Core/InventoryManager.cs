@@ -132,6 +132,12 @@ public class InventoryManager : MonoBehaviour
     {
         BaseItemSO item = slot.ItemSO;
 
+        if (item is PermanentSO perm && perm.CannotBeUnequipped)
+        {
+            Debug.Log("This permanent item cannot be removed, sold or discarded.");
+            return;
+        }
+
         slots.RemoveItem(slot, qty);
         permanentEffects.TryDeactivate(item);
 
@@ -143,12 +149,26 @@ public class InventoryManager : MonoBehaviour
 
     public void HandleSlotClick(ItemSlot slot)
     {
+        if (slot == null)
+            return;
+
+        BaseItemSO item = slot.ItemSO;
+
+        // Bloquear permanentes no desequipables
+        if (item is PermanentSO perm && perm.CannotBeUnequipped)
+        {
+            Debug.Log("This permanent item cannot be unequipped.");
+            return;
+        }
+
+        // Si estamos en modo venta
         if (sellMode.IsActive)
         {
             sellMode.HandleClick(slot);
             return;
         }
 
+        // Si estamos esperando reemplazo
         if (slots.IsWaitingForReplace)
         {
             slots.ReplaceInSlot(slot);
@@ -156,8 +176,10 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
+        // Comportamiento normal
         slots.HandleSlotClick(slot);
     }
+
 
     public void HandleSlotDrop(ItemSlot from, ItemSlot to)
     {
@@ -219,9 +241,20 @@ public class InventoryManager : MonoBehaviour
 
     public void PrepareReplace(BaseItemSO item, int quantity)
     {
+        if (item == null)
+            return;
+
+        // Bloquear reemplazo de permanentes no desequipables
+        if (item is PermanentSO perm && perm.CannotBeUnequipped)
+        {
+            Debug.Log("This permanent item cannot be replaced.");
+            return;
+        }
+
         slots.PrepareReplace(item, quantity);
         OpenInventory();
     }
+
 
     public void ToggleInventory()
     {

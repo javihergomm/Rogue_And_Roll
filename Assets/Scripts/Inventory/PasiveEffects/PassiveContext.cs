@@ -10,6 +10,6 @@ public class PassiveContext
     public int PlayerLives { get; set; } = 1;
     public bool LifeGranted { get; set; }
     public bool ExtraLifeUsed { get; set; }
-
     public bool IgnoreNegativeEffect { get; set; }
+    public bool DoubleBadSpotEffects { get; set; }
 }

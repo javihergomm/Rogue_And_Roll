@@ -106,7 +106,7 @@ public static class Unlocks
 
             foreach (var folder in folders)
             {
-                var loaded = Resources.Load<BaseItemSO>("Items/" + folder + "/" + item.itemID);
+                var loaded = Resources.Load<BaseItemSO>("Resources/Items/" + folder + "/" + item.itemID);
                 if (loaded != null)
                 {
                     string result = folder switch

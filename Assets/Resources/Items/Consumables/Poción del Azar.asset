@@ -31,4 +31,4 @@ MonoBehaviour:
   AutoUseOnPickup: 0
   canBeUsedOnSpot: 0
   effects:
-  - {fileID: 11400000, guid: 8548c6a9691863c48b89cca0e6a938ec, type: 2}
+  - {fileID: 11400000, guid: 8794174baa45ef14fa20895d6f6cb74f, type: 2}
