@@ -125,7 +125,7 @@ public class StatsUI : MonoBehaviour
                 anim = img.gameObject.AddComponent<Animator>();
 
             anim.runtimeAnimatorController =
-                Resources.Load<RuntimeAnimatorController>("Sprites/Animations/Spining coin");
+                Resources.Load<RuntimeAnimatorController>("Sprites/Animations/Moneda bien");
 
             anim.speed = coinAnimationSpeed;
             img.enabled = true;
