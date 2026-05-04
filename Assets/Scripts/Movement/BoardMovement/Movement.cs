@@ -14,6 +14,8 @@ public class Movement : MonoBehaviour
 
     public bool ignoreBridgeThisMove = false;
 
+    public string lastSpotEffectText = "";
+
     public void SetPositions(Transform[] newPositions)
     {
         positions = newPositions;
@@ -47,7 +49,7 @@ public class Movement : MonoBehaviour
     public int startPos;
     public int lastPos;
 
-    private bool effectAlreadyTriggered = false;
+    public bool effectAlreadyTriggered = false;
 
     public int probabilityExtraSteps = 50;
     public int probabilityBlockEnemy = 50;
@@ -148,7 +150,7 @@ public class Movement : MonoBehaviour
         if (actualPos <= 0)
         {
             OnMovementFinished?.Invoke();
-            SendRealMovementToUI();
+            SendRealMovementToUI(lastSpotEffectText);
             yield break;
         }
 
@@ -274,57 +276,8 @@ public class Movement : MonoBehaviour
 
         if (isPlayer && TurnManager.Instance.IsPlayerTurn() && !effectAlreadyTriggered)
         {
-            if (type == Spot.SpotType.Good)
-            {
-                effectAlreadyTriggered = true;
-
-                int roll = UnityEngine.Random.Range(0, 100);
-
-                if (roll < probabilityExtraSteps)
-                {
-                    int extra = UnityEngine.Random.Range(3, 6);
-
-                    lastTotalMovement += extra;
-
-                    yield return StartCoroutine(ExtraMovementRoutine(extra));
-                }
-                else
-                {
-                    ScriptableObject.CreateInstance<BlockEnemyMovementEffect>().Activate();
-                }
-
-                OnMovementFinished?.Invoke();
-                SendRealMovementToUI();
-                yield break;
-            }
-            else if (type == Spot.SpotType.Bad)
-            {
-                effectAlreadyTriggered = true;
-
-                int roll = UnityEngine.Random.Range(0, 100);
-
-                if (roll < probabilityNegativeSteps)
-                {
-                    int extra = UnityEngine.Random.Range(-3, -6);
-
-                    // Duplicate REAL effect
-                    if (StatManager.Instance.PassiveCtx.DoubleBadSpotEffects)
-                        extra *= 2;
-
-                    lastTotalMovement += extra;
-
-                    yield return StartCoroutine(ExtraMovementRoutine(extra));
-                }
-                else
-                {
-                    // Only activate once. Effect handles duplication internally.
-                    ScriptableObject.CreateInstance<BlockPlayerMovementEffect>().Activate();
-                }
-
-                OnMovementFinished?.Invoke();
-                SendRealMovementToUI();
-                yield break;
-            }
+            yield return StartCoroutine(spots[actualPos - 1].TriggerSpotEffect(this));
+            yield break;
         }
 
         if (isPlayer && cachedRenderer != null && wasHiddenByEffect)
@@ -339,10 +292,11 @@ public class Movement : MonoBehaviour
         lastPos = actualPos;
 
         OnMovementFinished?.Invoke();
-        SendRealMovementToUI();
+        SendRealMovementToUI(lastSpotEffectText);
+
     }
 
-    private IEnumerator ExtraMovementRoutine(int extraSteps)
+    public IEnumerator ExtraMovementRoutine(int extraSteps)
     {
         if (extraSteps != 0)
         {
@@ -354,10 +308,11 @@ public class Movement : MonoBehaviour
         lastPos = actualPos;
 
         OnMovementFinished?.Invoke();
-        SendRealMovementToUI();
+        SendRealMovementToUI(lastSpotEffectText);
+
     }
 
-    private void SendRealMovementToUI(string effectText = "")
+    public void SendRealMovementToUI(string effectText = "")
     {
         int total = positions.Length;
         int realMovement = actualPos - startPos;

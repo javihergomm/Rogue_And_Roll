@@ -5,7 +5,7 @@ public class BlockEnemyMovementEffect : BasePassiveEffect
 {
     // This effect blocks enemy movement for a number of turns using a cloned instance.
 
-    [SerializeField] private int turnsBlocked = 1;
+    public int turnsBlocked = 1;
     private int remaining;
 
     public override void Activate()

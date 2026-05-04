@@ -3,7 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "BlockPlayerMovementEffect", menuName = "Effects/Passive/BlockPlayerMovement")]
 public class BlockPlayerMovementEffect : BasePassiveEffect
 {
-    [SerializeField] private int turnsBlocked = 1;
+    public int turnsBlocked = 1;
     private int remaining;
 
     public override void Activate()
