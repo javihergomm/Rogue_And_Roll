@@ -1,59 +1,52 @@
 using UnityEngine;
 using UnityEditor;
 
-public static class CreateGafasDestruidas
+public static class CreateEspejoMaldito
 {
-    [MenuItem("Tools/Create Gafas Destruidas")]
+    [MenuItem("Tools/Create Espejo Maldito")]
     public static void CreateItemAndEffect()
     {
-        // Correct resource paths
-        string effectFolder = "Assets/Resources/Effects/Passive";
-        string itemFolder = "Assets/Resources/Items/Permanents";
+        string effectFolder = "Assets/Resources/Effects/ConsumableEffects";
+        string itemFolder = "Assets/Resources/Items/Consumables";
 
-        string effectPath = effectFolder + "/DoubleBadSpotEffect.asset";
-        string itemPath = itemFolder + "/GafasDestruidas.asset";
+        string effectPath = effectFolder + "/MirrorTeleportEffect.asset";
+        string itemPath = itemFolder + "/EspejoMaldito.asset";
 
-        // Ensure folders exist
         EnsureFolder("Assets/Resources");
         EnsureFolder("Assets/Resources/Effects");
-        EnsureFolder("Assets/Resources/Effects/Passive");
+        EnsureFolder("Assets/Resources/Effects/ConsumableEffects");
         EnsureFolder("Assets/Resources/Items");
-        EnsureFolder("Assets/Resources/Items/Permanents");
+        EnsureFolder("Assets/Resources/Items/Consumables");
 
-        // 1. Create effect SO
-        DoubleBadSpotEffect effect = ScriptableObject.CreateInstance<DoubleBadSpotEffect>();
+        // Crear efecto
+        MirrorTeleportEffect effect = ScriptableObject.CreateInstance<MirrorTeleportEffect>();
         AssetDatabase.CreateAsset(effect, effectPath);
         Debug.Log("[Editor] Created effect: " + effectPath);
 
-        // 2. Create item SO
-        PermanentSO item = ScriptableObject.CreateInstance<PermanentSO>();
+        // Crear item consumible
+        ConsumableSO item = ScriptableObject.CreateInstance<ConsumableSO>();
 
-        // Assign public fields
-        item.itemID = "item_permanent_gafas_destruidas";
-        item.CannotBeUnequipped = true;
+        item.itemID = "item_consumable_espejo_maldito";
 
-        // SerializedObject to assign private fields
         SerializedObject so = new SerializedObject(item);
 
-        so.FindProperty("itemName").stringValue = "Gafas Destruidas";
-        so.FindProperty("itemDescription").stringValue = "Duplica los efectos de las casillas malas.";
-        so.FindProperty("polarity").enumValueIndex = (int)BaseItemSO.ItemPolarity.Negative;
+        so.FindProperty("itemName").stringValue = "Espejo Maldito";
+        so.FindProperty("itemDescription").stringValue = "Teletransporta a la casilla positiva mas cercana o a la tienda.";
+        so.FindProperty("polarity").enumValueIndex = (int)BaseItemSO.ItemPolarity.Positive;
 
-        // Assign effect array
         SerializedProperty effectsProp = so.FindProperty("effects");
         effectsProp.arraySize = 1;
         effectsProp.GetArrayElementAtIndex(0).objectReferenceValue = effect;
 
         so.ApplyModifiedProperties();
 
-        // Save item
         AssetDatabase.CreateAsset(item, itemPath);
         Debug.Log("[Editor] Created item: " + itemPath);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log("[Editor] Gafas Destruidas created and linked successfully.");
+        Debug.Log("[Editor] Espejo Maldito created and linked successfully.");
     }
 
     private static void EnsureFolder(string path)

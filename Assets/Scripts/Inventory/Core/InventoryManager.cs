@@ -73,7 +73,7 @@ public class InventoryManager : MonoBehaviour
     private void Start()
     {
         // Añadir gafas destruidas cuando TODO está inicializado
-        if (itemCatalog.TryGetValue("item_permanent_gafas_destruidas", out BaseItemSO testItem))
+        if (itemCatalog.TryGetValue("item_permanents_broken_glasses", out BaseItemSO testItem))
         {
             Debug.Log("[DEBUG] Añadiendo Gafas Destruidas al inventario en Start.");
             AddItem(testItem, 1);

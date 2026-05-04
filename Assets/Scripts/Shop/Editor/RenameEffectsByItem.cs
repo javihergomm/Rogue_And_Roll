@@ -66,16 +66,31 @@ public static class RenameEffectsByItem
     private static int TryRenameEffect(BaseEffect effect, ScriptableObject itemSO)
     {
         if (effect == null)
+        {
+            Debug.Log("Efecto NULL en item: " + itemSO.name);
             return 0;
+        }
 
         string effectPath = AssetDatabase.GetAssetPath(effect);
+
+        // Log SIEMPRE
+        Debug.Log("Encontrado efecto: " + effect.name +
+                  " | Item: " + itemSO.name +
+                  " | Path: " + effectPath);
+
         if (string.IsNullOrEmpty(effectPath))
+        {
+            Debug.Log("No tiene ruta valida, no se puede renombrar: " + effect.name);
             return 0;
+        }
 
         string itemName = GetItemName(itemSO);
         string newEffectName = "Efecto de " + itemName;
 
         AssetDatabase.RenameAsset(effectPath, newEffectName);
+
+        Debug.Log("Renombrado: " + effect.name + " -> " + newEffectName);
+
         return 1;
     }
 
