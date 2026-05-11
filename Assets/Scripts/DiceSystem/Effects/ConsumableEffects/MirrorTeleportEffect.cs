@@ -2,7 +2,7 @@ using UnityEngine;
 
 [CreateAssetMenu(
     fileName = "MirrorTeleportEffect",
-    menuName = "Effects/Consumable/MirrorTeleport"
+    menuName = "Effects/Consumables/MirrorTeleport"
 )]
 public class MirrorTeleportEffect : BaseConsumableEffect
 {

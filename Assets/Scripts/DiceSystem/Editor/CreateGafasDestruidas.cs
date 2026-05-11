@@ -1,57 +1,58 @@
 using UnityEngine;
 using UnityEditor;
 
-public static class CreateVaritaDeCambioItem
+public static class CreateBendicionClerigo
 {
-    [MenuItem("Tools/Fix Varita de Cambio (Item)")]
-    public static void CreateItem()
+    [MenuItem("Tools/Fix Bendicion del Clerigo (Efecto + Item)")]
+    public static void CreateAll()
     {
-        string folder = "Assets/Resources/Items/Consumables";
-        string itemPath = folder + "/Varita de Cambio.asset";
+        // ================================
+        // 1) RUTAS
+        // ================================
+        string effectFolder = "Assets/Resources/Effects/ConsumableEffects";
+        string itemFolder = "Assets/Resources/Items/Consumables";
+
+        string effectPath = effectFolder + "/Efecto de Bendicion del Clerigo.asset";
+        string itemPath = itemFolder + "/Bendicion del Clerigo.asset";
 
         EnsureFolder("Assets/Resources");
+        EnsureFolder("Assets/Resources/Effects");
+        EnsureFolder(effectFolder);
         EnsureFolder("Assets/Resources/Items");
-        EnsureFolder("Assets/Resources/Items/Consumables");
+        EnsureFolder(itemFolder);
 
-        // ---------------------------------------------------------
-        // 1) ELIMINAR ITEM ANTIGUO SI EXISTE
-        // ---------------------------------------------------------
+        // ================================
+        // 2) BORRAR ASSETS ANTIGUOS
+        // ================================
+        DeleteIfExists(effectPath);
         DeleteIfExists(itemPath);
 
-        // ---------------------------------------------------------
-        // 2) CARGAR EFECTO
-        // ---------------------------------------------------------
-        string effectPath = "Assets/Resources/Effects/ConsumableEffects/Efecto de Varita de Cambio.asset";
-        ChangeLootBoxPolarityEffect effect = AssetDatabase.LoadAssetAtPath<ChangeLootBoxPolarityEffect>(effectPath);
+        // ================================
+        // 3) CREAR EFECTO
+        // ================================
+        BendicionClerigoEffect effect = ScriptableObject.CreateInstance<BendicionClerigoEffect>();
+        effect.name = "Efecto de Bendicion del Clerigo";
 
-        if (effect == null)
-        {
-            Debug.LogError("[Editor] No se encontro el efecto 'Efecto de Varita de Cambio'. Ejecuta primero el creador del efecto.");
-            return;
-        }
+        AssetDatabase.CreateAsset(effect, effectPath);
+        EditorUtility.SetDirty(effect);
 
-        // ---------------------------------------------------------
-        // 3) CREAR ITEM NUEVO
-        // ---------------------------------------------------------
+        Debug.Log("[Editor] Efecto de Bendicion del Clerigo creado.");
+
+        // ================================
+        // 4) CREAR ITEM
+        // ================================
         ConsumableSO item = ScriptableObject.CreateInstance<ConsumableSO>();
-        item.name = "Varita de Cambio";
+        item.name = "Bendicion del Clerigo";
+        item.itemID = "BendicionClerigo";
 
-        // Asignar itemID directamente (es público)
-        item.itemID = "VaritaCambio";
-
-        // ---------------------------------------------------------
-        // 4) Asignar nombre, descripción e icono mediante SerializedObject
-        // ---------------------------------------------------------
         SerializedObject so = new SerializedObject(item);
 
-        so.FindProperty("itemName").stringValue = "Varita de Cambio";
-        so.FindProperty("itemDescription").stringValue = "Permite cambiar la polaridad de una lootbox del inventario.";
-        // si quieres asignar icono:
-        // so.FindProperty("icon").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("ruta");
+        // Nombre y descripción
+        so.FindProperty("itemName").stringValue = "Bendición del Clérigo";
+        so.FindProperty("itemDescription").stringValue =
+            "Durante X turnos, permite mover dos veces por turno.";
 
-        // ---------------------------------------------------------
-        // 5) Asignar el efecto en el array privado "effects"
-        // ---------------------------------------------------------
+        // Asignar efecto en array privado "effects"
         SerializedProperty effectsProp = so.FindProperty("effects");
         effectsProp.arraySize = 1;
         effectsProp.GetArrayElementAtIndex(0).objectReferenceValue = effect;
@@ -61,16 +62,20 @@ public static class CreateVaritaDeCambioItem
         AssetDatabase.CreateAsset(item, itemPath);
         EditorUtility.SetDirty(item);
 
+        Debug.Log("[Editor] Item 'Bendicion del Clerigo' creado.");
+
+        // ================================
+        // 5) FINAL
+        // ================================
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log("[Editor] Item 'Varita de Cambio' creado correctamente.");
+        Debug.Log("[Editor] Bendicion del Clerigo (Efecto + Item) creado correctamente.");
     }
 
-    // ---------------------------------------------------------
+    // ================================
     // HELPERS
-    // ---------------------------------------------------------
-
+    // ================================
     private static void EnsureFolder(string path)
     {
         if (!AssetDatabase.IsValidFolder(path))

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Effects/ChangeLootBoxPolarityEffect")]
+[CreateAssetMenu(menuName = "Effects/Consumables/ChangeLootBoxPolarityEffect")]
 public class ChangeLootBoxPolarityEffect : BaseConsumableEffect
 {
     public override void Activate(ConsumableContext ctx)
