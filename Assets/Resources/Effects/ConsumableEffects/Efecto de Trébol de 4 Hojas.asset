@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e76aa9d74db3a1646b88c8ca54f56a04, type: 3}
-  m_Name: StrategyTotemEffect
-  m_EditorClassIdentifier: Assembly-CSharp::StrategyTotemEffect
-  requiredValue: 2
+  m_Script: {fileID: 11500000, guid: c9a38b678302aea4cb5965209cf9ab12, type: 3}
+  m_Name: "Efecto de Tr\xE9bol de 4 Hojas"
+  m_EditorClassIdentifier: Assembly-CSharp::FourLeafCloverEffect
+  alignment: 0

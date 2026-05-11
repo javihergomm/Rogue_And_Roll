@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEditor;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 public static class RenameEffectsByItem
 {
-    [MenuItem("Tools/Renombrar Efectos segun Objetos")]
+    [MenuItem("Tools/Renombrar Efectos segun Objetos (FULL)")]
     public static void RenameEffects()
     {
         System.Type[] itemTypes = new System.Type[]
@@ -34,14 +35,12 @@ public static class RenameEffectsByItem
 
                 foreach (FieldInfo field in fields)
                 {
-                    // Caso 1: campo es BaseEffect (uno solo)
                     if (typeof(BaseEffect).IsAssignableFrom(field.FieldType))
                     {
                         BaseEffect effect = field.GetValue(itemSO) as BaseEffect;
-                        renamed += TryRenameEffect(effect, itemSO);
+                        renamed += RenameEffectAsset(effect, itemSO);
                     }
 
-                    // Caso 2: campo es BaseEffect[]
                     if (field.FieldType.IsArray &&
                         typeof(BaseEffect).IsAssignableFrom(field.FieldType.GetElementType()))
                     {
@@ -52,7 +51,7 @@ public static class RenameEffectsByItem
 
                         foreach (BaseEffect effect in effects)
                         {
-                            renamed += TryRenameEffect(effect, itemSO);
+                            renamed += RenameEffectAsset(effect, itemSO);
                         }
                     }
                 }
@@ -63,34 +62,42 @@ public static class RenameEffectsByItem
         Debug.Log("Renombrado completado. Efectos renombrados: " + renamed);
     }
 
-    private static int TryRenameEffect(BaseEffect effect, ScriptableObject itemSO)
+    private static int RenameEffectAsset(BaseEffect effect, ScriptableObject itemSO)
     {
         if (effect == null)
-        {
-            Debug.Log("Efecto NULL en item: " + itemSO.name);
             return 0;
+
+        string itemName = NormalizeName(GetItemName(itemSO));
+        string newName = "Efecto de " + itemName;
+
+        string path = AssetDatabase.GetAssetPath(effect);
+
+        // Si el efecto es sub-asset, hay que extraerlo
+        if (AssetDatabase.IsSubAsset(effect))
+        {
+            string parentPath = path;
+            string newPath = parentPath.Replace(".asset", "_" + newName + ".asset");
+
+            // Crear nuevo asset con el efecto
+            BaseEffect clone = Object.Instantiate(effect);
+            clone.name = newName;
+
+            AssetDatabase.CreateAsset(clone, newPath);
+            EditorUtility.SetDirty(clone);
+
+            // Eliminar sub-asset antiguo
+            Object.DestroyImmediate(effect, true);
+
+            Debug.Log("Sub-asset migrado y renombrado: " + newName);
+            return 1;
         }
 
-        string effectPath = AssetDatabase.GetAssetPath(effect);
+        // Si es asset normal, renombrar archivo y objeto
+        AssetDatabase.RenameAsset(path, newName);
+        effect.name = newName;
+        EditorUtility.SetDirty(effect);
 
-        // Log SIEMPRE
-        Debug.Log("Encontrado efecto: " + effect.name +
-                  " | Item: " + itemSO.name +
-                  " | Path: " + effectPath);
-
-        if (string.IsNullOrEmpty(effectPath))
-        {
-            Debug.Log("No tiene ruta valida, no se puede renombrar: " + effect.name);
-            return 0;
-        }
-
-        string itemName = GetItemName(itemSO);
-        string newEffectName = "Efecto de " + itemName;
-
-        AssetDatabase.RenameAsset(effectPath, newEffectName);
-
-        Debug.Log("Renombrado: " + effect.name + " -> " + newEffectName);
-
+        Debug.Log("Asset renombrado: " + newName);
         return 1;
     }
 
@@ -107,5 +114,13 @@ public static class RenameEffectsByItem
         }
 
         return item.name;
+    }
+
+    private static string NormalizeName(string name)
+    {
+        name = Regex.Replace(name, @"\s+", " ");
+        name = name.Trim();
+        name = name.Replace("_", " ");
+        return name;
     }
 }

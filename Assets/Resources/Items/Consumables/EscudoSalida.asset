@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bd3dc40917a57e40920014beee12295, type: 3}
-  m_Name: EspejoMaldito
+  m_Name: EscudoSalida
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
-  itemName: Espejo Maldito
+  itemName: Escudo de Salida
   icon: {fileID: 0}
   lockedIcon: {fileID: 0}
-  itemDescription: Teletransporta a la casilla positiva mas cercana o a la tienda.
+  itemDescription: Bloquea el efecto de la proxima casilla mala.
   prefab3D: {fileID: 0}
-  itemID: item_consumable_espejo_maldito
+  itemID: item_consumable_escudo_salida
   buyPrice: 0
   sellPrice: 0
   polarity: 0
@@ -31,4 +31,4 @@ MonoBehaviour:
   AutoUseOnPickup: 0
   canBeUsedOnSpot: 0
   effects:
-  - {fileID: 11400000, guid: 8bc39026514506c4389e370d4526e7e0, type: 2}
+  - {fileID: 11400000, guid: 686355bf9c7c3b84380d10743eb3f668, type: 2}

@@ -51,12 +51,6 @@ public class Movement : MonoBehaviour
 
     public bool effectAlreadyTriggered = false;
 
-    public int probabilityExtraSteps = 50;
-    public int probabilityBlockEnemy = 50;
-
-    public int probabilityNegativeSteps = 50;
-    public int probabilityBlockPlayer = 50;
-
     public int pendingSteps = 0;
     public bool turnShouldEnd = true;
     public bool movementIsPlayerControlled = true;
@@ -272,7 +266,7 @@ public class Movement : MonoBehaviour
 
         ignoreBridgeThisMove = false;
 
-        var type = spots[actualPos - 1].GetSpotType();
+        var type = spots[actualPos - 1].type;
 
         if (isPlayer && TurnManager.Instance.IsPlayerTurn() && !effectAlreadyTriggered)
         {

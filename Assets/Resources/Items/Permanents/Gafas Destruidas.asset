@@ -17,7 +17,7 @@ MonoBehaviour:
   lockedIcon: {fileID: 0}
   itemDescription: Duplica los efectos de las casillas malas.
   prefab3D: {fileID: 919132149155446097, guid: 2932a904d894d3841ac62d81d93e026d, type: 3}
-  itemID: item_permanent_gafas_destruidas
+  itemID: item_permanents_broken_glasses
   buyPrice: 0
   sellPrice: 0
   polarity: 1

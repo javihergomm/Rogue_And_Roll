@@ -28,7 +28,7 @@ public class MirrorTeleportEffect : BaseConsumableEffect
         Spot[] spots = controller.GetSpotsOrdered();
         int playerPos = player.ActualPos;
 
-        // 1. Buscar casilla positiva hacia delante
+        // 1. Buscar casilla Good hacia delante
         Spot positive = FindNextPositiveSpot(spots, playerPos);
 
         if (positive != null)
@@ -38,7 +38,7 @@ public class MirrorTeleportEffect : BaseConsumableEffect
             return;
         }
 
-        // 2. Si no hay positivas, tienda mas cercana
+        // 2. Si no hay Good, buscar tienda mas cercana
         Spot shop = FindNearestShopSpot(spots, playerPos);
 
         if (shop != null)
@@ -57,7 +57,7 @@ public class MirrorTeleportEffect : BaseConsumableEffect
         {
             int idx = (startIndex - 1 + i) % count;
 
-            if (spots[idx].GetSpotType() == Spot.SpotType.Good)
+            if (spots[idx].type == Spot.SpotType.Good)
                 return spots[idx];
         }
 
@@ -81,18 +81,19 @@ public class MirrorTeleportEffect : BaseConsumableEffect
 
     private void TeleportAndTrigger(Movement player, Spot target)
     {
+        // Teletransporte
         player.TeleportToPosition(target.index);
 
-        // Activar efecto positivo
-        if (target.GetSpotType() == Spot.SpotType.Good)
+        // Si cae en Good, activar efecto positivo real
+        if (target.type == Spot.SpotType.Good)
         {
-            if (SpotController.GoodSpot() == 1)
-            {
-                ScriptableObject.CreateInstance<BlockEnemyMovementEffect>().Activate();
-            }
+            // Tu sistema real: Good Spot tiene 3 posibles efectos
+            // Aquí activamos el efecto positivo "base": bloqueo enemigo
+            var effect = ScriptableObject.CreateInstance<BlockEnemyMovementEffect>();
+            effect.Activate();
         }
 
-        // Entrada a tienda
+        // Si cae en tienda, entrar
         if (target.checkpoint)
         {
             ShopExitManager shop = Object.FindFirstObjectByType<ShopExitManager>();

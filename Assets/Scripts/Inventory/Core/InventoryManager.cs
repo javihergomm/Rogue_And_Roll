@@ -70,20 +70,6 @@ public class InventoryManager : MonoBehaviour
         // 5. Suscribirse a eventos
         LootBoxEvents.OnLootBoxOpened += HandleLootBoxReward;
     }
-    private void Start()
-    {
-        // Añadir gafas destruidas cuando TODO está inicializado
-        if (itemCatalog.TryGetValue("item_permanents_broken_glasses", out BaseItemSO testItem))
-        {
-            Debug.Log("[DEBUG] Añadiendo Gafas Destruidas al inventario en Start.");
-            AddItem(testItem, 1);
-        }
-        else
-        {
-            Debug.LogError("[DEBUG] ERROR: No se encontró 'item_permanent_gafas_destruidas' en el catálogo.");
-        }
-    }
-
     private void LoadItemCatalog()
     {
         itemCatalog.Clear();
@@ -373,6 +359,24 @@ public class InventoryManager : MonoBehaviour
             return;
 
         RemoveItem(slot, 1);
+    }
+
+    public void PlaceConsumableOnSlot(ItemSlot consumableSlot, ItemSlot targetSlot)
+    {
+        if (consumableSlot == null || targetSlot == null)
+            return;
+
+        BaseItemSO item = consumableSlot.ItemSO;
+        if (item is not ConsumableSO consumable)
+            return;
+
+        ConsumableContext ctx = new();
+        ctx.TargetSlot = targetSlot;
+
+        consumable.UseItem(ctx);
+
+        if (ctx.WasUsed)
+            RemoveItem(consumableSlot, 1);
     }
 
     private void HandleLootBoxReward(LootBoxSO box, BaseItemSO reward)

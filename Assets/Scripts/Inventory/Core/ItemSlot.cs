@@ -274,7 +274,7 @@ public class ItemSlot : MonoBehaviour,
 
         if (controller != null)
         {
-            Spot[] normalSpots = controller.GetAllSpots();
+            Spot[] normalSpots = controller.GetSpotsOrdered();
             if (normalSpots != null && normalSpots.Length > 0)
                 all.AddRange(normalSpots);
         }

@@ -211,25 +211,41 @@ public class InventorySlots
     /*
      * Replaces the contents of a slot with the pending item.
      */
-    public void ReplaceInSlot(ItemSlot slot)
+    public void ReplaceInSlot(ItemSlot targetSlot)
     {
         if (!waitingForReplace)
             return;
 
-        slot.ClearSlot();
-        slot.AddItem(pendingItem, pendingQuantity);
+        // Si el item pendiente es un consumible, usarlo sobre el slot objetivo
+        if (pendingItem is ConsumableSO)
+        {
+            ItemSlot consumableSlot = GetSlotHoldingPendingItem();
+            InventoryManager.Instance.PlaceConsumableOnSlot(consumableSlot, targetSlot);
+
+            // limpiar estado de replace
+            waitingForReplace = false;
+            pendingItem = null;
+            pendingQuantity = 0;
+
+            return;
+        }
+
+        // Flujo normal de reemplazo de items
+        targetSlot.ClearSlot();
+        targetSlot.AddItem(pendingItem, pendingQuantity);
 
         waitingForReplace = false;
         pendingItem = null;
         pendingQuantity = 0;
 
-        slot.RefreshUI();
+        targetSlot.RefreshUI();
 
-        bool isActiveSlot = InventoryManager.Instance.ActiveDice.Contains(slot);
+        bool isActiveSlot = InventoryManager.Instance.ActiveDice.Contains(targetSlot);
 
         if (isActiveSlot)
-            InventoryManager.Instance.ActiveDice.SyncSlot(slot);
+            InventoryManager.Instance.ActiveDice.SyncSlot(targetSlot);
     }
+
 
     /*
      * Deselects all slots in the inventory.
@@ -239,4 +255,15 @@ public class InventorySlots
         foreach (var slot in allSlots)
             slot.DeselectSlot();
     }
+
+    private ItemSlot GetSlotHoldingPendingItem()
+    {
+        foreach (var slot in allSlots)
+        {
+            if (slot.ItemSO == pendingItem)
+                return slot;
+        }
+        return null;
+    }
+
 }

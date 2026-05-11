@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bd3dc40917a57e40920014beee12295, type: 3}
-  m_Name: EspejoMaldito
+  m_Name: Varita de Cambio
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
-  itemName: Espejo Maldito
+  itemName: Varita de Cambio
   icon: {fileID: 0}
   lockedIcon: {fileID: 0}
-  itemDescription: Teletransporta a la casilla positiva mas cercana o a la tienda.
-  prefab3D: {fileID: 0}
-  itemID: item_consumable_espejo_maldito
+  itemDescription: Permite cambiar la polaridad de una lootbox del inventario.
+  prefab3D: {fileID: 6406918071297616627, guid: 052a6293efacbbd498bcaccb627cc519, type: 3}
+  itemID: item_consumables_change_wand
   buyPrice: 0
   sellPrice: 0
   polarity: 0
@@ -31,4 +31,4 @@ MonoBehaviour:
   AutoUseOnPickup: 0
   canBeUsedOnSpot: 0
   effects:
-  - {fileID: 11400000, guid: 8bc39026514506c4389e370d4526e7e0, type: 2}
+  - {fileID: 11400000, guid: 110221db601c03f4c8a6f8cb6317d27d, type: 2}
