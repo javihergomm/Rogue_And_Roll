@@ -16,17 +16,17 @@ MonoBehaviour:
   icon: {fileID: 0}
   lockedIcon: {fileID: 0}
   itemDescription: Solo puedes tirar numeros pares.
-  prefab3D: {fileID: 0}
+  prefab3D: {fileID: 4306189673888547, guid: 8a7d37078cc7ec946b5ebcadb2b603a7, type: 3}
   itemID: item_special_slime_even_only
   buyPrice: 0
   sellPrice: 0
   polarity: 0
-  StoreRotationOffset: {x: 0, y: 0, z: 0}
-  StoreHeightOffset: 0
-  StoreScaleMultiplier: 1
+  StoreRotationOffset: {x: -75, y: 0, z: 180}
+  StoreHeightOffset: 0.05
+  StoreScaleMultiplier: 20
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  ConsumeOnUse: 1
+  ConsumeOnUse: 0
   CannotBeUnequipped: 0
   effects:
   - {fileID: 11400000, guid: 33ad9ec7898a78741b22fcce751fea06, type: 2}

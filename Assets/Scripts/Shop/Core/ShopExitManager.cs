@@ -2,6 +2,10 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 /*
  * Manages entering and exiting the shop, enabling and disabling gameplay systems,
  * and resuming pending player movement after leaving the shop if needed.
@@ -304,7 +308,6 @@ public class ShopExitManager : MonoBehaviour
         }
     }
 
-
     private void ClearGhosts()
     {
         foreach (var g in activeGhosts)
@@ -313,4 +316,56 @@ public class ShopExitManager : MonoBehaviour
         activeGhosts.Clear();
     }
 
+    // ---------------------------------------------------------
+    // -------------------- EDITOR PREVIEW ----------------------
+    // ---------------------------------------------------------
+
+#if UNITY_EDITOR
+    public void EditorPreviewShop()
+    {
+        Debug.Log("=== SHOP EDITOR PREVIEW ===");
+
+        // 1. Activar pedestales
+        foreach (var pedestal in shopPedestals)
+            if (pedestal != null)
+                pedestal.SetActive(true);
+
+        // 2. Intentar previsualizar items si existe el componente
+        foreach (var pedestal in shopPedestals)
+        {
+            if (pedestal == null) continue;
+
+            var comp = pedestal.GetComponent("ShopPedestal");
+            if (comp != null)
+            {
+                var method = comp.GetType().GetMethod("EditorPreview");
+                if (method != null)
+                    method.Invoke(comp, null);
+            }
+        }
+
+        // 3. Intentar mover la cámara si existe un objeto llamado "ShopCameraPoint"
+        var shopCameraPoint = GameObject.Find("ShopCameraPoint");
+        if (Camera.main != null && shopCameraPoint != null)
+        {
+            Camera.main.transform.position = shopCameraPoint.transform.position;
+            Camera.main.transform.rotation = shopCameraPoint.transform.rotation;
+        }
+
+        // 4. Ocultar jugador si existe un objeto llamado "Player"
+        var player = GameObject.Find("Player");
+        if (player != null)
+            player.SetActive(false);
+
+        // 5. Ocultar enemigos si existe un objeto raíz llamado "Enemies"
+        var enemiesRoot = GameObject.Find("Enemies");
+        if (enemiesRoot != null)
+        {
+            foreach (Transform child in enemiesRoot.transform)
+                child.gameObject.SetActive(false);
+        }
+
+        Debug.Log("Shop preview activated in Scene View.");
+    }
+#endif
 }
