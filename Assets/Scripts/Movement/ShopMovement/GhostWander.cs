@@ -40,7 +40,6 @@ public class GhostWander : MonoBehaviour
     private float noiseOffsetX;
     private float noiseOffsetZ;
 
-    // Dirección suavizada
     private Vector3 smoothDir;
 
     void OnEnable() => allGhosts.Add(this);
@@ -70,9 +69,6 @@ public class GhostWander : MonoBehaviour
         HandleClick();
     }
 
-    // -------------------------
-    // MOVEMENT
-    // -------------------------
     private void HandleMovement()
     {
         if (isInvisible)
@@ -112,12 +108,10 @@ public class GhostWander : MonoBehaviour
     {
         float t = Time.time * noiseSpeed;
 
-        // Dirección Perlin
         float nx = Mathf.PerlinNoise(noiseOffsetX, t) * 2f - 1f;
         float nz = Mathf.PerlinNoise(noiseOffsetZ, t) * 2f - 1f;
         Vector3 desiredDir = new Vector3(nx, 0f, nz).normalized;
 
-        // Corrección hacia el centro
         Vector3 toCenter = center.position - transform.position;
         float dist = toCenter.magnitude;
 
@@ -127,18 +121,22 @@ public class GhostWander : MonoBehaviour
             desiredDir = Vector3.Lerp(desiredDir, toCenter.normalized, lerp).normalized;
         }
 
-        // 1. Suavizar dirección Perlin
-        smoothDir = Vector3.Lerp(smoothDir, desiredDir, Time.deltaTime * 2f);
-
-        // 2. Evitar giros imposibles (Perlin hacia atrás)
-        float dot = Vector3.Dot(transform.forward, smoothDir);
-        if (dot < -0.5f)
+        // Bloquear direcciones hacia atrás
+        if (Vector3.Dot(transform.forward, desiredDir) < 0f)
         {
-            smoothDir = Vector3.Lerp(transform.forward, smoothDir, 0.25f).normalized;
+            desiredDir = Vector3.ProjectOnPlane(desiredDir, Vector3.up);
+            desiredDir = Vector3.Lerp(transform.forward, desiredDir, 0.5f).normalized;
         }
 
-        // 3. Rotación suave con límite de giro
-        float maxTurnSpeed = 120f; // grados por segundo
+        smoothDir = Vector3.Lerp(smoothDir, desiredDir, Time.deltaTime * 2f);
+
+        // Reforzar que smoothDir nunca quede detrás
+        if (Vector3.Dot(transform.forward, smoothDir) < 0f)
+        {
+            smoothDir = Vector3.Lerp(transform.forward, smoothDir, 0.3f).normalized;
+        }
+
+        float maxTurnSpeed = 120f;
         Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
 
         transform.rotation = Quaternion.RotateTowards(
@@ -147,8 +145,7 @@ public class GhostWander : MonoBehaviour
             maxTurnSpeed * Time.deltaTime
         );
 
-        // Movimiento hacia adelante
-        Vector3 newPos = transform.position + transform.forward * speed * Time.deltaTime;
+        Vector3 newPos = transform.position + speed * Time.deltaTime * smoothDir;
         newPos.y = baseY + Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
 
         transform.position = newPos;
@@ -166,9 +163,6 @@ public class GhostWander : MonoBehaviour
         transform.position = newPos;
     }
 
-    // -------------------------
-    // CLICK + REWARD
-    // -------------------------
     private void HandleClick()
     {
         if (Mouse.current == null ||
@@ -194,9 +188,6 @@ public class GhostWander : MonoBehaviour
         }
     }
 
-    // -------------------------
-    // HELPERS
-    // -------------------------
     private void SetVisible(bool visible)
     {
         foreach (var r in meshRenderers)

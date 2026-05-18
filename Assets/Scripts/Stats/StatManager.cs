@@ -155,8 +155,6 @@ public class StatManager : MonoBehaviour
     {
         CurrentTurn++;
 
-        ResetTurnFlags();
-
         // Reset passive context
         PassiveCtx.PreventMovement = false;
         PassiveCtx.PreventEnemyMovement = false;
@@ -166,7 +164,7 @@ public class StatManager : MonoBehaviour
         {
             eff.OnTurnStart(PassiveCtx);
         }
-
+        ResetTurnFlags();
         PreventMovementThisTurn = PassiveCtx.PreventMovement;
         PreventEnemyMovementThisTurn = PassiveCtx.PreventEnemyMovement;
 

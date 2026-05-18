@@ -17,7 +17,7 @@ public class BlockPlayerMovementEffect : BasePassiveEffect
         if (StatManager.Instance.PassiveCtx.DoubleBadSpotEffects)
             duration *= 2;
 
-        clone.remaining = duration;
+        clone.remaining = duration + 1;
 
         StatManager.Instance.RegisterPassiveEffect(clone);
     }
