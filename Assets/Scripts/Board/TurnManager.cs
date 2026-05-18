@@ -17,6 +17,7 @@ public class TurnManager : MonoBehaviour
     }
 
     private TurnState state = TurnState.PlayerTurn;
+    public int TurnNumber { get; private set; } = 0;
 
     private List<EnemyBase> activeEnemies = new();
     private int currentEnemyIndex = 0;
@@ -87,6 +88,7 @@ public class TurnManager : MonoBehaviour
 
     public void StartPlayerTurn()
     {
+        TurnNumber++;
         state = TurnState.PlayerTurn;
 
         StatManager.Instance.NextTurn();

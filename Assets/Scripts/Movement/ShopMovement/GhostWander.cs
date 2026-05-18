@@ -24,7 +24,6 @@ public class GhostWander : MonoBehaviour
 
     [Header("Special Ghost")]
     public bool isSpecial = false;
-    public Color specialColor = Color.yellow;
     public BaseItemSO rewardA;
     public BaseItemSO rewardB;
     public float rewardChance = 1f;
@@ -41,6 +40,9 @@ public class GhostWander : MonoBehaviour
     private float noiseOffsetX;
     private float noiseOffsetZ;
 
+    // Dirección suavizada
+    private Vector3 smoothDir;
+
     void OnEnable() => allGhosts.Add(this);
     void OnDisable() => allGhosts.Remove(this);
 
@@ -56,11 +58,10 @@ public class GhostWander : MonoBehaviour
         meshRenderers = GetComponentsInChildren<MeshRenderer>();
         SetVisible(true);
 
-        if (isSpecial)
-            SetColor(specialColor);
-
         noiseOffsetX = Random.Range(0f, 999f);
         noiseOffsetZ = Random.Range(0f, 999f);
+
+        smoothDir = transform.forward;
     }
 
     void Update()
@@ -111,29 +112,46 @@ public class GhostWander : MonoBehaviour
     {
         float t = Time.time * noiseSpeed;
 
+        // Dirección Perlin
         float nx = Mathf.PerlinNoise(noiseOffsetX, t) * 2f - 1f;
         float nz = Mathf.PerlinNoise(noiseOffsetZ, t) * 2f - 1f;
-        Vector3 dir = new(nx, 0f, nz);
+        Vector3 desiredDir = new Vector3(nx, 0f, nz).normalized;
 
+        // Corrección hacia el centro
         Vector3 toCenter = center.position - transform.position;
         float dist = toCenter.magnitude;
 
         if (dist > maxDistance * 0.7f)
         {
             float lerp = Mathf.InverseLerp(maxDistance * 0.7f, maxDistance, dist);
-            dir = Vector3.Lerp(dir, toCenter.normalized, lerp);
+            desiredDir = Vector3.Lerp(desiredDir, toCenter.normalized, lerp).normalized;
         }
 
-        dir.Normalize();
+        // 1. Suavizar dirección Perlin
+        smoothDir = Vector3.Lerp(smoothDir, desiredDir, Time.deltaTime * 2f);
 
-        Vector3 newPos = transform.position + speed * Time.deltaTime * dir;
+        // 2. Evitar giros imposibles (Perlin hacia atrás)
+        float dot = Vector3.Dot(transform.forward, smoothDir);
+        if (dot < -0.5f)
+        {
+            smoothDir = Vector3.Lerp(transform.forward, smoothDir, 0.25f).normalized;
+        }
+
+        // 3. Rotación suave con límite de giro
+        float maxTurnSpeed = 120f; // grados por segundo
+        Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            targetRot,
+            maxTurnSpeed * Time.deltaTime
+        );
+
+        // Movimiento hacia adelante
+        Vector3 newPos = transform.position + transform.forward * speed * Time.deltaTime;
         newPos.y = baseY + Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
 
         transform.position = newPos;
-
-        Vector3 flatDir = new(dir.x, 0f, dir.z);
-        if (flatDir.sqrMagnitude > 0.001f)
-            transform.forward = Vector3.Lerp(transform.forward, flatDir.normalized, Time.deltaTime * 2f);
     }
 
     private void StartDisappear()
@@ -153,10 +171,8 @@ public class GhostWander : MonoBehaviour
     // -------------------------
     private void HandleClick()
     {
-        if (Mouse.current == null)
-            return;
-
-        if (!Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current == null ||
+            !Mouse.current.leftButton.wasPressedThisFrame)
             return;
 
         Camera cam = Camera.main;
@@ -164,23 +180,17 @@ public class GhostWander : MonoBehaviour
             return;
 
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
-
-        RaycastHit hit;
-        if (!Physics.Raycast(ray, out hit, 100f))
+        if (!Physics.Raycast(ray, out RaycastHit hit, 100f))
             return;
 
-        Transform hitTransform = hit.collider.transform;
-        if (hitTransform != transform && !hitTransform.IsChildOf(transform))
+        if (hit.collider.transform != transform &&
+            !hit.collider.transform.IsChildOf(transform))
             return;
 
         BaseItemSO reward = TryGiveReward();
-        if (reward != null)
+        if (reward != null && InventoryManager.Instance != null)
         {
-            if (InventoryManager.Instance != null)
-            {
-                InventoryManager.Instance.AddItem(reward, 1);
-                SetColor(Color.white);
-            }
+            InventoryManager.Instance.AddItem(reward, 1);
         }
     }
 
@@ -189,21 +199,8 @@ public class GhostWander : MonoBehaviour
     // -------------------------
     private void SetVisible(bool visible)
     {
-        for (int i = 0; i < meshRenderers.Length; i++)
-            meshRenderers[i].enabled = visible;
-    }
-
-    private void SetColor(Color c)
-    {
-        for (int i = 0; i < meshRenderers.Length; i++)
-        {
-            Material[] mats = meshRenderers[i].materials;
-            for (int m = 0; m < mats.Length; m++)
-            {
-                if (mats[m].HasProperty("_Color"))
-                    mats[m].color = c;
-            }
-        }
+        foreach (var r in meshRenderers)
+            r.enabled = visible;
     }
 
     public BaseItemSO TryGiveReward()

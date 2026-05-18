@@ -87,6 +87,7 @@ public class Movement : MonoBehaviour
         turnShouldEnd = true;
         movementIsPlayerControlled = true;
         lastTotalMovement = 0;
+        lastSpotEffectText = "";
 
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
         {
@@ -100,11 +101,10 @@ public class Movement : MonoBehaviour
 
     public void StartMovingFixed(int steps)
     {
-        startPos = actualPos;
+        
         nextCheckpoint = int.MaxValue;
         effectAlreadyTriggered = false;
         turnShouldEnd = true;
-        lastTotalMovement = 0;
 
         StartCoroutine(MoveWithVisibilityCheck(steps));
     }
@@ -250,7 +250,6 @@ public class Movement : MonoBehaviour
                 }
             }
 
-            // NO entrar en tienda si direction < 0
             if (direction > 0 && spots[actualPos - 1].checkpoint && isPlayer && movementIsPlayerControlled)
             {
                 int remaining = totalSteps - (i + 1);
@@ -260,6 +259,7 @@ public class Movement : MonoBehaviour
                 shopExitManager.EnterShop();
                 yield break;
             }
+
 
             yield return new WaitForSeconds(0.1f);
         }
@@ -271,7 +271,7 @@ public class Movement : MonoBehaviour
         if (isPlayer && TurnManager.Instance.IsPlayerTurn() && !effectAlreadyTriggered)
         {
             yield return StartCoroutine(spots[actualPos - 1].TriggerSpotEffect(this));
-            yield break;
+            effectAlreadyTriggered = true;
         }
 
         if (isPlayer && cachedRenderer != null && wasHiddenByEffect)
@@ -359,7 +359,7 @@ public class Movement : MonoBehaviour
         startPos = actualPos;
         lastTotalMovement = 0;
         effectAlreadyTriggered = false;
-        movementIsPlayerControlled = true;
+        movementIsPlayerControlled = false;
     }
 
 #if UNITY_EDITOR

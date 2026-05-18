@@ -36,5 +36,10 @@ public class ShopExitManagerEditor : Editor
         {
             manager.EditorPreviewShop();
         }
+
+        if (GUILayout.Button("Exit Shop (Editor Preview)"))
+        {
+            manager.EditorExitShop();
+        }
     }
 }

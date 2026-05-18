@@ -2,7 +2,6 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
-using System.Collections.Generic;
 
 public class ActiveDiceUI : MonoBehaviour
 {
@@ -23,6 +22,7 @@ public class ActiveDiceUI : MonoBehaviour
     private int lastMovement = 0;
     private string lastEffects = "";
     private bool lastWasEnemy = false;
+    private bool hasSummary = false;
 
     private void OnEnable()
     {
@@ -120,15 +120,19 @@ public class ActiveDiceUI : MonoBehaviour
         lastWasEnemy = true;
         lastMovement = total;
         lastEffects = "";
+        hasSummary = true;          
+
         RefreshUI();
     }
 
-    // Llamado desde Movement para mostrar el resumen real del turno
+    // Llamado desde Movement SIEMPRE al final del turno real
     public void SetLastTurnSummary(int movement, string effects, bool wasEnemy)
     {
         lastMovement = movement;
-        lastEffects = effects;
+        lastEffects = effects ?? "";
         lastWasEnemy = wasEnemy;
+        hasSummary = true;          
+
         RefreshUI();
     }
 
@@ -137,11 +141,11 @@ public class ActiveDiceUI : MonoBehaviour
         if (diceBlock == null || summaryBlock == null)
             return;
 
+        // 1. Limpiar dados
         foreach (Transform t in diceBlock)
             Destroy(t.gameObject);
-        foreach (Transform t in summaryBlock)
-            Destroy(t.gameObject);
 
+        // 2. Header + dados
         CreateHeader(isPlayerTurn ? "Jugador" : "Enemigo");
 
         if (!isPlayerTurn)
@@ -166,8 +170,10 @@ public class ActiveDiceUI : MonoBehaviour
                 CreateSimpleRow("Sin tirar");
         }
 
-        CreateLastTurnSummary();
+        // 3. Redibujar resumen SOLO si alguna vez hemos recibido uno
+        RedrawSummary();
 
+        // 4. Colocar el bloque de resumen debajo de los dados
         if (diceBlock.childCount > 0)
         {
             RectTransform lastRow = diceBlock.GetChild(diceBlock.childCount - 1).GetComponent<RectTransform>();
@@ -178,6 +184,27 @@ public class ActiveDiceUI : MonoBehaviour
         {
             summaryBlock.anchoredPosition = new Vector2(0, -20);
         }
+    }
+
+    private void RedrawSummary()
+    {
+        foreach (Transform t in summaryBlock)
+            Destroy(t.gameObject);
+
+        //  Si aún no ha habido ningún turno real, no mostramos nada
+        if (!hasSummary)
+            return;
+
+        var row = Instantiate(rowPrefab, summaryBlock);
+
+        string title = lastWasEnemy ? "Turno anterior (enemigo)" : "Turno anterior";
+        string text = "Mov: " + lastMovement + "  |  Efectos: " +
+                      (string.IsNullOrEmpty(lastEffects) ? "ninguno" : lastEffects);
+
+        SetupRow(row, title, text, false);
+
+        var nameTMP = row.transform.Find("NameText").GetComponent<TextMeshProUGUI>();
+        nameTMP.rectTransform.sizeDelta = new Vector2(300, nameTMP.rectTransform.sizeDelta.y);
     }
 
     private void CreateHeader(string text)
@@ -270,22 +297,5 @@ public class ActiveDiceUI : MonoBehaviour
             nameRT.anchoredPosition = new Vector2(0, -2);
             effRT.anchoredPosition = new Vector2(0, -22);
         }
-    }
-
-    private void CreateLastTurnSummary()
-    {
-        if (lastMovement == 0 && string.IsNullOrEmpty(lastEffects))
-            return;
-
-        var row = Instantiate(rowPrefab, summaryBlock);
-
-        string title = lastWasEnemy ? "Turno anterior (enemigo)" : "Turno anterior";
-        string text = "Mov: " + lastMovement + "  |  Efectos: " +
-                      (string.IsNullOrEmpty(lastEffects) ? "ninguno" : lastEffects);
-
-        SetupRow(row, title, text, false);
-
-        var nameTMP = row.transform.Find("NameText").GetComponent<TextMeshProUGUI>();
-        nameTMP.rectTransform.sizeDelta = new Vector2(300, nameTMP.rectTransform.sizeDelta.y);
     }
 }

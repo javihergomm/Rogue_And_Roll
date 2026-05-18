@@ -17,8 +17,13 @@ public class ShopExitManager : MonoBehaviour
     [SerializeField] private List<GameObject> decisionEmpties = new();
     [SerializeField] private GameObject ghostSpawnRoot;
 
-    [Header("Ghosts (Shop Decoration)")]
-    [SerializeField] private GameObject ghostPrefab;
+    [Header("Ghosts")]
+    [SerializeField] private GameObject normalGhostPrefab;
+    [SerializeField] private GameObject specialGhostPrefab;
+
+    [Header("Special Ghost Settings")]
+    [SerializeField] private float specialGhostChance = 0.05f; 
+
     [SerializeField] private int ghostCount = 5;
     [SerializeField] private Transform ghostSpawnCenter;
     [SerializeField] private float ghostSpawnRadius = 3f;
@@ -257,7 +262,6 @@ public class ShopExitManager : MonoBehaviour
                 int steps = playerMovement.pendingSteps;
                 playerMovement.pendingSteps = 0;
 
-                // Reset movement state after exiting the shop
                 playerMovement.ResetAfterShop();
 
                 playerMovement.turnShouldEnd = true;
@@ -266,6 +270,7 @@ public class ShopExitManager : MonoBehaviour
 
             else
             {
+                playerMovement.SendRealMovementToUI(playerMovement.lastSpotEffectText);
                 playerMovement.turnShouldEnd = true;
                 TurnManager.Instance.ForcePlayerTurnEnd();
             }
@@ -288,25 +293,35 @@ public class ShopExitManager : MonoBehaviour
     {
         ClearGhosts();
 
-        // Select one ghost at random to be the special one
-        int specialIndex = UnityEngine.Random.Range(0, ghostCount);
+        bool spawnSpecial = UnityEngine.Random.value <= specialGhostChance;
+        int specialIndex = spawnSpecial ? UnityEngine.Random.Range(0, ghostCount) : -1;
 
         for (int i = 0; i < ghostCount; i++)
         {
-            GameObject g = Instantiate(ghostPrefab, ghostSpawnCenter.position, Quaternion.identity);
+            bool isThisSpecial = (i == specialIndex);
+
+            GameObject prefabToUse = isThisSpecial ? specialGhostPrefab : normalGhostPrefab;
+
+            GameObject g = Instantiate(
+                prefabToUse,
+                ghostSpawnCenter.position,
+                Quaternion.identity
+            );
 
             if (g.TryGetComponent<GhostWander>(out var wander))
             {
                 wander.center = ghostSpawnCenter;
                 wander.maxDistance = ghostSpawnRadius;
 
-                // Mark this ghost as the special one
-                wander.isSpecial = (i == specialIndex);
+                // El prefab especial ya define su comportamiento especial
+                wander.isSpecial = isThisSpecial;
             }
 
             activeGhosts.Add(g);
         }
     }
+
+
 
     private void ClearGhosts()
     {
@@ -339,8 +354,7 @@ public class ShopExitManager : MonoBehaviour
             if (comp != null)
             {
                 var method = comp.GetType().GetMethod("EditorPreview");
-                if (method != null)
-                    method.Invoke(comp, null);
+                method?.Invoke(comp, null);
             }
         }
 
@@ -348,8 +362,7 @@ public class ShopExitManager : MonoBehaviour
         var shopCameraPoint = GameObject.Find("ShopCameraPoint");
         if (Camera.main != null && shopCameraPoint != null)
         {
-            Camera.main.transform.position = shopCameraPoint.transform.position;
-            Camera.main.transform.rotation = shopCameraPoint.transform.rotation;
+            Camera.main.transform.SetPositionAndRotation(shopCameraPoint.transform.position, shopCameraPoint.transform.rotation);
         }
 
         // 4. Ocultar jugador si existe un objeto llamado "Player"
@@ -366,6 +379,51 @@ public class ShopExitManager : MonoBehaviour
         }
 
         Debug.Log("Shop preview activated in Scene View.");
+    }
+
+    public void EditorExitShop()
+    {
+        Debug.Log("=== SHOP EDITOR EXIT ===");
+
+        // 1. Desactivar pedestales
+        foreach (var pedestal in shopPedestals)
+            if (pedestal != null)
+                pedestal.SetActive(false);
+
+        // 2. Borrar previews de items si existe el componente
+        foreach (var pedestal in shopPedestals)
+        {
+            if (pedestal == null) continue;
+
+            var comp = pedestal.GetComponent("ShopPedestal");
+            if (comp != null)
+            {
+                var method = comp.GetType().GetMethod("ClearPreview");
+                method?.Invoke(comp, null);
+            }
+        }
+
+        // 3. Restaurar jugador si existe
+        var player = GameObject.Find("Player");
+        if (player != null)
+            player.SetActive(true);
+
+        // 4. Restaurar enemigos si existe el root "Enemies"
+        var enemiesRoot = GameObject.Find("Enemies");
+        if (enemiesRoot != null)
+        {
+            foreach (Transform child in enemiesRoot.transform)
+                child.gameObject.SetActive(true);
+        }
+
+        // 5. Restaurar cámara si existe un punto original
+        var originalPoint = GameObject.Find("OriginalCameraPoint");
+        if (Camera.main != null && originalPoint != null)
+        {
+            Camera.main.transform.SetPositionAndRotation(originalPoint.transform.position, originalPoint.transform.rotation);
+        }
+
+        Debug.Log("Shop editor preview exited. Scene restored.");
     }
 #endif
 }
