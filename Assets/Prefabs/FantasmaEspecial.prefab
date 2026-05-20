@@ -27,13 +27,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8048286614692587187}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0.50032485, z: 0.8418682}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6004786153305617324
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -109,13 +109,13 @@ MonoBehaviour:
   noiseScale: 0.5
   noiseSpeed: 0.5
   center: {fileID: 0}
-  maxDistance: 3
+  maxDistance: 2
   floatAmplitude: 0.5
   floatSpeed: 1
   groupCheckDistance: 1.2
   maxAllowedNearby: 2
   invisibleMoveTime: 1.5
   isSpecial: 1
-  rewardA: {fileID: 11400000, guid: 7f63bde7f64550a47bb86c8fc24654d3, type: 2}
-  rewardB: {fileID: 11400000, guid: ff90fed3d8584894bbeec7cb024d3a55, type: 2}
+  rewardA: {fileID: 0}
+  rewardB: {fileID: 0}
   rewardChance: 1

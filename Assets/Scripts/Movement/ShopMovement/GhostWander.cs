@@ -108,10 +108,12 @@ public class GhostWander : MonoBehaviour
     {
         float t = Time.time * noiseSpeed;
 
+        // 1. Perlin Noise -> dirección deseada (solo para ROTAR)
         float nx = Mathf.PerlinNoise(noiseOffsetX, t) * 2f - 1f;
         float nz = Mathf.PerlinNoise(noiseOffsetZ, t) * 2f - 1f;
         Vector3 desiredDir = new Vector3(nx, 0f, nz).normalized;
 
+        // 2. Corrección hacia el centro si se aleja demasiado
         Vector3 toCenter = center.position - transform.position;
         float dist = toCenter.magnitude;
 
@@ -121,21 +123,23 @@ public class GhostWander : MonoBehaviour
             desiredDir = Vector3.Lerp(desiredDir, toCenter.normalized, lerp).normalized;
         }
 
-        // Bloquear direcciones hacia atrás
+        // 3. Evitar giros hacia atrás respecto al forward visual
         if (Vector3.Dot(transform.forward, desiredDir) < 0f)
         {
             desiredDir = Vector3.ProjectOnPlane(desiredDir, Vector3.up);
             desiredDir = Vector3.Lerp(transform.forward, desiredDir, 0.5f).normalized;
         }
 
+        // 4. Suavizado de dirección
         smoothDir = Vector3.Lerp(smoothDir, desiredDir, Time.deltaTime * 2f);
 
-        // Reforzar que smoothDir nunca quede detrás
+        // 5. Reforzar que smoothDir nunca quede detrás
         if (Vector3.Dot(transform.forward, smoothDir) < 0f)
         {
             smoothDir = Vector3.Lerp(transform.forward, smoothDir, 0.3f).normalized;
         }
 
+        // 6. Rotación suave hacia smoothDir
         float maxTurnSpeed = 120f;
         Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
 
@@ -145,11 +149,16 @@ public class GhostWander : MonoBehaviour
             maxTurnSpeed * Time.deltaTime
         );
 
-        Vector3 newPos = transform.position + speed * Time.deltaTime * smoothDir;
+        // 7. Movimiento SIEMPRE hacia delante visual 
+        Vector3 forwardDir = -transform.forward; 
+        Vector3 newPos = transform.position + speed * Time.deltaTime * forwardDir;
+
+        // 8. Flotación vertical
         newPos.y = baseY + Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
 
         transform.position = newPos;
     }
+
 
     private void StartDisappear()
     {

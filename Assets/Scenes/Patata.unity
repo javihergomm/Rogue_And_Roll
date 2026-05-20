@@ -1287,9 +1287,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 792cc8bd4effc534abd2354a98a55005, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpotController
-  probNormal: 60
-  probGood: 20
-  probBad: 20
+  probNormal: 100
+  probGood: 0
+  probBad: 0
   probGoodExtraSteps: 50
   probGoodBlockEnemy: 50
   probGoodLootBox: 0
@@ -6899,8 +6899,8 @@ Transform:
   m_GameObject: {fileID: 1008195275}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.36, y: -0.095, z: -0.77}
-  m_LocalScale: {x: 2.5953116, y: 1, z: 2}
+  m_LocalPosition: {x: 3.31, y: -0.095, z: -0.77}
+  m_LocalScale: {x: 1.5, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 371584076}
@@ -8607,7 +8607,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6544432553920818503, guid: cb3b8b6b5bb5d734b895c880bfc5135f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -12781,7 +12781,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6544432553920818503, guid: cb3b8b6b5bb5d734b895c880bfc5135f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15222,7 +15222,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6544432553920818503, guid: cb3b8b6b5bb5d734b895c880bfc5135f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
