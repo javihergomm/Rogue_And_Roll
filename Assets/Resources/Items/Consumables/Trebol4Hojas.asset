@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: "Tr\xE9bol de 4 Hojas"
   icon: {fileID: 0}
-  lockedIcon: {fileID: 0}
-  itemDescription: Convierte la siguiente casilla negativa en una LuckBox positiva.
+  itemDescription: Convierte una casilla negativa en una luckbox.
   prefab3D: {fileID: 0}
   itemID: item_consumable_trebol_4_hojas
   buyPrice: 0
@@ -26,7 +25,6 @@ MonoBehaviour:
   StoreScaleMultiplier: 1
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  ConsumeOnUse: 1
   AppearsIn3D: 0
   AutoUseOnPickup: 0
   canBeUsedOnSpot: 0

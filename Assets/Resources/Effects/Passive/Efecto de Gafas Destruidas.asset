@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: Efecto de Gafas Destruidas
   m_EditorClassIdentifier: Assembly-CSharp::DoubleBadSpotEffect
   alignment: 0
+  permanent: 1
+  durationTurns: 0

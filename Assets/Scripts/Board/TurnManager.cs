@@ -6,8 +6,7 @@ public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance { get; private set; }
 
-    public static event Action OnPlayerTurnStarted;
-    public static event Action OnEnemyTurnStarted;
+    // Mantengo solo el evento de roll enemigo porque tu UI lo usa
     public static event Action<int> OnEnemyRollCalculated;
 
     private enum TurnState
@@ -86,14 +85,31 @@ public class TurnManager : MonoBehaviour
             activeEnemies.Remove(enemy);
     }
 
+    // ============================================================
+    // PLAYER TURN
+    // ============================================================
     public void StartPlayerTurn()
     {
         TurnNumber++;
         state = TurnState.PlayerTurn;
 
         StatManager.Instance.NextTurn();
+        var ctx = StatManager.Instance.PassiveCtx;
 
-        OnPlayerTurnStarted?.Invoke();
+        // Notificar efectos
+        CharacterEffectManager.Instance.NotifyTurnStart();
+
+        // Lógica especial tuya
+        if (ctx.AvoidBadSpotEvery3TurnsActive)
+        {
+            ctx.AvoidBadSpotTurnCounter++;
+
+            if (ctx.AvoidBadSpotTurnCounter >= 3)
+            {
+                ctx.AvoidBadSpotBoostReady = true;
+                ctx.AvoidBadSpotTurnCounter = 0;
+            }
+        }
     }
 
     private void OnPlayerFinishedMovement()
@@ -104,6 +120,8 @@ public class TurnManager : MonoBehaviour
         if (!playerMovement.turnShouldEnd)
             return;
 
+        CharacterEffectManager.Instance.NotifyTurnEnd();
+
         StartEnemyTurns();
     }
 
@@ -112,11 +130,9 @@ public class TurnManager : MonoBehaviour
         OnPlayerFinishedMovement();
     }
 
-    public void NotifyEnemyFinishedMovement()
-    {
-        OnEnemyFinishedMovement();
-    }
-
+    // ============================================================
+    // ENEMY TURNS (turnos reales)
+    // ============================================================
     public void StartEnemyTurns()
     {
         if (activeEnemies.Count == 0)
@@ -127,8 +143,6 @@ public class TurnManager : MonoBehaviour
 
         state = TurnState.EnemyTurn;
         currentEnemyIndex = 0;
-
-        OnEnemyTurnStarted?.Invoke();
 
         StartNextEnemyTurn();
     }
@@ -150,12 +164,18 @@ public class TurnManager : MonoBehaviour
             return;
         }
 
+        // Bloqueo global de movimiento enemigo
         if (StatManager.Instance.PreventEnemyMovementThisTurn)
         {
             currentEnemyIndex++;
             StartNextEnemyTurn();
             return;
         }
+
+        // ============================================================
+        // Notificar inicio de turno enemigo
+        // ============================================================
+        CharacterEffectManager.Instance.NotifyEnemyTurnStart(enemy);
 
         enemy.movement.OnMovementFinished -= OnEnemyFinishedMovement;
         enemy.movement.OnMovementFinished += OnEnemyFinishedMovement;
@@ -168,10 +188,26 @@ public class TurnManager : MonoBehaviour
         EnemyBase enemy = activeEnemies[currentEnemyIndex];
         enemy.movement.OnMovementFinished -= OnEnemyFinishedMovement;
 
+        // ============================================================
+        // Notificar fin de turno enemigo
+        // ============================================================
+        CharacterEffectManager.Instance.NotifyEnemyTurnEnd(enemy);
+
         currentEnemyIndex++;
         StartNextEnemyTurn();
     }
 
+    // ============================================================
+    // Método requerido por BansheeBoss
+    // ============================================================
+    public void ForceEnemyTurnEnd()
+    {
+        OnEnemyFinishedMovement();
+    }
+
+    // ============================================================
+    // ENEMY ROLL NOTIFICATION
+    // ============================================================
     public static void NotifyEnemyRoll(int total)
     {
         OnEnemyRollCalculated?.Invoke(total);

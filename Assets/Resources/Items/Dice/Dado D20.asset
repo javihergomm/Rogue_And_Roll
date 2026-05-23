@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DiceSO
   itemName: D20
   icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
-  lockedIcon: {fileID: 0}
-  itemDescription: 
+  itemDescription: Sin descripcion.
   prefab3D: {fileID: 2272190440689176511, guid: 31742afae4788744689e2a5657122293, type: 3}
   itemID: item_dice_d20
   buyPrice: 1
@@ -26,6 +25,5 @@ MonoBehaviour:
   StoreScaleMultiplier: 1
   StoreZPositionOffset: -0.1
   StoreXPositionOffset: 0
-  ConsumeOnUse: 1
   diceType: 3
   effects: []

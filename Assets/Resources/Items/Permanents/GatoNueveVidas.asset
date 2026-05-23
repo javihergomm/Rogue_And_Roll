@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PermanentSO
   itemName: Gato de 9 Vidas
   icon: {fileID: 0}
-  lockedIcon: {fileID: 0}
-  itemDescription: Otorga una vida extra al jugador.
+  itemDescription: Otorga una vida extra.
   prefab3D: {fileID: 0}
   itemID: item_permanent_gato_9_vidas
   buyPrice: 0
@@ -26,7 +25,6 @@ MonoBehaviour:
   StoreScaleMultiplier: 1
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  ConsumeOnUse: 1
   CannotBeUnequipped: 0
   effects:
   - {fileID: 11400000, guid: 172d5a006fcc79a4fa27d6a51021d4a1, type: 2}

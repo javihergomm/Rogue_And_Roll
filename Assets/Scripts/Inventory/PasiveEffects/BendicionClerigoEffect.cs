@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Effects/BendicionClerigoEffect")]
+[CreateAssetMenu(menuName = "Effects/Passive/BendicionClerigo")]
 public class BendicionClerigoEffect : BasePassiveEffect
 {
     [SerializeField] private int turnsActive = 1;
@@ -8,25 +8,26 @@ public class BendicionClerigoEffect : BasePassiveEffect
 
     public override void Activate()
     {
-        // Clonar para que cada activación tenga su propio contador independiente
+        // Crear instancia independiente
         var clone = Instantiate(this);
-        clone.remaining = clone.turnsActive;
+        clone.remaining = turnsActive;
 
-        StatManager.Instance.RegisterPassiveEffect(clone);
+        // Registrar en el sistema de efectos
+        CharacterEffectManager.Instance.AddPassiveEffect(clone);
     }
 
-    public override void OnTurnStart(PassiveContext ctx)
+    public override void OnTurnStart()
     {
         if (remaining > 0)
         {
-            // Añade un movimiento extra este turno
-            ctx.ExtraMoves += 1;
+            // Añadir movimiento extra este turno
+            StatManager.Instance.PassiveCtx.ExtraMoves += 1;
             remaining--;
         }
         else
         {
-            // Eliminar pasiva cuando termina
-            StatManager.Instance.ActivePassiveEffects.Remove(this);
+            // Eliminar la pasiva cuando termina
+            CharacterEffectManager.Instance.RemovePassiveEffect(this);
         }
     }
 }

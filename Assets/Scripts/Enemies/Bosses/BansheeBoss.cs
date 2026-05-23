@@ -5,7 +5,7 @@ using UnityEngine;
  * -----------
  * Enemy that does not move. Instead, it pulls the player toward its tile
  * based on a dice roll. The Banshee only kills the player if the player
- * ends on her tile *as a result of being pulled by her*.
+ * ends on her tile as a result of being pulled by her.
  * If the player reaches her from behind by normal movement, it does NOT kill.
  * The Banshee also does not despawn by durability.
  */
@@ -22,7 +22,10 @@ public class BansheeBoss : EnemyBase
             return;
 
         if (ShouldKillPlayer())
+        {
+            Debug.Log("[Banshee] Player pulled into her tile. Killing player.");
             KillPlayerNow();
+        }
     }
 
     public override void SpawnEnemy()
@@ -36,9 +39,14 @@ public class BansheeBoss : EnemyBase
             return;
 
         if (IsEnemyMovementBlocked())
+        {
+            Debug.Log("[Banshee] Movement blocked this turn.");
+            TurnManager.Instance.ForceEnemyTurnEnd();
             return;
+        }
 
         int roll = EnemyDice.ThrowDice();
+        Debug.Log("[Banshee] Rolled: " + roll);
         TurnManager.NotifyEnemyRoll(roll);
 
         playerWasPulled = true;
@@ -63,6 +71,8 @@ public class BansheeBoss : EnemyBase
 
         playerMovement.ignoreBridgeThisMove = ignoreBridge;
 
+        Debug.Log("[Banshee] Pulling player " + steps + " steps. Ignore bridge: " + ignoreBridge);
+
         playerMovement.OnMovementFinished += OnPlayerPulledFinished;
         playerMovement.StartMovingFixed(steps);
     }
@@ -73,13 +83,15 @@ public class BansheeBoss : EnemyBase
 
         if (ShouldKillPlayer())
         {
+            Debug.Log("[Banshee] Player ended on Banshee tile after pull. Killing player.");
             KillPlayerNow();
             return;
         }
 
         playerWasPulled = false;
 
-        TurnManager.Instance.NotifyEnemyFinishedMovement();
+        Debug.Log("[Banshee] Pull finished. Enemy turn ends.");
+        TurnManager.Instance.ForceEnemyTurnEnd();
     }
 
     private bool ShouldKillPlayer()

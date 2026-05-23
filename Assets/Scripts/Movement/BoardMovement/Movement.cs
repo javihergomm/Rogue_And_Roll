@@ -96,15 +96,26 @@ public class Movement : MonoBehaviour
             return;
         }
 
+        // ============================================================
+        // Notificar inicio de movimiento
+        // ============================================================
+        if (isPlayer)
+            CharacterEffectManager.Instance.NotifyMovementStart(this);
+
         StartCoroutine(MoveWithVisibilityCheck());
     }
 
     public void StartMovingFixed(int steps)
     {
-        
         nextCheckpoint = int.MaxValue;
         effectAlreadyTriggered = false;
         turnShouldEnd = true;
+
+        // ============================================================
+        // Notificar inicio de movimiento fijo
+        // ============================================================
+        if (isPlayer)
+            CharacterEffectManager.Instance.NotifyMovementStart(this);
 
         StartCoroutine(MoveWithVisibilityCheck(steps));
     }
@@ -145,6 +156,13 @@ public class Movement : MonoBehaviour
         {
             OnMovementFinished?.Invoke();
             SendRealMovementToUI(lastSpotEffectText);
+
+            // ============================================================
+            // Notificar fin de movimiento
+            // ============================================================
+            if (isPlayer)
+                CharacterEffectManager.Instance.NotifyMovementEnd(this);
+
             yield break;
         }
 
@@ -260,7 +278,6 @@ public class Movement : MonoBehaviour
                 yield break;
             }
 
-
             yield return new WaitForSeconds(0.1f);
         }
 
@@ -288,6 +305,11 @@ public class Movement : MonoBehaviour
         OnMovementFinished?.Invoke();
         SendRealMovementToUI(lastSpotEffectText);
 
+        // ============================================================
+        // Notificar fin de movimiento
+        // ============================================================
+        if (isPlayer)
+            CharacterEffectManager.Instance.NotifyMovementEnd(this);
     }
 
     public IEnumerator ExtraMovementRoutine(int extraSteps)
@@ -304,6 +326,11 @@ public class Movement : MonoBehaviour
         OnMovementFinished?.Invoke();
         SendRealMovementToUI(lastSpotEffectText);
 
+        // ============================================================
+        // Notificar fin de movimiento extra
+        // ============================================================
+        if (isPlayer)
+            CharacterEffectManager.Instance.NotifyMovementEnd(this);
     }
 
     public void SendRealMovementToUI(string effectText = "")
@@ -316,10 +343,25 @@ public class Movement : MonoBehaviour
         if (realMovement < -total / 2)
             realMovement += total;
 
+        // ================================
+        // Incluir efectos de dados
+        // ================================
+        var diceEffects = DiceRollManager.Instance.GetLastAppliedEffects();
+        string allEffects = effectText;
+
+        if (diceEffects.Count > 0)
+        {
+            if (!string.IsNullOrEmpty(allEffects))
+                allEffects += " | ";
+
+            allEffects += string.Join(", ", diceEffects);
+        }
+
         var ui = FindFirstObjectByType<ActiveDiceUI>();
         if (ui != null)
-            ui.SetLastTurnSummary(realMovement, effectText, false);
+            ui.SetLastTurnSummary(realMovement, allEffects, false);
     }
+
 
     public int GetNextCheckpoint()
     {
@@ -353,7 +395,7 @@ public class Movement : MonoBehaviour
         actualPos = index;
         transform.position = positions[index - 1].position;
     }
-    // Reset used when exiting the shop and resuming pending movement
+
     public void ResetAfterShop()
     {
         startPos = actualPos;

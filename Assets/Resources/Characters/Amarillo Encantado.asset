@@ -12,18 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75e8964f79a5af948b23e1b04b5647cb, type: 3}
   m_Name: Amarillo Encantado
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSO
-  characterID: 
-  characterName: 
-  description: 
-  icon: {fileID: 0}
-  lockedIcon: {fileID: 0}
-  characterColor: {r: 1, g: 1, b: 1, a: 1}
+  characterID: character_amarillo_encantado
+  characterName: Amarillo Encantado
+  description: Un cubilete imbuido con magia protectora. Cada 3 turnos, tu proximo
+    movimiento ignora por completo la siguiente casilla mala que pises.
+  unlockHint: 
+  icon: {fileID: 21300000, guid: e67046c4e5e7a3c46bd254e7e5c4c476, type: 3}
+  characterColor: {r: 0.9333179, g: 1, b: 0, a: 1}
   applyColor: 1
-  applyTileColor: 0
+  applyTileColor: 1
   tileMaterial: {fileID: 0}
-  cupPrefab: {fileID: 0}
+  cupLightMaterials:
+  - {fileID: -6922793697723135513, guid: 0e20a84d7f77dde4180ce0378672a6ad, type: 3}
+  cupDarkMaterials:
+  - {fileID: -3522955778539423533, guid: 0e20a84d7f77dde4180ce0378672a6ad, type: 3}
+  cupPrefab: {fileID: 2253894143461937924, guid: 6cf4b70af5f4f1046b40c6a554ec90ab, type: 3}
   tilePrefab: {fileID: 0}
-  spawnPointName: 
-  tileSpotIndex: 0
-  effects: []
-  startingDice: {fileID: 0}
+  spawnPointName: Spawn_Amarillo
+  tileSpotIndex: 5
+  effects:
+  - {fileID: 11400000, guid: 5051aa72d4a55f94cb3a8a24fd21883a, type: 2}
+  startingDice: {fileID: 11400000, guid: 8105016687592461f977c054a80ce2f2, type: 2}

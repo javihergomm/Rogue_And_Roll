@@ -4,9 +4,6 @@ using UnityEngine;
  * HantuBoss
  * ---------
  * Enemy that rolls 1D6 each turn and has a chance to add +2.
- * Moves forward by the final roll value.
- * If it reaches the same tile as the player, the player is killed.
- * Uses the standard spawn system (lapsToActivate) with no special spawn logic.
  */
 public class HantuBoss : EnemyBase
 {
@@ -20,73 +17,20 @@ public class HantuBoss : EnemyBase
             return;
 
         if (movement.ActualPos == playerMovement.ActualPos)
+        {
+            Debug.Log("[Hantu] Landed on player tile. Killing player.");
             KillPlayerNow();
+        }
     }
 
-    // ---------------------------------------------------------
-    // NEW: SpawnEnemy override so EnemyManager can activate boss
-    // ---------------------------------------------------------
     public override void SpawnEnemy()
     {
-        StartCoroutine(SpawnRoutine());
-    }
-
-    private System.Collections.IEnumerator SpawnRoutine()
-    {
-        // Wait one frame so the host prefab is fully initialized
-        yield return null;
-
-        // Instanciar la cup
-        CupInstance = Instantiate(data.cupPrefab);
-
-        // Instanciar la tile
-        GameObject token = Instantiate(data.tilePrefab);
-        movement = token.GetComponent<Movement>();
-
-
-        if (movement == null)
-        {
-            Debug.LogError("HantuBoss: Token prefab has no Movement component!");
-            yield break;
-        }
-
-        InitializeHantu();
-
-        // Place behind player (Hantu uses max roll 6)
-        PlaceEnemyBehindPlayer(6);
-
-        movement.TeleportToPosition(movement.ActualPos);
-
-        isActive = true;
-
-        EnemyManager.Instance.ActivateEnemy(this);
-    }
-
-    // ---------------------------------------------------------
-
-    private void InitializeHantu()
-    {
-        CachePlayerMovement();
-
-        if (playerMovement == null)
-            return;
-
-        movement.SetPositions(playerMovement.Positions);
-
-        movement.startPos = movement.ActualPos;
-        movement.lastPos = movement.ActualPos;
-    }
-
-    private System.Collections.IEnumerator ActivateHantuRoutine()
-    {
-        // Only used for testing
-        SpawnEnemy();
-        yield return null;
+        base.SpawnEnemy();
     }
 
     public void ActivateHantu()
     {
-        StartCoroutine(ActivateHantuRoutine());
+        SpawnEnemy();
     }
 
     public override void StartTurn()
@@ -94,13 +38,38 @@ public class HantuBoss : EnemyBase
         if (!isActive || movement == null)
             return;
 
+        if (IsEnemyMovementBlocked())
+        {
+            Debug.Log("[Hantu] Movement blocked this turn.");
+            TurnManager.Instance.ForceEnemyTurnEnd();
+            return;
+        }
+
         int roll = EnemyDice.ThrowDice();
 
+        bool addedTwo = false;
         if (Random.value <= chanceToAddTwo)
+        {
             roll += 2;
+            addedTwo = true;
+        }
+
+        Debug.Log("[Hantu] Base roll: " + (roll - (addedTwo ? 2 : 0)) +
+                  (addedTwo ? " (+2 bonus)" : "") +
+                  " => Final: " + roll);
 
         TurnManager.NotifyEnemyRoll(roll);
 
+        movement.OnMovementFinished += OnMovementFinished;
         movement.StartMovingFixed(roll);
+    }
+
+
+
+    private void OnMovementFinished()
+    {
+        movement.OnMovementFinished -= OnMovementFinished;
+        Debug.Log("[Hantu] Movement finished. Enemy turn ends.");
+        TurnManager.Instance.ForceEnemyTurnEnd();
     }
 }

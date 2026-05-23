@@ -26,9 +26,6 @@ public class CharacterSelectManager : MonoBehaviour
     [SerializeField] private CharacterSO[] characters;
     [SerializeField] private List<CharacterSlot> slots;
 
-    [Header("Cup Prefab")]
-    [SerializeField] private GameObject cupPrefab;
-
     private CharacterSO selectedCharacter;
     private GameObject spawnedCup;
 

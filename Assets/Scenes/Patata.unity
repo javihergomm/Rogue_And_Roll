@@ -10315,62 +10315,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1347338823
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1347338825}
-  - component: {fileID: 1347338824}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1347338824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1347338823}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58c3a115dce069840ab519bedb3cfb14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AutoUIAligner
-  inventoryButton: {fileID: 803790078}
-  diceResultsRoot: {fileID: 487961021}
-  rowPrefab: {fileID: 1207443075648547964, guid: 6f8526df77cddef409fc8ffb0f4902f9, type: 3}
-  verticalOffset: 20
-  rowSpacing: 90
-  numberOfDice: 3
-  simulatedMaxRolls: 060000000600000004000000
-  simulatedResults: 030000000500000004000000
-  simulatedEffects:
-  - veneno
-  - stun
-  - fuego
---- !u!4 &1347338825
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1347338823}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 194.80598, y: 591.97125, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1355900186
 GameObject:
   m_ObjectHideFlags: 0
@@ -11792,6 +11736,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 472485bead3c1cd4f87696de668f3193, type: 2}
   - {fileID: 11400000, guid: ecae8977e4ef0ae4085239a18d3d7458, type: 2}
   - {fileID: 11400000, guid: 14a4b6f067715b141b2545f046b03daf, type: 2}
+  - {fileID: 11400000, guid: e98ae72a5509d954e8a29ced62656177, type: 2}
+  - {fileID: 11400000, guid: 5963fd4dadde7e4479bd49c7ff51ed5f, type: 2}
   slots:
   - {fileID: 1774812335}
   - {fileID: 1577283360}
@@ -11823,7 +11769,6 @@ MonoBehaviour:
   - {fileID: 1941972371}
   - {fileID: 1956786437}
   - {fileID: 2008515815}
-  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
 --- !u!114 &1548563265
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16590,4 +16535,3 @@ SceneRoots:
   - {fileID: 1954619202}
   - {fileID: 1008195276}
   - {fileID: 1085795493}
-  - {fileID: 1347338825}

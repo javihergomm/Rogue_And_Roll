@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: "Bendici\xF3n del Cl\xE9rigo"
   icon: {fileID: 0}
-  lockedIcon: {fileID: 0}
-  itemDescription: Durante X turnos, permite mover dos veces por turno.
+  itemDescription: Permite mover dos veces durante varios turnos.
   prefab3D: {fileID: 0}
   itemID: item_consumables_cleric_blessing
   buyPrice: 0
@@ -26,7 +25,6 @@ MonoBehaviour:
   StoreScaleMultiplier: 1
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  ConsumeOnUse: 1
   AppearsIn3D: 0
   AutoUseOnPickup: 0
   canBeUsedOnSpot: 0

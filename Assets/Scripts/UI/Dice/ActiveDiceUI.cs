@@ -14,8 +14,6 @@ public class ActiveDiceUI : MonoBehaviour
     public float extraRight = 6f;
     public float extraDown = 34f;
 
-    private bool isPlayerTurn = true;
-
     private RectTransform diceBlock;
     private RectTransform summaryBlock;
 
@@ -28,8 +26,7 @@ public class ActiveDiceUI : MonoBehaviour
     {
         StartCoroutine(DelayedInit());
 
-        TurnManager.OnPlayerTurnStarted += HandlePlayerTurn;
-        TurnManager.OnEnemyTurnStarted += HandleEnemyTurn;
+        // ÚNICO EVENTO NECESARIO
         TurnManager.OnEnemyRollCalculated += HandleEnemyRoll;
     }
 
@@ -38,8 +35,6 @@ public class ActiveDiceUI : MonoBehaviour
         if (InventoryManager.Instance != null)
             InventoryManager.Instance.OnActiveDiceChanged -= RefreshUI;
 
-        TurnManager.OnPlayerTurnStarted -= HandlePlayerTurn;
-        TurnManager.OnEnemyTurnStarted -= HandleEnemyTurn;
         TurnManager.OnEnemyRollCalculated -= HandleEnemyRoll;
     }
 
@@ -103,24 +98,15 @@ public class ActiveDiceUI : MonoBehaviour
         resultsRoot.localScale = Vector3.one;
     }
 
-    private void HandlePlayerTurn()
-    {
-        isPlayerTurn = true;
-        RefreshUI();
-    }
-
-    private void HandleEnemyTurn()
-    {
-        isPlayerTurn = false;
-        RefreshUI();
-    }
-
+    // ============================================================
+    // Solo necesitamos detectar tiradas enemigas
+    // ============================================================
     private void HandleEnemyRoll(int total)
     {
         lastWasEnemy = true;
         lastMovement = total;
         lastEffects = "";
-        hasSummary = true;          
+        hasSummary = true;
 
         RefreshUI();
     }
@@ -131,7 +117,7 @@ public class ActiveDiceUI : MonoBehaviour
         lastMovement = movement;
         lastEffects = effects ?? "";
         lastWasEnemy = wasEnemy;
-        hasSummary = true;          
+        hasSummary = true;
 
         RefreshUI();
     }
@@ -140,6 +126,8 @@ public class ActiveDiceUI : MonoBehaviour
     {
         if (diceBlock == null || summaryBlock == null)
             return;
+
+        bool isPlayerTurn = TurnManager.Instance.IsPlayerTurn();
 
         // 1. Limpiar dados
         foreach (Transform t in diceBlock)
@@ -191,7 +179,6 @@ public class ActiveDiceUI : MonoBehaviour
         foreach (Transform t in summaryBlock)
             Destroy(t.gameObject);
 
-        //  Si aún no ha habido ningún turno real, no mostramos nada
         if (!hasSummary)
             return;
 

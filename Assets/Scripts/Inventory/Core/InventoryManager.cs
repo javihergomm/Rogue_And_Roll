@@ -65,16 +65,16 @@ public class InventoryManager : MonoBehaviour
     private void Start()
     {
         // Obtener el item desde el catálogo
-        BaseItemSO slime = GetItemSO("item_special_slime_even_only");
+        BaseItemSO slime = GetItemSO("item_consumables_catan_bridge");
 
         if (slime != null)
         {
             AddItem(slime, 1);
-            Debug.Log("Añadido item_special_slime_even_only al iniciar.");
+            Debug.Log("Añadido item_consumables_catan_bridge al iniciar.");
         }
         else
         {
-            Debug.LogError("No se encontró item_special_slime_even_only en el catálogo.");
+            Debug.LogError("No se encontró item_consumables_catan_bridge en el catálogo.");
         }
     }
 

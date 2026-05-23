@@ -1,5 +1,0 @@
-=== LOG DE OBJETOS POR TURNO ===
-
-=== NUEVO TURNO DEL JUGADOR ===
-Dado activo equipado: D6
-Dado activo equipado: D6

@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PermanentSO
   itemName: Gafas Destruidas
   icon: {fileID: 0}
-  lockedIcon: {fileID: 0}
-  itemDescription: Duplica los efectos de las casillas malas.
+  itemDescription: Duplica el efecto de casillas peligrosas.
   prefab3D: {fileID: 919132149155446097, guid: 2932a904d894d3841ac62d81d93e026d, type: 3}
   itemID: item_permanents_broken_glasses
   buyPrice: 0
@@ -26,7 +25,6 @@ MonoBehaviour:
   StoreScaleMultiplier: 1
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  ConsumeOnUse: 0
   CannotBeUnequipped: 1
   effects:
   - {fileID: 11400000, guid: 31ffac2e0b72586429014e82d891ec30, type: 2}

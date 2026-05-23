@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: Varita de Cambio
   icon: {fileID: 0}
-  lockedIcon: {fileID: 0}
-  itemDescription: Permite cambiar la polaridad de una lootbox del inventario.
+  itemDescription: Convierte una luckbox en su efecto opuesto.
   prefab3D: {fileID: 6406918071297616627, guid: 052a6293efacbbd498bcaccb627cc519, type: 3}
   itemID: item_consumables_change_wand
   buyPrice: 0
@@ -26,7 +25,6 @@ MonoBehaviour:
   StoreScaleMultiplier: 1
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  ConsumeOnUse: 1
   AppearsIn3D: 0
   AutoUseOnPickup: 0
   canBeUsedOnSpot: 0

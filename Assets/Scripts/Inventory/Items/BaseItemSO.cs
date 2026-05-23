@@ -20,7 +20,6 @@ public abstract class BaseItemSO : ScriptableObject
     [Header("Basic Info")]
     [SerializeField] private string itemName;
     [SerializeField] private Sprite icon;
-    public Sprite lockedIcon;
     [SerializeField][TextArea] private string itemDescription;
     [SerializeField] private GameObject prefab3D;
     
@@ -61,9 +60,6 @@ public abstract class BaseItemSO : ScriptableObject
 
     public int BuyPrice => buyPrice;
     public int SellPrice => sellPrice;
-
-    // Controls whether the item is consumed immediately when used
-    public bool ConsumeOnUse = true;
 
     public ItemPolarity Polarity => polarity;
 

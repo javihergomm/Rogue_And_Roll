@@ -9,10 +9,10 @@ public static class Unlocks
     // IDs que empiezan desbloqueados
     private static readonly string[] defaultUnlocked =
     {
-        "char_basic_1",
-        "char_basic_2",
-        "char_basic_3",
-        "char_basic_4",
+        "character_amarillo",
+        "character_rojo",
+        "character_azul",
+        "character_verde",
         "item_dice_d6",
         "item_lootbox_lootbox",
         "item_permanents_precision_amulet"

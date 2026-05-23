@@ -507,5 +507,9 @@ public class DiceRollManager : MonoBehaviour
 
         return total;
     }
+    public Movement GetPlayerMovement()
+    {
+        return playerMovement;
+    }
 
 }

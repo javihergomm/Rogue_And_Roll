@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: Espejo Maldito
   icon: {fileID: 0}
-  lockedIcon: {fileID: 0}
-  itemDescription: Teletransporta a la casilla positiva mas cercana o a la tienda.
+  itemDescription: Teletransporta a la casilla buena o entrada de tienda mas cercana.
   prefab3D: {fileID: 0}
   itemID: item_consumable_espejo_maldito
   buyPrice: 0
@@ -26,7 +25,6 @@ MonoBehaviour:
   StoreScaleMultiplier: 1
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  ConsumeOnUse: 1
   AppearsIn3D: 0
   AutoUseOnPickup: 0
   canBeUsedOnSpot: 0

@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: Linterna Potenciadora
   icon: {fileID: 0}
-  lockedIcon: {fileID: 0}
-  itemDescription: Duplica el efecto de la proxima casilla buena.
+  itemDescription: Duplica el efecto de casillas positivas.
   prefab3D: {fileID: 0}
   itemID: item_consumable_linterna_potenciadora
   buyPrice: 0
@@ -26,7 +25,6 @@ MonoBehaviour:
   StoreScaleMultiplier: 1
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  ConsumeOnUse: 1
   AppearsIn3D: 0
   AutoUseOnPickup: 0
   canBeUsedOnSpot: 0

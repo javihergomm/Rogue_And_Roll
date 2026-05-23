@@ -12,4 +12,7 @@ public class PassiveContext
     public bool ExtraLifeUsed { get; set; }
     public bool IgnoreNegativeEffect { get; set; }
     public bool DoubleBadSpotEffects { get; set; }
+    public bool AvoidBadSpotEvery3TurnsActive { get; set; }
+    public int AvoidBadSpotTurnCounter { get; set; }
+    public bool AvoidBadSpotBoostReady { get; set; }
 }

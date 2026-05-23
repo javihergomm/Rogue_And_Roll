@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [CreateAssetMenu(
@@ -84,21 +85,19 @@ public class MirrorTeleportEffect : BaseConsumableEffect
         // Teletransporte
         player.TeleportToPosition(target.index);
 
-        // Si cae en Good, activar efecto positivo real
-        if (target.type == Spot.SpotType.Good)
-        {
-            // Tu sistema real: Good Spot tiene 3 posibles efectos
-            // Aquí activamos el efecto positivo "base": bloqueo enemigo
-            var effect = ScriptableObject.CreateInstance<BlockEnemyMovementEffect>();
-            effect.Activate();
-        }
+        // IMPORTANTE: activar efecto real de la casilla
+        player.StartCoroutine(TriggerAfterTeleport(player, target));
+    }
 
-        // Si cae en tienda, entrar
-        if (target.checkpoint)
-        {
-            ShopExitManager shop = Object.FindFirstObjectByType<ShopExitManager>();
-            if (shop != null)
-                shop.EnterShop();
-        }
+    private IEnumerator TriggerAfterTeleport(Movement player, Spot target)
+    {
+        // Esperar un frame para que el teletransporte se aplique
+        yield return null;
+
+        // Activar efecto real de la casilla
+        yield return player.StartCoroutine(target.TriggerSpotEffect(player));
+
+        // Notificar fin de movimiento
+        player.OnMovementFinished?.Invoke();
     }
 }
