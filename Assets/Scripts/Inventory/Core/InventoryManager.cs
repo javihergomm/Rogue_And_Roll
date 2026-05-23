@@ -24,7 +24,6 @@ public class InventoryManager : MonoBehaviour
     public InventoryDescriptionUI DescriptionUI => descriptionUI;
 
     public IReadOnlyList<ItemSlot> AllSlots => slots.AllSlots;
-    public IReadOnlyList<ItemSlot> ItemSlots => slots.AllSlots;
     public ActiveDiceSlots ActiveDice => activeDice;
 
     public event Action OnInventoryChanged;
@@ -47,19 +46,12 @@ public class InventoryManager : MonoBehaviour
 
         Instance = this;
 
-        // 1. Cargar catálogo
         LoadItemCatalog();
-        Debug.Log("Catalog count = " + itemCatalog.Count);
-
-        // 2. Cargar unlocks
         Unlocks.Load();
-        Debug.Log("Unlocks loaded: " + string.Join(",", Unlocks.GetAllUnlockedIDs()));
 
-        // 3. Inicializar slots e inventario
         slots.Initialize();
         activeDice.Initialize(slots.ActiveDiceSlots);
 
-        // 4. Inicializar CanvasGroup del menú
         if (inventoryMenu != null)
         {
             canvasGroup = inventoryMenu.GetComponent<CanvasGroup>();
@@ -67,9 +59,25 @@ public class InventoryManager : MonoBehaviour
                 canvasGroup = inventoryMenu.AddComponent<CanvasGroup>();
         }
 
-        // 5. Suscribirse a eventos
         LootBoxEvents.OnLootBoxOpened += HandleLootBoxReward;
     }
+
+    private void Start()
+    {
+        // Obtener el item desde el catálogo
+        BaseItemSO slime = GetItemSO("item_special_slime_even_only");
+
+        if (slime != null)
+        {
+            AddItem(slime, 1);
+            Debug.Log("Añadido item_special_slime_even_only al iniciar.");
+        }
+        else
+        {
+            Debug.LogError("No se encontró item_special_slime_even_only en el catálogo.");
+        }
+    }
+
     private void LoadItemCatalog()
     {
         itemCatalog.Clear();
@@ -79,37 +87,17 @@ public class InventoryManager : MonoBehaviour
         foreach (var folder in folders)
         {
             var items = Resources.LoadAll<BaseItemSO>("Items/" + folder);
-
             foreach (var item in items)
             {
-                if (item == null)
-                    continue;
-
-                // DEBUG: print the real itemID of every ScriptableObject
-                Debug.Log("[Catalog] Loaded item: " + item.itemID + " from folder " + folder);
-
-                itemCatalog[item.itemID] = item;
+                if (item != null)
+                    itemCatalog[item.itemID] = item;
             }
         }
-
-        Debug.Log("[Catalog] Total items loaded = " + itemCatalog.Count);
     }
 
-
-    public void AddStartingDice(DiceSO dice)
+    public BaseItemSO GetItemSO(string id)
     {
-        ItemSlot slot = activeDice.GetFirstEmptySlot();
-        if (slot == null)
-            return;
-
-        slot.AddItem(dice, 1);
-        activeDice.SyncSlot(slot);
-        OnActiveDiceChanged?.Invoke();
-    }
-
-    public BaseItemSO GetItemSO(string name)
-    {
-        if (itemCatalog.TryGetValue(name, out var item))
+        if (itemCatalog.TryGetValue(id, out var item))
             return item;
 
         return null;
@@ -120,13 +108,13 @@ public class InventoryManager : MonoBehaviour
         slots.AddItem(item, qty);
         permanentEffects.TryActivate(item);
 
-        if (item is ConsumableSO consumable && consumable.AutoUseOnPickup)
+        if (item is ConsumableSO cons && cons.AutoUseOnPickup)
         {
             var ctx = new ConsumableContext();
-            consumable.UseItem(ctx);
+            cons.UseItem(ctx);
 
             if (ctx.WasUsed)
-                slots.RemoveItemByName(consumable.ItemName, 1);
+                slots.RemoveItemByName(cons.ItemName, 1);
         }
 
         OnInventoryChanged?.Invoke();
@@ -137,10 +125,7 @@ public class InventoryManager : MonoBehaviour
         BaseItemSO item = slot.ItemSO;
 
         if (item is PermanentSO perm && perm.CannotBeUnequipped)
-        {
-            Debug.Log("This permanent item cannot be removed, sold or discarded.");
             return;
-        }
 
         slots.RemoveItem(slot, qty);
         permanentEffects.TryDeactivate(item);
@@ -158,21 +143,15 @@ public class InventoryManager : MonoBehaviour
 
         BaseItemSO item = slot.ItemSO;
 
-        // Bloquear permanentes no desequipables
         if (item is PermanentSO perm && perm.CannotBeUnequipped)
-        {
-            Debug.Log("This permanent item cannot be unequipped.");
             return;
-        }
 
-        // Si estamos en modo venta
         if (sellMode.IsActive)
         {
             sellMode.HandleClick(slot);
             return;
         }
 
-        // Si estamos esperando reemplazo
         if (slots.IsWaitingForReplace)
         {
             slots.ReplaceInSlot(slot);
@@ -180,10 +159,8 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
-        // Comportamiento normal
         slots.HandleSlotClick(slot);
     }
-
 
     public void HandleSlotDrop(ItemSlot from, ItemSlot to)
     {
@@ -203,15 +180,13 @@ public class InventoryManager : MonoBehaviour
         OnActiveDiceChanged?.Invoke();
     }
 
+    // ---------------------------------------------------------
+    // ACTIVE DICE API (usado por DiceRoller, Movement, Spawner)
+    // ---------------------------------------------------------
 
     public int GetFinalDiceNumber()
     {
         return DiceRollManager.Instance.GetTotalRoll();
-    }
-
-    public void DeselectAllSlots()
-    {
-        slots.DeselectAll();
     }
 
     public int GetActiveDiceSlotIndex(ItemSlot slot)
@@ -219,14 +194,15 @@ public class InventoryManager : MonoBehaviour
         return activeDice.GetIndexOf(slot);
     }
 
-    public void SetActiveSellPedestal(SellPedestal pedestal)
+    public void AddStartingDice(DiceSO dice)
     {
-        sellMode.Enable(pedestal);
-    }
+        ItemSlot slot = activeDice.GetFirstEmptySlot();
+        if (slot == null)
+            return;
 
-    public void ClearActiveSellPedestal()
-    {
-        sellMode.Disable();
+        slot.AddItem(dice, 1);
+        activeDice.SyncSlot(slot);
+        OnActiveDiceChanged?.Invoke();
     }
 
     public void TryRemoveActiveDice(ItemSlot slot)
@@ -238,27 +214,49 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    public void DeselectAllSlots()
+    {
+        slots.DeselectAll();
+    }
+
     public void RefreshActiveDiceUI()
     {
         OnActiveDiceChanged?.Invoke();
     }
+
+    // ---------------------------------------------------------
+    // SELL MODE
+    // ---------------------------------------------------------
+
+    public void SetActiveSellPedestal(SellPedestal pedestal)
+    {
+        sellMode.Enable(pedestal);
+    }
+
+    public void ClearActiveSellPedestal()
+    {
+        sellMode.Disable();
+    }
+
+    // ---------------------------------------------------------
+    // REPLACE MODE
+    // ---------------------------------------------------------
 
     public void PrepareReplace(BaseItemSO item, int quantity)
     {
         if (item == null)
             return;
 
-        // Bloquear reemplazo de permanentes no desequipables
         if (item is PermanentSO perm && perm.CannotBeUnequipped)
-        {
-            Debug.Log("This permanent item cannot be replaced.");
             return;
-        }
 
         slots.PrepareReplace(item, quantity);
         OpenInventory();
     }
 
+    // ---------------------------------------------------------
+    // INVENTORY UI
+    // ---------------------------------------------------------
 
     public void ToggleInventory()
     {
@@ -274,10 +272,6 @@ public class InventoryManager : MonoBehaviour
 
     public void OpenInventory()
     {
-        if (CharacterSelectManager.Instance != null &&
-            CharacterSelectManager.Instance.IsAnySelectorUIOpen())
-            return;
-
         if (menuOpen)
             return;
 
@@ -325,6 +319,10 @@ public class InventoryManager : MonoBehaviour
         canvasGroup.interactable = false;
     }
 
+    // ---------------------------------------------------------
+    // CONSUMABLES
+    // ---------------------------------------------------------
+
     public void PlaceConsumableOnSpot(ItemSlot slot, Spot spot)
     {
         PlaceConsumableInternal(slot, spot);
@@ -341,24 +339,22 @@ public class InventoryManager : MonoBehaviour
             return;
 
         BaseItemSO item = slot.ItemSO;
-        if (item is not ConsumableSO consumable)
+        if (item is not ConsumableSO cons)
             return;
 
         ConsumableContext ctx = new();
 
-        if (target is ColorSpot colorSpot)
-            ctx.TargetColorSpot = colorSpot;
-        else if (target is Spot spot)
-            ctx.TargetSpot = spot;
+        if (target is ColorSpot cs)
+            ctx.TargetColorSpot = cs;
+        else if (target is Spot s)
+            ctx.TargetSpot = s;
         else
             return;
 
-        consumable.UseItem(ctx);
+        cons.UseItem(ctx);
 
-        if (!ctx.WasUsed)
-            return;
-
-        RemoveItem(slot, 1);
+        if (ctx.WasUsed)
+            RemoveItem(slot, 1);
     }
 
     public void PlaceConsumableOnSlot(ItemSlot consumableSlot, ItemSlot targetSlot)
@@ -367,17 +363,21 @@ public class InventoryManager : MonoBehaviour
             return;
 
         BaseItemSO item = consumableSlot.ItemSO;
-        if (item is not ConsumableSO consumable)
+        if (item is not ConsumableSO cons)
             return;
 
         ConsumableContext ctx = new();
         ctx.TargetSlot = targetSlot;
 
-        consumable.UseItem(ctx);
+        cons.UseItem(ctx);
 
         if (ctx.WasUsed)
             RemoveItem(consumableSlot, 1);
     }
+
+    // ---------------------------------------------------------
+    // LOOTBOX
+    // ---------------------------------------------------------
 
     private void HandleLootBoxReward(LootBoxSO box, BaseItemSO reward)
     {
