@@ -42,6 +42,7 @@ public class Movement : MonoBehaviour
     private bool wasHiddenByEffect = false;
 
     private bool isExtraMovement = false;
+    private bool ignoreInitialCheckpoint = true;
 
     public int Round { get; private set; } = 1;
     public float LapProgress { get; private set; } = 0f;
@@ -101,7 +102,7 @@ public class Movement : MonoBehaviour
         // ============================================================
         if (isPlayer)
             CharacterEffectManager.Instance.NotifyMovementStart(this);
-
+        ignoreInitialCheckpoint = false;
         StartCoroutine(MoveWithVisibilityCheck());
     }
 
@@ -140,6 +141,10 @@ public class Movement : MonoBehaviour
 
         int steps = fixedSteps ?? InventoryManager.Instance.GetFinalDiceNumber();
 
+        Debug.Log("[MOVE] Steps recibidos del dado: " + steps);
+        Debug.Log("[MOVE] Round actual: " + Round);
+
+
         int divisor = 1;
         if (Round >= 3)
             divisor = ((Round - 3) / 2) + 2;
@@ -147,11 +152,17 @@ public class Movement : MonoBehaviour
         if (isPlayer)
             steps /= divisor;
 
+        Debug.Log("[MOVE] Divisor aplicado: " + divisor);
+        Debug.Log("[MOVE] Steps despues de divisor: " + steps);
+
+
         yield return StartCoroutine(Move(steps));
     }
 
     private IEnumerator Move(int steps)
     {
+        Debug.Log("[MOVE] Iniciando movimiento con steps = " + steps + " desde pos " + actualPos);
+
         if (actualPos <= 0)
         {
             OnMovementFinished?.Invoke();
@@ -174,6 +185,9 @@ public class Movement : MonoBehaviour
             int hypotheticalSpot = actualPos + steps;
             if (hypotheticalSpot > nextCheckpoint)
                 steps = nextCheckpoint - actualPos;
+            Debug.Log("[MOVE] Recorte por checkpoint. Hypothetical: " + hypotheticalSpot + " checkpoint: " + nextCheckpoint);
+            Debug.Log("[MOVE] Steps recortados a: " + steps);
+
         }
 
         if (!isPlayer)
@@ -239,6 +253,7 @@ public class Movement : MonoBehaviour
                 int targetSpot = connections[0];
                 int prev = actualPos;
                 actualPos = targetSpot;
+                Debug.Log("[MOVE] Puente detectado. De " + prev + " -> " + targetSpot);
 
                 Vector3 bridgeTarget = positions[targetSpot - 1].position;
 
@@ -270,13 +285,24 @@ public class Movement : MonoBehaviour
 
             if (direction > 0 && spots[actualPos - 1].checkpoint && isPlayer && movementIsPlayerControlled)
             {
-                int remaining = totalSteps - (i + 1);
-                pendingSteps = remaining;
-                turnShouldEnd = false;
+                if (ignoreInitialCheckpoint)
+                {
+                    Debug.Log("[MOVE] Ignorando checkpoint inicial en pos " + actualPos);
+                    ignoreInitialCheckpoint = false;
+                }
+                else
+                {
+                    int remaining = totalSteps - (i + 1);
+                    pendingSteps = remaining;
+                    turnShouldEnd = false;
 
-                shopExitManager.EnterShop();
-                yield break;
+                    Debug.Log("[MOVE] Entrando en checkpoint. Quedan " + remaining + " pasos pendientes.");
+
+                    shopExitManager.EnterShop();
+                    yield break;
+                }
             }
+
 
             yield return new WaitForSeconds(0.1f);
         }
@@ -303,6 +329,9 @@ public class Movement : MonoBehaviour
         lastPos = actualPos;
 
         OnMovementFinished?.Invoke();
+        Debug.Log("[MOVE] Movimiento finalizado. Posicion final: " + actualPos + " | StartPos: " + startPos);
+        Debug.Log("[MOVE] Movimiento real enviado a UI: " + (actualPos - startPos));
+
         SendRealMovementToUI(lastSpotEffectText);
 
         // ============================================================

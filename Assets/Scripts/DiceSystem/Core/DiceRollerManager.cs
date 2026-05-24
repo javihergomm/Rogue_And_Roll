@@ -487,13 +487,12 @@ public class DiceRollManager : MonoBehaviour
                 Debug.Log("* " + slot.ItemName + ": " + baseRoll + " -> " + finalRollValue + " | " + effects);
             }
 
-            int total = GetTotalRoll();
-            Debug.Log("TOTAL FINAL: " + total);
+            // SOLO AQUÍ iniciamos el movimiento del jugador
+            if (playerMovement != null)
+                playerMovement.StartMoving();
         }
-
-        if (playerMovement != null)
-            playerMovement.StartMoving();
     }
+
 
     public void ResetDiceTurnState()
     {

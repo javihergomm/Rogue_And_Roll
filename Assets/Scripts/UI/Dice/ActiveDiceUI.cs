@@ -6,13 +6,8 @@ using System.Collections;
 public class ActiveDiceUI : MonoBehaviour
 {
     [Header("UI")]
-    public RectTransform inventoryButton;
     public RectTransform resultsRoot;
     public GameObject rowPrefab;
-
-    [Header("Layout")]
-    public float extraRight = 6f;
-    public float extraDown = 10f; // ahora es distancia desde el botón hacia abajo
 
     private RectTransform diceBlock;
     private RectTransform summaryBlock;
@@ -40,8 +35,6 @@ public class ActiveDiceUI : MonoBehaviour
     {
         yield return null;
 
-        AlignUnderButton();
-
         diceBlock = CreateBlock("DiceBlock");
         summaryBlock = CreateBlock("SummaryBlock");
 
@@ -62,42 +55,9 @@ public class ActiveDiceUI : MonoBehaviour
         rt.pivot = new Vector2(0f, 1f);
 
         rt.anchoredPosition = Vector2.zero;
-        rt.sizeDelta = new Vector2(350, 0); // <-- NUEVO
+        rt.sizeDelta = new Vector2(420, 0);
 
         return rt;
-    }
-
-
-    private void Update()
-    {
-        if (!Application.isPlaying)
-            AlignUnderButton();
-    }
-
-    // ============================================================
-    // OPCIÓN 3 — SIEMPRE PEGADO AL BOTÓN
-    // ============================================================
-    private void AlignUnderButton()
-    {
-        if (inventoryButton == null || resultsRoot == null)
-            return;
-
-        if (resultsRoot.parent != inventoryButton)
-            resultsRoot.SetParent(inventoryButton, false);
-
-        resultsRoot.anchorMin = new Vector2(0f, 1f);
-        resultsRoot.anchorMax = new Vector2(0f, 1f);
-        resultsRoot.pivot = new Vector2(0f, 1f);
-
-        float leftX = -inventoryButton.rect.width * inventoryButton.pivot.x;
-
-        // NUEVO: resultsRoot SIEMPRE pegado al borde inferior del botón
-        resultsRoot.anchoredPosition = new Vector2(
-            leftX + extraRight,
-            -extraDown
-        );
-
-        resultsRoot.localScale = Vector3.one;
     }
 
     private void HandleEnemyRoll(int total)
@@ -156,7 +116,13 @@ public class ActiveDiceUI : MonoBehaviour
 
         RedrawSummary();
 
-        // NUEVO: reposicionar filas y summary
+        StartCoroutine(RepositionNextFrame());
+    }
+
+    private IEnumerator RepositionNextFrame()
+    {
+        yield return null;
+
         RepositionDiceRows();
         RepositionSummary();
     }
@@ -175,22 +141,22 @@ public class ActiveDiceUI : MonoBehaviour
         string text = "Mov: " + lastMovement + "  |  Efectos: " +
                       (string.IsNullOrEmpty(lastEffects) ? "ninguno" : lastEffects);
 
-        SetupRow(row, title, text, false);
+        SetupRow(row, title, text, false, true);
 
         var nameTMP = row.transform.Find("NameText").GetComponent<TextMeshProUGUI>();
-        nameTMP.rectTransform.sizeDelta = new Vector2(300, nameTMP.rectTransform.sizeDelta.y);
+        nameTMP.rectTransform.sizeDelta = new Vector2(380, nameTMP.rectTransform.sizeDelta.y);
     }
 
     private void CreateHeader(string text)
     {
         var row = Instantiate(rowPrefab, diceBlock);
-        SetupRow(row, text, "", false);
+        SetupRow(row, text, "", false, false);
     }
 
     private void CreateSimpleRow(string text)
     {
         var row = Instantiate(rowPrefab, diceBlock);
-        SetupRow(row, "", text, false);
+        SetupRow(row, "", text, false, false);
     }
 
     private void CreateDiceRow(ItemSlot slot)
@@ -201,14 +167,14 @@ public class ActiveDiceUI : MonoBehaviour
 
         if (!rollInfo.HasValue)
         {
-            SetupRow(row, "", "Sin tirar", false);
+            SetupRow(row, "", "Sin tirar", false, false);
             return;
         }
 
         DiceSO dice = slot.ItemSO as DiceSO;
         if (dice == null)
         {
-            SetupRow(row, "", "Error: dado no encontrado", false);
+            SetupRow(row, "", "Error: dado no encontrado", false, false);
             return;
         }
 
@@ -225,10 +191,10 @@ public class ActiveDiceUI : MonoBehaviour
         foreach (var e in effects)
             effText += "- " + e + "\n";
 
-        SetupRow(row, "", effText, true);
+        SetupRow(row, "", effText, true, false);
     }
 
-    private void SetupRow(GameObject row, string nameText, string effectsText, bool rolled)
+    private void SetupRow(GameObject row, string nameText, string effectsText, bool rolled, bool isSummary)
     {
         var nameTMP = row.transform.Find("NameText").GetComponent<TextMeshProUGUI>();
         var effTMP = row.transform.Find("EffectsText").GetComponent<TextMeshProUGUI>();
@@ -237,45 +203,50 @@ public class ActiveDiceUI : MonoBehaviour
         nameTMP.text = nameText;
         effTMP.text = effectsText;
 
-        nameTMP.lineSpacing = -15f;
-        effTMP.lineSpacing = -15f;
+        nameTMP.lineSpacing = -10f;
+        effTMP.lineSpacing = -10f;
 
         var rt = row.GetComponent<RectTransform>();
         rt.anchorMin = new Vector2(0f, 1f);
         rt.anchorMax = new Vector2(0f, 1f);
         rt.pivot = new Vector2(0f, 1f);
 
-        rt.sizeDelta = new Vector2(350, rolled ? 90 : 40);
+        rt.sizeDelta = new Vector2(420, rolled ? 55 : 28);
 
-        PositionRow(nameTMP.rectTransform, effTMP.rectTransform, img.rectTransform, rolled);
+        PositionRow(nameTMP.rectTransform, effTMP.rectTransform, img.rectTransform, rolled, isSummary);
     }
 
-    private void PositionRow(RectTransform nameRT, RectTransform effRT, RectTransform imgRT, bool rolled)
+    private void PositionRow(RectTransform nameRT, RectTransform effRT, RectTransform imgRT, bool rolled, bool isSummary)
     {
         imgRT.anchorMin = imgRT.anchorMax = imgRT.pivot = new Vector2(0f, 1f);
         nameRT.anchorMin = nameRT.anchorMax = nameRT.pivot = new Vector2(0f, 1f);
         effRT.anchorMin = effRT.anchorMax = effRT.pivot = new Vector2(0f, 1f);
 
+        // SUMMARY FIX: independent layout
+        if (isSummary)
+        {
+            imgRT.sizeDelta = Vector2.zero;
+            nameRT.anchoredPosition = new Vector2(4, -2);
+            effRT.anchoredPosition = new Vector2(4, -30); // guaranteed separation
+            return;
+        }
+
         if (rolled)
         {
-            imgRT.sizeDelta = new Vector2(50, 50);
-            imgRT.anchoredPosition = new Vector2(0, -26);
+            imgRT.sizeDelta = new Vector2(40, 40);
+            imgRT.anchoredPosition = new Vector2(0, -14);
 
-            nameRT.anchoredPosition = new Vector2(60, -10);
-            effRT.anchoredPosition = new Vector2(60, -42);
+            nameRT.anchoredPosition = new Vector2(60, -4);
+            effRT.anchoredPosition = new Vector2(60, -22);
         }
         else
         {
             imgRT.sizeDelta = Vector2.zero;
 
-            nameRT.anchoredPosition = new Vector2(0, -2);
-            effRT.anchoredPosition = new Vector2(0, -22);
+            nameRT.anchoredPosition = new Vector2(4, -2);
+            effRT.anchoredPosition = new Vector2(4, -14);
         }
     }
-
-    // ============================================================
-    // NUEVO SISTEMA DE LAYOUT
-    // ============================================================
 
     private void RepositionDiceRows()
     {
@@ -285,7 +256,7 @@ public class ActiveDiceUI : MonoBehaviour
         {
             RectTransform rt = diceBlock.GetChild(i).GetComponent<RectTransform>();
             rt.anchoredPosition = new Vector2(0, -y);
-            y += rt.rect.height + 10f;
+            y += rt.rect.height + 4f;
         }
     }
 
@@ -296,9 +267,9 @@ public class ActiveDiceUI : MonoBehaviour
         for (int i = 0; i < diceBlock.childCount; i++)
         {
             RectTransform rt = diceBlock.GetChild(i).GetComponent<RectTransform>();
-            totalHeight += rt.rect.height + 10f;
+            totalHeight += rt.rect.height + 4f;
         }
 
-        summaryBlock.anchoredPosition = new Vector2(0, -totalHeight - 10f);
+        summaryBlock.anchoredPosition = new Vector2(0, -totalHeight - 4f);
     }
 }

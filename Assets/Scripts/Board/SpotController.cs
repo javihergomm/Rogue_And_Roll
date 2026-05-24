@@ -1,5 +1,6 @@
-using UnityEngine;
+using System;
 using System.Linq;
+using UnityEngine;
 
 public class SpotController : MonoBehaviour
 {
@@ -43,15 +44,18 @@ public class SpotController : MonoBehaviour
     {
         spots = FindObjectsByType<Spot>(FindObjectsSortMode.None);
 
+        foreach (Spot s in spots)
+            s.checkpoint = false;
+
         AssignRandomTypes();
-        AssignCheckpoints(1);
     }
+
 
     private void AssignRandomTypes()
     {
         foreach (Spot s in spots)
         {
-            int roll = Random.Range(0, 100);
+            int roll = UnityEngine.Random.Range(0, 100);
 
             if (roll < probNormal)
                 s.AssignType(Spot.SpotType.Normal);
@@ -62,8 +66,12 @@ public class SpotController : MonoBehaviour
         }
     }
 
-    private void AssignCheckpoints(int color)
+    public void AssignCheckpoints(int color)
     {
+        
+        foreach (Spot s in spots)
+            s.checkpoint = false;
+
         int[] checkpoints;
 
         if (color == 1)
@@ -76,13 +84,7 @@ public class SpotController : MonoBehaviour
             checkpoints = new int[] { 63, 5, 17, 29, 39, 51 };
 
         foreach (Spot s in spots)
-        {
-            if (System.Array.Exists(checkpoints, x => x == s.index))
-            {
-                s.checkpoint = true;
-                s.AssignType(Spot.SpotType.Normal);
-            }
-        }
+            s.checkpoint = checkpoints.Contains(s.index);
     }
 
     public Spot[] GetSpotsOrdered()
