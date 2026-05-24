@@ -19,7 +19,7 @@ MonoBehaviour:
   itemID: item_consumables_catan_bridge
   buyPrice: 4
   sellPrice: 2
-  polarity: 0
+  polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: -0.15
   StoreScaleMultiplier: 0.2

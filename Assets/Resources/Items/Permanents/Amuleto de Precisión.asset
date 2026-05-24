@@ -19,7 +19,7 @@ MonoBehaviour:
   itemID: item_permanents_precision_amulet
   buyPrice: 0
   sellPrice: 0
-  polarity: 0
+  polarity: 1
   StoreRotationOffset: {x: 0, y: -20, z: 0}
   StoreHeightOffset: 0.1
   StoreScaleMultiplier: 0.6

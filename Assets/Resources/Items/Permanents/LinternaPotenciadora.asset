@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa883210174fa744bb4e92c273a1b86b, type: 3}
-  m_Name: GatoNueveVidas
+  m_Name: LinternaPotenciadora
   m_EditorClassIdentifier: Assembly-CSharp::PermanentSO
-  itemName: Gato de 9 Vidas
+  itemName: Linterna Potenciadora
   icon: {fileID: 0}
-  itemDescription: Otorga una vida extra.
+  itemDescription: Duplica el efecto de casillas positivas.
   prefab3D: {fileID: 0}
-  itemID: item_permanent_gato_9_vidas
+  itemID: item_consumable_linterna_potenciadora
   buyPrice: 0
   sellPrice: 0
-  polarity: 0
+  polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0
   StoreScaleMultiplier: 1
@@ -27,4 +27,4 @@ MonoBehaviour:
   StoreXPositionOffset: 0
   CannotBeUnequipped: 0
   effects:
-  - {fileID: 11400000, guid: 172d5a006fcc79a4fa27d6a51021d4a1, type: 2}
+  - {fileID: 11400000, guid: 572f2987500421841bb1806a805d7cc6, type: 2}

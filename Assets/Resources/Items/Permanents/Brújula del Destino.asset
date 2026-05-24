@@ -19,7 +19,7 @@ MonoBehaviour:
   itemID: item_permanents_destiny_compass
   buyPrice: 0
   sellPrice: 0
-  polarity: 0
+  polarity: 1
   StoreRotationOffset: {x: -45, y: 180, z: 0}
   StoreHeightOffset: -0.05
   StoreScaleMultiplier: 1

@@ -9,22 +9,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f51b93ef3597de2489a4f637747d52bc, type: 3}
-  m_Name: LootBox
-  m_EditorClassIdentifier: Assembly-CSharp::LootBoxSO
-  itemName: LootBox
+  m_Script: {fileID: 11500000, guid: 3bd3dc40917a57e40920014beee12295, type: 3}
+  m_Name: GatoNueveVidas
+  m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
+  itemName: Gato de 9 Vidas
   icon: {fileID: 0}
-  itemDescription: Lootbox que otorga un objeto aleatorio segun su polaridad.
-  prefab3D: {fileID: 5268606362059046244, guid: 1f164fd9655e6ac48a7e7fddf788f149, type: 3}
-  itemID: item_lootbox_lootbox
+  itemDescription: Otorga una vida extra.
+  prefab3D: {fileID: 0}
+  itemID: item_permanent_gato_9_vidas
   buyPrice: 0
   sellPrice: 0
-  polarity: 0
+  polarity: 3
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0
   StoreScaleMultiplier: 1
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  lootType: 0
-  positiveItems: []
-  negativeItems: []
+  AppearsIn3D: 0
+  AutoUseOnPickup: 0
+  canBeUsedOnSpot: 0
+  effects:
+  - {fileID: 11400000, guid: 172d5a006fcc79a4fa27d6a51021d4a1, type: 2}

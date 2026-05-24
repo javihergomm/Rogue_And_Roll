@@ -19,7 +19,7 @@ MonoBehaviour:
   itemID: item_consumables_cleric_blessing
   buyPrice: 0
   sellPrice: 0
-  polarity: 0
+  polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0
   StoreScaleMultiplier: 1

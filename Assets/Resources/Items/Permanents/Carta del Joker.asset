@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Carta del Joker
   m_EditorClassIdentifier: Assembly-CSharp::PermanentSO
   itemName: Carta del Joker
-  icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
+  icon: {fileID: 0}
   itemDescription: Reduce el rango del dado a la mitad de su valor inferior.
   prefab3D: {fileID: 4121997984402377415, guid: bdf55daba5cb7e6489d5356ac5a0b2f7, type: 3}
   itemID: item_permanents_joker_card
   buyPrice: 10
   sellPrice: 5
-  polarity: 1
+  polarity: 2
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0.1
   StoreScaleMultiplier: 0.8
