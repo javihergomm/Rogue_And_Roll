@@ -405,4 +405,17 @@ public class InventoryManager : MonoBehaviour
     {
         AddItem(reward, 1);
     }
+
+    public bool AllDiceFinishedRolling()
+    {
+        foreach (ItemSlot slot in ActiveDice.GetNonEmptySlots())
+        {
+            var info = DiceRollManager.Instance.GetRollInfo(slot);
+            if (!info.HasValue)
+                return false;
+        }
+
+        return true;
+    }
+
 }

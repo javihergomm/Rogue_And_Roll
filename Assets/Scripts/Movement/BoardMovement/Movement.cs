@@ -187,7 +187,7 @@ public class Movement : MonoBehaviour
             int previousPos = actualPos;
 
             actualPos += direction;
-
+            Debug.Log($"[MOVEMENT] De {previousPos} -> {actualPos}");
             if (actualPos > positions.Length)
                 actualPos = 1;
             if (actualPos < 1)

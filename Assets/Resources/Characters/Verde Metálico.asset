@@ -27,7 +27,7 @@ MonoBehaviour:
   - {fileID: -6087771358165109452, guid: cdb9bbc805265f2429844ee135c82222, type: 3}
   cupPrefab: {fileID: 8896195281185510353, guid: 004365b7000dd4a40ae16a2a037e3057, type: 3}
   tilePrefab: {fileID: 44463376864901974, guid: c76b77f35fbe14b49a22476698763f27, type: 3}
-  spawnPointName: Spawn_Verde
+  spawnPointName: Spawn_Green
   tileSpotIndex: 5
   effects:
   - {fileID: 11400000, guid: 5d942cf6b6bd26f42891d2a12d3e45e1, type: 2}

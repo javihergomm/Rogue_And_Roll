@@ -199,6 +199,16 @@ public class DiceRollManager : MonoBehaviour
             return;
 
         rollHistory[slot] = (baseRoll, finalRoll);
+
+        // LOG POR DADO
+        string slotName = slot.ItemName;
+        string effects = appliedEffects.ContainsKey(slot)
+            ? string.Join(", ", appliedEffects[slot])
+            : "Sin efectos";
+
+        Debug.Log("[DICE] " + slotName + " -> Base: " + baseRoll + " | Final: " + finalRoll + " | Efectos: " + effects);
+
+
         FinalizeRoll(finalRoll);
     }
 
@@ -458,6 +468,28 @@ public class DiceRollManager : MonoBehaviour
     {
         Debug.Log("Final roll result: " + finalRoll);
         StatManager.Instance.OnDiceFinalResult(finalRoll);
+
+        // RESUMEN FINAL DE TIRADA
+        if (InventoryManager.Instance.AllDiceFinishedRolling())
+        {
+            Debug.Log("=== RESUMEN DE TIRADA ===");
+
+            foreach (var kvp in rollHistory)
+            {
+                ItemSlot slot = kvp.Key;
+                int baseRoll = kvp.Value.baseRoll;
+                int finalRollValue = kvp.Value.finalRoll;
+
+                string effects = appliedEffects.ContainsKey(slot)
+                    ? string.Join(", ", appliedEffects[slot])
+                    : "Sin efectos";
+
+                Debug.Log("* " + slot.ItemName + ": " + baseRoll + " -> " + finalRollValue + " | " + effects);
+            }
+
+            int total = GetTotalRoll();
+            Debug.Log("TOTAL FINAL: " + total);
+        }
 
         if (playerMovement != null)
             playerMovement.StartMoving();

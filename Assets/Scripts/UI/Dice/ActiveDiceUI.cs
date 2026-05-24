@@ -12,7 +12,7 @@ public class ActiveDiceUI : MonoBehaviour
 
     [Header("Layout")]
     public float extraRight = 6f;
-    public float extraDown = 34f;
+    public float extraDown = 10f; // ahora es distancia desde el botón hacia abajo
 
     private RectTransform diceBlock;
     private RectTransform summaryBlock;
@@ -25,8 +25,6 @@ public class ActiveDiceUI : MonoBehaviour
     private void OnEnable()
     {
         StartCoroutine(DelayedInit());
-
-        // ÚNICO EVENTO NECESARIO
         TurnManager.OnEnemyRollCalculated += HandleEnemyRoll;
     }
 
@@ -64,10 +62,11 @@ public class ActiveDiceUI : MonoBehaviour
         rt.pivot = new Vector2(0f, 1f);
 
         rt.anchoredPosition = Vector2.zero;
-        rt.sizeDelta = Vector2.zero;
+        rt.sizeDelta = new Vector2(350, 0); // <-- NUEVO
 
         return rt;
     }
+
 
     private void Update()
     {
@@ -75,6 +74,9 @@ public class ActiveDiceUI : MonoBehaviour
             AlignUnderButton();
     }
 
+    // ============================================================
+    // OPCIÓN 3 — SIEMPRE PEGADO AL BOTÓN
+    // ============================================================
     private void AlignUnderButton()
     {
         if (inventoryButton == null || resultsRoot == null)
@@ -88,19 +90,16 @@ public class ActiveDiceUI : MonoBehaviour
         resultsRoot.pivot = new Vector2(0f, 1f);
 
         float leftX = -inventoryButton.rect.width * inventoryButton.pivot.x;
-        float bottomY = -inventoryButton.rect.height * (1f - inventoryButton.pivot.y);
 
+        // NUEVO: resultsRoot SIEMPRE pegado al borde inferior del botón
         resultsRoot.anchoredPosition = new Vector2(
             leftX + extraRight,
-            bottomY - extraDown
+            -extraDown
         );
 
         resultsRoot.localScale = Vector3.one;
     }
 
-    // ============================================================
-    // Solo necesitamos detectar tiradas enemigas
-    // ============================================================
     private void HandleEnemyRoll(int total)
     {
         lastWasEnemy = true;
@@ -111,7 +110,6 @@ public class ActiveDiceUI : MonoBehaviour
         RefreshUI();
     }
 
-    // Llamado desde Movement SIEMPRE al final del turno real
     public void SetLastTurnSummary(int movement, string effects, bool wasEnemy)
     {
         lastMovement = movement;
@@ -129,11 +127,9 @@ public class ActiveDiceUI : MonoBehaviour
 
         bool isPlayerTurn = TurnManager.Instance.IsPlayerTurn();
 
-        // 1. Limpiar dados
         foreach (Transform t in diceBlock)
             Destroy(t.gameObject);
 
-        // 2. Header + dados
         CreateHeader(isPlayerTurn ? "Jugador" : "Enemigo");
 
         if (!isPlayerTurn)
@@ -158,20 +154,11 @@ public class ActiveDiceUI : MonoBehaviour
                 CreateSimpleRow("Sin tirar");
         }
 
-        // 3. Redibujar resumen SOLO si alguna vez hemos recibido uno
         RedrawSummary();
 
-        // 4. Colocar el bloque de resumen debajo de los dados
-        if (diceBlock.childCount > 0)
-        {
-            RectTransform lastRow = diceBlock.GetChild(diceBlock.childCount - 1).GetComponent<RectTransform>();
-            float lastRowBottom = lastRow.anchoredPosition.y - lastRow.rect.height;
-            summaryBlock.anchoredPosition = new Vector2(0, lastRowBottom - 20);
-        }
-        else
-        {
-            summaryBlock.anchoredPosition = new Vector2(0, -20);
-        }
+        // NUEVO: reposicionar filas y summary
+        RepositionDiceRows();
+        RepositionSummary();
     }
 
     private void RedrawSummary()
@@ -284,5 +271,34 @@ public class ActiveDiceUI : MonoBehaviour
             nameRT.anchoredPosition = new Vector2(0, -2);
             effRT.anchoredPosition = new Vector2(0, -22);
         }
+    }
+
+    // ============================================================
+    // NUEVO SISTEMA DE LAYOUT
+    // ============================================================
+
+    private void RepositionDiceRows()
+    {
+        float y = 0f;
+
+        for (int i = 0; i < diceBlock.childCount; i++)
+        {
+            RectTransform rt = diceBlock.GetChild(i).GetComponent<RectTransform>();
+            rt.anchoredPosition = new Vector2(0, -y);
+            y += rt.rect.height + 10f;
+        }
+    }
+
+    private void RepositionSummary()
+    {
+        float totalHeight = 0f;
+
+        for (int i = 0; i < diceBlock.childCount; i++)
+        {
+            RectTransform rt = diceBlock.GetChild(i).GetComponent<RectTransform>();
+            totalHeight += rt.rect.height + 10f;
+        }
+
+        summaryBlock.anchoredPosition = new Vector2(0, -totalHeight - 10f);
     }
 }
