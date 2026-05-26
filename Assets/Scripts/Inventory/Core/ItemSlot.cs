@@ -198,23 +198,23 @@ public class ItemSlot : MonoBehaviour,
         if (target == null)
             return;
 
+        // PRIORIDAD: COLORSPOT PRIMERO 
+        if (target is ColorSpot colorSpot)
+        {
+            InventoryManager.Instance.PlaceConsumableOnColorSpot(this, colorSpot);
+            InventoryManager.Instance.CloseInventory();
+            return;
+        }
+
+        // SI NO ES COLORSPOT, ENTONCES SPOT NORMAL 
         if (target is Spot spot)
         {
             InventoryManager.Instance.PlaceConsumableOnSpot(this, spot);
             InventoryManager.Instance.CloseInventory();
             return;
         }
-
-        if (target is ColorSpot colorSpot)
-        {
-            if (consumable.AppearsIn3D)
-            {
-                InventoryManager.Instance.PlaceConsumableOnColorSpot(this, colorSpot);
-                InventoryManager.Instance.CloseInventory();
-            }
-            return;
-        }
     }
+
 
     public void OnDrop(PointerEventData eventData)
     {
@@ -285,16 +285,18 @@ public class ItemSlot : MonoBehaviour,
         SpotController controller = Object.FindFirstObjectByType<SpotController>();
         List<MonoBehaviour> all = new();
 
+        // 1. Primero añadimos ColorSpot (PRIORIDAD MÁXIMA)
+        ColorSpot[] colorSpots = Object.FindObjectsByType<ColorSpot>(FindObjectsSortMode.None);
+        if (colorSpots != null && colorSpots.Length > 0)
+            all.AddRange(colorSpots);
+
+        // 2. Luego añadimos Spot normales
         if (controller != null)
         {
             Spot[] normalSpots = controller.GetSpotsOrdered();
             if (normalSpots != null && normalSpots.Length > 0)
                 all.AddRange(normalSpots);
         }
-
-        ColorSpot[] colorSpots = Object.FindObjectsByType<ColorSpot>(FindObjectsSortMode.None);
-        if (colorSpots != null && colorSpots.Length > 0)
-            all.AddRange(colorSpots);
 
         if (all.Count == 0)
             return null;
@@ -320,6 +322,7 @@ public class ItemSlot : MonoBehaviour,
 
         return closest;
     }
+
 
     public void OnPointerEnter(PointerEventData eventData)
     {

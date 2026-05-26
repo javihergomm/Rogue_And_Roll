@@ -15,7 +15,12 @@ public static class Unlocks
         "character_verde",
         "item_dice_d6",
         "item_lootbox_lootbox",
-        "item_permanents_precision_amulet"
+        "item_permanents_precision_amulet",
+        "item_consumables_deadly_chest",
+        "item_consumables_cursed_incense",
+        "item_consumables_broken_map",
+        "item_permanents_joker_card",
+        "item_permanents_broken_glasses"
     };
 
     public static bool IsUnlocked(string id)

@@ -187,34 +187,33 @@ public class DescriptionAutoFill : EditorWindow
             t = t.BaseType;
         }
     }
-
     private string GetDescriptionField(ScriptableObject so, out FieldInfo foundField)
     {
         foundField = null;
 
         string[] names =
         {
-            "description",
-            "itemDescription",
-            "ItemDescription",
-            "desc",
-            "tooltip"
-        };
+        "description",
+        "itemDescription",
+        "ItemDescription",
+        "desc",
+        "tooltip"
+    };
 
-        foreach (var f in GetAllFields(so.GetType()))
+        var fields = so.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+        foreach (var f in fields)
         {
             foreach (var n in names)
             {
                 if (f.Name == n && f.FieldType == typeof(string))
                 {
                     foundField = f;
-                    Debug.Log("[DESC-FIELD] " + so.name + " usa campo: " + f.Name);
                     return (string)f.GetValue(so);
                 }
             }
         }
 
-        Debug.LogWarning("[DESC-FIELD] " + so.name + " NO tiene campo de descripcion compatible.");
         return null;
     }
 
@@ -222,108 +221,31 @@ public class DescriptionAutoFill : EditorWindow
     {
         Debug.Log("[GEN-DESC] Procesando: " + so.name + " (" + so.GetType().Name + ")");
 
-        string raw = so.name.ToLower();
-        string name = RemoveAccents(raw);
-
-        // 1. PERSONAJES BASICOS (nombre = solo el color)
-        if (so.GetType().Name.Contains("Character"))
+        // Solo queremos cambiar descripciones de ciertos objetos negativos
+        if (so is BaseItemSO baseItem)
         {
-            string color = ExtractColorFromName(so.name);
-            Debug.Log("[GEN-DESC] Character detectado. Color: " + color + " | name=" + name);
-
-            if (name == color)
+            switch (baseItem.itemID)
             {
-                Debug.Log("[GEN-DESC] Personaje basico detectado: " + so.name);
-                return "El cubilete clasico. Sin efectos especiales: solo tu suerte, tu ruta y tu estrategia. La experiencia mas pura del juego.";
+                case "item_consumables_deadly_chest":
+                    return "Un cofre antiguo con mecanismos poco comunes. Su contenido suele sorprender incluso a los jugadores mas experimentados.";
+
+                case "item_consumables_cursed_incense":
+                    return "Un incienso de aroma intenso que altera ligeramente la atmosfera del tablero. Su efecto puede cambiar el ritmo de la partida.";
+
+                case "item_consumables_broken_map":
+                    return "Un mapa desgastado que muestra rutas alternativas. No siempre es facil interpretarlo, pero puede revelar caminos inesperados.";
+
+                case "item_permanents_joker_card":
+                    return "Una carta comodin con reglas poco claras. Su influencia en el dado es peculiar y dificil de anticipar.";
+
+                case "item_permanents_broken_glasses":
+                    return "Unas gafas antiguas que distorsionan un poco la percepcion del tablero. A veces muestran detalles que pasan desapercibidos.";
             }
         }
 
-        // 2. CONSUMIBLES (van ANTES que cubiletes para evitar colisiones como 'pocion del azar')
-        if (name.Contains("pocion"))
-            return "Multiplica el resultado del dado entre x2 y x5.";
-
-        if (name.Contains("espejo"))
-            return "Teletransporta a la casilla buena o entrada de tienda mas cercana.";
-
-        if (name.Contains("catan"))
-            return "Crea un atajo durante la ronda.";
-
-        if (name.Contains("mapa"))
-            return "Desorienta al jugador y oculta la tirada.";
-
-        if (name.Contains("varita"))
-            return "Convierte una luckbox en su efecto opuesto.";
-
-        if (name.Contains("trebol"))
-            return "Convierte una casilla negativa en una luckbox.";
-
-        if (name.Contains("cofre"))
-            return "Intercambia una casilla normal por una mala.";
-
-        if (name.Contains("incienso"))
-            return "Impide moverse durante varios turnos.";
-
-        if (name.Contains("clerigo"))
-            return "Permite mover dos veces durante varios turnos.";
-
-        // 3. LOOTBOXES (antes que cubiletes)
-        if (so is LootBoxSO)
-        {
-            Debug.Log("[GEN-DESC] Lootbox detectada: " + so.name);
-
-            if (name.Contains("positiva"))
-                return "Lootbox positiva que contiene objetos beneficiosos.";
-
-            if (name.Contains("negativa"))
-                return "Lootbox negativa que contiene objetos peligrosos.";
-
-            return "Lootbox que otorga un objeto aleatorio segun su polaridad.";
-        }
-
-        // 4. PERMANENTES
-        if (name.Contains("precision"))
-            return "Aumenta todas las tiradas en +1.";
-
-        if (name.Contains("brujula"))
-            return "Permite elegir entre dos resultados posibles del dado.";
-
-        if (name.Contains("joker"))
-            return "Reduce el rango del dado a la mitad de su valor inferior.";
-
-        if (name.Contains("linterna"))
-            return "Duplica el efecto de casillas positivas.";
-
-        if (name.Contains("gafas"))
-            return "Duplica el efecto de casillas peligrosas.";
-
-        if (name.Contains("escudo"))
-            return "Anula el efecto de la proxima casilla mala y se consume.";
-
-        // 5. ESPECIALES
-        if (name.Contains("gato"))
-            return "Otorga una vida extra.";
-
-        if (name.Contains("limo"))
-            return "Fuerza que todas las tiradas sean pares.";
-
-        // 6. CUBILETES (van al final porque son los mas genericos)
-        if (name.Contains("metalico"))
-            return "Un cubilete reforzado que estabiliza las tiradas pequenas. Aporta +1 a los dados d4 y d6, ideal para rutas seguras y movimientos controlados.";
-
-        if (name.Contains("encantado"))
-            return "Un cubilete imbuido con magia protectora. Cada 3 turnos, tu proximo movimiento ignora por completo la siguiente casilla mala que pises.";
-
-        if (name.Contains("azar"))
-            return "Un cubilete impredecible que altera el destino. Cada tirada tiene un 10% de activar un efecto extra: casilla estrategica, duplicar movimiento u otros eventos especiales.";
-
-        if (name.Contains("basico"))
-            return "El cubilete clasico. Sin efectos especiales: solo tu suerte, tu ruta y tu estrategia. La experiencia mas pura del juego.";
-
-        // 7. NADA COINCIDE
-        Debug.LogWarning("[GEN-DESC] No se encontro descripcion para: " + so.name);
-        return "Sin descripcion.";
+        // Para todos los demas objetos NO cambiar la descripcion
+        return null;
     }
-
 
     private string ExtractColorFromName(string name)
     {

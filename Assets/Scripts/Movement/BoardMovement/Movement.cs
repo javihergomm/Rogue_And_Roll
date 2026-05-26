@@ -60,9 +60,26 @@ public class Movement : MonoBehaviour
 
     private void Start()
     {
+        // ============================
+        // Cargar Spots del tablero
+        // ============================
         spots = FindObjectsByType<Spot>(FindObjectsSortMode.None);
+
+        Debug.Log("========== DEBUG SPOTS ENCONTRADOS ==========");
+        Debug.Log("[DEBUG] Total Spots encontrados: " + spots.Length);
+
+        foreach (var s in spots)
+        {
+            Debug.Log("[DEBUG] Spot encontrado: " + s.name + " | index=" + s.index + " | activo=" + s.gameObject.activeInHierarchy);
+        }
+        Debug.Log("==============================================");
+
+        // Ordenar por índice
         Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
+        // ============================
+        // Asignar posiciones
+        // ============================
         if (positions == null || positions.Length == 0)
         {
             positions = new Transform[spots.Length];
@@ -73,12 +90,18 @@ public class Movement : MonoBehaviour
         shopExitManager = FindFirstObjectByType<ShopExitManager>();
         cachedRenderer = GetComponentInChildren<Renderer>();
 
+        // ============================
+        // Posición inicial
+        // ============================
         if (actualPos >= 1 && actualPos <= positions.Length)
             transform.position = positions[actualPos - 1].position;
 
         startPos = actualPos;
         lastPos = actualPos;
+
+        Debug.Log($"[DEBUG] Movement iniciado. actualPos={actualPos}, totalPositions={positions.Length}");
     }
+
 
     public void StartMoving()
     {
@@ -89,6 +112,7 @@ public class Movement : MonoBehaviour
         movementIsPlayerControlled = true;
         lastTotalMovement = 0;
         lastSpotEffectText = "";
+        ignoreBridgeThisMove = false;
 
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
         {
@@ -111,6 +135,7 @@ public class Movement : MonoBehaviour
         nextCheckpoint = int.MaxValue;
         effectAlreadyTriggered = false;
         turnShouldEnd = true;
+        ignoreBridgeThisMove = false;
 
         // ============================================================
         // Notificar inicio de movimiento fijo
@@ -427,10 +452,9 @@ public class Movement : MonoBehaviour
 
     public void ResetAfterShop()
     {
-        startPos = actualPos;
-        lastTotalMovement = 0;
-        effectAlreadyTriggered = false;
-        movementIsPlayerControlled = false;
+        ignoreInitialCheckpoint = true;
+        isExtraMovement = false;
+        lastPos = actualPos;
     }
 
 #if UNITY_EDITOR

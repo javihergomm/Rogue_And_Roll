@@ -8,14 +8,11 @@ public class CharacterEffectManager : MonoBehaviour
     [Header("Active Character")]
     public CharacterSO activeCharacter;
 
-    // Listas REALES que usa tu sistema
     public List<BaseDiceEffect> ActiveDiceEffects { get; private set; } = new();
     public List<BasePassiveEffect> ActivePassiveEffects { get; private set; } = new();
 
-    // Efectos temporales (Bridge of Catan, etc.)
     private readonly List<BaseConsumableEffect> activeTemporaryEffects = new();
 
-    // Lista unificada para callbacks
     private readonly List<BaseEffect> allEffects = new();
 
     private void Awake()
@@ -31,7 +28,7 @@ public class CharacterEffectManager : MonoBehaviour
     }
 
     // ============================================================
-    // ACTIVACIÓN DE PERSONAJE
+    // ACTIVACION DE PERSONAJE
     // ============================================================
     public void ActivateCharacter(CharacterSO character)
     {
@@ -41,13 +38,11 @@ public class CharacterEffectManager : MonoBehaviour
             return;
         }
 
-        // Quitar efectos anteriores
         if (activeCharacter != null)
             CharacterEffectApplier.RemoveEffects(activeCharacter);
 
         activeCharacter = character;
 
-        // Aplicar efectos nuevos
         CharacterEffectApplier.ApplyEffects(character);
 
         RebuildUnifiedEffectList();
@@ -107,7 +102,7 @@ public class CharacterEffectManager : MonoBehaviour
     }
 
     // ============================================================
-    // LISTA UNIFICADA PARA CALLBACKS
+    // LISTA UNIFICADA
     // ============================================================
     private void RebuildUnifiedEffectList()
     {
@@ -124,44 +119,44 @@ public class CharacterEffectManager : MonoBehaviour
     }
 
     // ============================================================
-    // CALLBACKS DE TURNO
+    // CALLBACKS DE TURNO (ARREGLADOS)
     // ============================================================
     public void NotifyTurnStart()
     {
-        foreach (var eff in allEffects)
-            eff.OnTurnStart();
+        for (int i = allEffects.Count - 1; i >= 0; i--)
+            allEffects[i].OnTurnStart();
     }
 
     public void NotifyTurnEnd()
     {
-        foreach (var eff in allEffects)
-            eff.OnTurnEnd();
+        for (int i = allEffects.Count - 1; i >= 0; i--)
+            allEffects[i].OnTurnEnd();
     }
 
     public void NotifyEnemyTurnStart(EnemyBase enemy)
     {
-        foreach (var eff in allEffects)
-            eff.OnEnemyTurnStart(enemy);
+        for (int i = allEffects.Count - 1; i >= 0; i--)
+            allEffects[i].OnEnemyTurnStart(enemy);
     }
 
     public void NotifyEnemyTurnEnd(EnemyBase enemy)
     {
-        foreach (var eff in allEffects)
-            eff.OnEnemyTurnEnd(enemy);
+        for (int i = allEffects.Count - 1; i >= 0; i--)
+            allEffects[i].OnEnemyTurnEnd(enemy);
     }
 
     // ============================================================
-    // CALLBACKS DE MOVIMIENTO
+    // CALLBACKS DE MOVIMIENTO (ARREGLADOS)
     // ============================================================
     public void NotifyMovementStart(Movement m)
     {
-        foreach (var eff in allEffects)
-            eff.OnMovementStart(m);
+        for (int i = allEffects.Count - 1; i >= 0; i--)
+            allEffects[i].OnMovementStart(m);
     }
 
     public void NotifyMovementEnd(Movement m)
     {
-        foreach (var eff in allEffects)
-            eff.OnMovementEnd(m);
+        for (int i = allEffects.Count - 1; i >= 0; i--)
+            allEffects[i].OnMovementEnd(m);
     }
 }

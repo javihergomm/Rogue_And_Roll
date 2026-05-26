@@ -12,7 +12,22 @@ public class ColorSpot : MonoBehaviour
     [SerializeField] private int leftPositionIndex;
     [SerializeField] private int rightPositionIndex;
 
-    public int LeftPositionIndex { get; set; }
-    public int RightPositionIndex { get; set; }
+    public int LeftPositionIndex
+    {
+        get => leftPositionIndex;
+        set => leftPositionIndex = value;
+    }
 
+    public int RightPositionIndex
+    {
+        get => rightPositionIndex;
+        set => rightPositionIndex = value;
+    }
+
+    private void OnValidate()
+    {
+        Debug.Log($"[COLORSPOT] {name} -> Left={leftPositionIndex}, Right={rightPositionIndex}");
+    }
 }
+
+

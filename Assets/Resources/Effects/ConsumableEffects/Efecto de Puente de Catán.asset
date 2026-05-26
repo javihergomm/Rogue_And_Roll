@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: "Efecto de Puente de Cat\xE1n"
   m_EditorClassIdentifier: Assembly-CSharp::BridgeOfCatanEffect
   alignment: 0
-  bridgePrefab: {fileID: 5774364267047174808, guid: d313e14225492c543b48fe5f9a319218, type: 3}
+  bridgePrefab: {fileID: 5683758079633837136, guid: 262904a93677e5e44a17178dc8164e71, type: 3}

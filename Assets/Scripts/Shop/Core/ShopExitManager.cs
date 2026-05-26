@@ -176,7 +176,7 @@ public class ShopExitManager : MonoBehaviour
         Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
         if (playerMovement != null)
             playerMovement.enabled = false;
-
+        BridgeOfCatanEffect.HideVisual();
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = false;
 
@@ -231,6 +231,7 @@ public class ShopExitManager : MonoBehaviour
             ghostSpawnRoot.SetActive(false);
         inShop = false;
         OnShopStateChanged?.Invoke(false);
+        BridgeOfCatanEffect.ShowVisual();
 
         Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
         if (playerMovement != null)
@@ -267,13 +268,14 @@ public class ShopExitManager : MonoBehaviour
                 playerMovement.turnShouldEnd = true;
                 playerMovement.StartMovingFixed(steps);
             }
-
             else
             {
                 playerMovement.SendRealMovementToUI(playerMovement.lastSpotEffectText);
                 playerMovement.turnShouldEnd = true;
                 TurnManager.Instance.ForcePlayerTurnEnd();
             }
+
+
         }
     }
 

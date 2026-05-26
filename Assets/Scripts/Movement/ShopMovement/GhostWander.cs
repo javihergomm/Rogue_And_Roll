@@ -47,6 +47,27 @@ public class GhostWander : MonoBehaviour
 
     void Start()
     {
+        // Auto-asignar GhostCreator si no está asignado
+        if (center == null)
+        {
+            GameObject creator = GameObject.Find("GhostCreator");
+            if (creator != null)
+                center = creator.transform;
+            else
+                Debug.LogError("GhostWander: No se encontró GhostCreator en la escena.");
+        }
+
+        // Ajustar radio según cámara
+        Camera cam = Camera.main;
+        if (cam != null && center != null)
+        {
+            float dist = Vector3.Distance(cam.transform.position, center.position);
+            float visibleRadius = Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) * dist;
+
+            maxDistance = visibleRadius * 0.4f; // 40% del área visible
+        }
+
+        // Posición inicial dentro del círculo
         if (center != null)
         {
             Vector2 circle = Random.insideUnitCircle * maxDistance;
@@ -62,6 +83,7 @@ public class GhostWander : MonoBehaviour
 
         smoothDir = transform.forward;
     }
+
 
     void Update()
     {
