@@ -142,8 +142,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 00
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 125cb55b44b24c4393181402bc6200e6, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 125cb55b44b24c4393181402bc6200e6, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e9b307b904cad4849b432e4c5675dc2d, type: 2}
+  m_sharedMaterial: {fileID: 1867055714457158432, guid: e9b307b904cad4849b432e4c5675dc2d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -178,6 +178,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -380,14 +381,10 @@ MonoBehaviour:
   itemName: 
   quantity: 0
   itemSprite: {fileID: 21300000, guid: 6531229df9ae62541852cc69c8cf4f5b, type: 3}
-  isFull: 0
   itemDescription: 
   emptySprite: {fileID: 21300000, guid: 6531229df9ae62541852cc69c8cf4f5b, type: 3}
-  maxNumberOfItems: 9
+  slotType: 0
   quantityText: {fileID: 6044862520204607901}
   itemImage: {fileID: 877206912320539104}
-  itemDescriptionImage: {fileID: 0}
-  itemDescriptionNameText: {fileID: 0}
-  itemDescriptionText: {fileID: 0}
   selectedShader: {fileID: 4157387568777493832}
-  thisItemSelected: 0
+  inventoryPanel: {fileID: 0}
