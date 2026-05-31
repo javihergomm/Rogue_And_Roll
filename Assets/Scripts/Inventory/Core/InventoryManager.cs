@@ -62,44 +62,6 @@ public class InventoryManager : MonoBehaviour
         LootBoxEvents.OnLootBoxOpened += HandleLootBoxReward;
     }
 
-    private void Start()
-    {
-        // IDs exactos de tus objetos
-        string idCatan = "item_consumables_catan_bridge";
-        string idD4 = "item_dice_d4";
-        string idLimo = "item_special_slime_even_only";
-
-        // Obtener objetos del catálogo
-        BaseItemSO catan = GetItemSO(idCatan);
-        BaseItemSO d4 = GetItemSO(idD4);
-        BaseItemSO slime = GetItemSO(idLimo);
-
-        // Añadir Puente del Catán
-        if (catan != null)
-        {
-            AddItem(catan, 1);
-            Debug.Log("Añadido Puente del Catán al iniciar.");
-        }
-        else Debug.LogError("No se encontró " + idCatan);
-
-        // Añadir D4
-        if (d4 != null)
-        {
-            AddItem(d4, 1);
-            Debug.Log("Añadido D4 al iniciar.");
-        }
-        else Debug.LogError("No se encontró " + idD4);
-
-        // Añadir Limo
-        if (slime != null)
-        {
-            AddItem(slime, 1);
-            Debug.Log("Añadido Limo al iniciar.");
-        }
-        else Debug.LogError("No se encontró " + idLimo);
-    }
-
-
     private void LoadItemCatalog()
     {
         itemCatalog.Clear();

@@ -14,13 +14,16 @@ public static class Unlocks
         "character_azul",
         "character_verde",
         "item_dice_d6",
-        "item_lootbox_lootbox",
+        "item_lootbox_negative",
+        "item_lootbox_positive",
         "item_permanents_precision_amulet",
         "item_consumables_deadly_chest",
         "item_consumables_cursed_incense",
         "item_consumables_broken_map",
         "item_permanents_joker_card",
-        "item_permanents_broken_glasses"
+        "item_permanents_broken_glasses",
+        "item_special_slime_even_only",
+        "item_permanent_gato_9_vidas"
     };
 
     public static bool IsUnlocked(string id)

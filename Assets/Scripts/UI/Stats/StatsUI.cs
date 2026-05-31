@@ -27,7 +27,7 @@ public class StatsUI : MonoBehaviour
     [SerializeField] private float iconSize = 48f;
     [SerializeField] private float nameOffsetX = 40f;
     [SerializeField] private float valueOffsetX = 225f;
-    [SerializeField] private float nameWidth = 210f;
+    [SerializeField] private float nameWidth = 250f;
 
     [Header("Animación")]
     [SerializeField] private float coinAnimationSpeed = 0.25f;

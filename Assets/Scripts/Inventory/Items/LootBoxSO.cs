@@ -1,11 +1,5 @@
 using UnityEngine;
 
-/*
- * LootBoxSO
- * ---------
- * Loot box with dynamic polarity and separate reward tables.
- * Includes the event dispatcher inside the same file.
- */
 [CreateAssetMenu(fileName = "LootBox", menuName = "Inventory/LootBox")]
 public class LootBoxSO : BaseItemSO
 {
@@ -24,21 +18,21 @@ public class LootBoxSO : BaseItemSO
     [Header("Negative Rewards")]
     [SerializeField] private BaseItemSO[] negativeItems;
 
+    [Header("Chance to unlock a locked item (0 to 1)")]
+    public float unlockChance = 0.2f;
+
     public LootType Type { get { return lootType; } }
 
-    // Called when the player obtains the loot box
     public void RandomizePolarity()
     {
         lootType = (Random.value < 0.5f) ? LootType.Positive : LootType.Negative;
     }
 
-    // Used by Movement when falling on Good/Bad spots
     public void ForcePolarity(LootType type)
     {
         lootType = type;
     }
 
-    // Select reward based on polarity (single check)
     public BaseItemSO Open()
     {
         BaseItemSO[] pool = (lootType == LootType.Positive)
@@ -51,7 +45,44 @@ public class LootBoxSO : BaseItemSO
             return null;
         }
 
-        return pool[Random.Range(0, pool.Length)];
+        // Separate unlocked and locked items
+        System.Collections.Generic.List<BaseItemSO> unlockedPool = new System.Collections.Generic.List<BaseItemSO>();
+        System.Collections.Generic.List<BaseItemSO> lockedPool = new System.Collections.Generic.List<BaseItemSO>();
+
+        foreach (var item in pool)
+        {
+            if (item == null)
+                continue;
+
+            if (Unlocks.IsUnlocked(item.itemID))
+                unlockedPool.Add(item);
+            else
+                lockedPool.Add(item);
+        }
+
+        // 1. Chance to unlock a locked item even if unlocked items exist
+        if (lockedPool.Count > 0 && Random.value < unlockChance)
+        {
+            BaseItemSO reward = lockedPool[Random.Range(0, lockedPool.Count)];
+            Unlocks.Unlock(reward.itemID);
+            return reward;
+        }
+
+        // 2. If there are unlocked items, choose one
+        if (unlockedPool.Count > 0)
+        {
+            return unlockedPool[Random.Range(0, unlockedPool.Count)];
+        }
+
+        // 3. If no unlocked items exist, unlock one locked item
+        if (lockedPool.Count > 0)
+        {
+            BaseItemSO reward = lockedPool[Random.Range(0, lockedPool.Count)];
+            Unlocks.Unlock(reward.itemID);
+            return reward;
+        }
+
+        return null;
     }
 
     public override void UseItem()
@@ -73,7 +104,6 @@ public class LootBoxSO : BaseItemSO
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        // Enforce correct polarity in Positive list
         if (positiveItems != null)
         {
             for (int i = 0; i < positiveItems.Length; i++)
@@ -88,7 +118,6 @@ public class LootBoxSO : BaseItemSO
             }
         }
 
-        // Enforce correct polarity in Negative list
         if (negativeItems != null)
         {
             for (int i = 0; i < negativeItems.Length; i++)
@@ -106,12 +135,6 @@ public class LootBoxSO : BaseItemSO
 #endif
 }
 
-/*
- * LootBoxEvents
- * -------------
- * Event dispatcher for loot box opening.
- * InventoryManager listens to this event to add the reward item.
- */
 public static class LootBoxEvents
 {
     public static System.Action<LootBoxSO, BaseItemSO> OnLootBoxOpened;

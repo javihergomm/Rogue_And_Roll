@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using static BaseItemSO;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -119,6 +121,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
         foreach (var item in possibleItems)
         {
             if (item == null) continue;
+            if (item.Polarity == BaseItemSO.ItemPolarity.Especial) continue;
             if (!Unlocks.IsUnlocked(item.itemID)) continue;
             if (UsedItemsThisVisit.Contains(item)) continue;
             if (UsedItemsThisReroll.Contains(item)) continue;
@@ -136,6 +139,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
             foreach (var item in items)
             {
                 if (item == null) continue;
+                if (item.Polarity == BaseItemSO.ItemPolarity.Especial) continue;
                 if (!Unlocks.IsUnlocked(item.itemID)) continue;
                 if (UsedItemsThisVisit.Contains(item)) continue;
                 if (UsedItemsThisReroll.Contains(item)) continue;

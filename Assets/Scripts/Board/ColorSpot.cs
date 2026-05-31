@@ -24,10 +24,6 @@ public class ColorSpot : MonoBehaviour
         set => rightPositionIndex = value;
     }
 
-    private void OnValidate()
-    {
-        Debug.Log($"[COLORSPOT] {name} -> Left={leftPositionIndex}, Right={rightPositionIndex}");
-    }
 }
 
 

@@ -11202,7 +11202,7 @@ MonoBehaviour:
   iconSize: 50
   nameOffsetX: 65
   valueOffsetX: 300
-  nameWidth: 170
+  nameWidth: 250
   coinAnimationSpeed: 1
 --- !u!114 &1548563271
 MonoBehaviour:
