@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "Br\xFAjula del Destino"
   m_EditorClassIdentifier: Assembly-CSharp::PermanentSO
   itemName: "Br\xFAjula del Destino"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: bb151f31cb413b54590956ca2cc0165c, type: 3}
   itemDescription: Permite elegir entre dos resultados posibles del dado.
   prefab3D: {fileID: 7491300678527347004, guid: d8ce4da759b23d240a0f66b54ab20173, type: 3}
   itemID: item_permanents_destiny_compass

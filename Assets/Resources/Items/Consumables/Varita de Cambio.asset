@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Varita de Cambio
   icon: {fileID: 0}
   itemDescription: Convierte una luckbox en su efecto opuesto.
-  prefab3D: {fileID: 6406918071297616627, guid: 052a6293efacbbd498bcaccb627cc519, type: 3}
+  prefab3D: {fileID: 8558679982063144916, guid: 34a53e5b7e339f1459bc460029fe76d0, type: 3}
   itemID: item_consumables_change_wand
   buyPrice: 0
   sellPrice: 0

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Puente de Catan
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: "Puente de Cat\xE1n"
-  icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
+  icon: {fileID: 21300000, guid: a0e9e0b03122b3c40984299eea12e23b, type: 3}
   itemDescription: Crea un atajo durante la ronda.
   prefab3D: {fileID: 5683758079633837136, guid: 262904a93677e5e44a17178dc8164e71, type: 3}
   itemID: item_consumables_catan_bridge

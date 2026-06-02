@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Linterna Potenciadora
   icon: {fileID: 0}
   itemDescription: Duplica el efecto de casillas positivas.
-  prefab3D: {fileID: 0}
+  prefab3D: {fileID: 1087326196185605937, guid: 410e470556e2a5c48b99dadb21eb5287, type: 3}
   itemID: item_consumable_linterna_potenciadora
   buyPrice: 0
   sellPrice: 0

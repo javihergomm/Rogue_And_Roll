@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Escudo de Salida
   icon: {fileID: 0}
   itemDescription: Anula el efecto de la proxima casilla mala y se consume.
-  prefab3D: {fileID: 0}
+  prefab3D: {fileID: 8592708307953126093, guid: 1605472ed2e19fe469172a73246f0832, type: 3}
   itemID: item_consumable_escudo_salida
   buyPrice: 0
   sellPrice: 0
