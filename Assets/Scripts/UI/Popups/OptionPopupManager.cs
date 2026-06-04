@@ -10,10 +10,10 @@ using System.Collections.Generic;
  * Handles:
  *   - Showing text
  *   - Creating buttons
- *   - Optional slider
- *   - Hiding/clearing UI
+ *   - Timed messages
+ *   - Hiding and clearing UI
  *
- * Does NOT contain game logic.
+ * Contains no gameplay logic.
  */
 public class OptionPopupManager : MonoBehaviour
 {
@@ -22,9 +22,6 @@ public class OptionPopupManager : MonoBehaviour
     [SerializeField] private GameObject popupPanel;
     [SerializeField] private TextMeshProUGUI popupText;
     [SerializeField] private Button buttonPrefab;
-
-    [SerializeField] private Slider popupSlider;
-    [SerializeField] private TextMeshProUGUI sliderLabel;
 
     private readonly List<Button> activeButtons = new();
 
@@ -40,24 +37,16 @@ public class OptionPopupManager : MonoBehaviour
 
         if (popupPanel != null)
             popupPanel.SetActive(false);
-
-        if (popupSlider != null)
-            popupSlider.gameObject.SetActive(false);
-
-        if (sliderLabel != null)
-            sliderLabel.gameObject.SetActive(false);
     }
 
     // -------------------------------------------------------------------------
     // PUBLIC API
     // -------------------------------------------------------------------------
 
-    public void ShowPopup(
-        string message,
-        List<PopupOption> options,
-        bool useSlider = false,
-        int sliderMax = 0,
-        System.Action<int> onConfirmWithNumber = null)
+    /*
+     * Shows a popup with a message and a list of button options.
+     */
+    public void ShowPopup(string message, List<PopupOption> options)
     {
         if (popupPanel == null || popupText == null)
             return;
@@ -66,12 +55,14 @@ public class OptionPopupManager : MonoBehaviour
         popupText.text = message;
 
         ClearButtons();
-        SetupSlider(useSlider, sliderMax);
 
         foreach (var opt in options)
-            CreateButton(opt, useSlider, onConfirmWithNumber);
+            CreateButton(opt);
     }
 
+    /*
+     * Shows a popup with only a message and no buttons.
+     */
     public void ShowMessage(string message)
     {
         if (popupPanel != null)
@@ -81,16 +72,17 @@ public class OptionPopupManager : MonoBehaviour
             popupText.text = message;
 
         ClearButtons();
-        HideSlider();
     }
 
+    /*
+     * Hides the popup and clears all UI elements.
+     */
     public void HidePopup()
     {
         if (popupPanel != null)
             popupPanel.SetActive(false);
 
         ClearButtons();
-        HideSlider();
     }
 
     public bool IsPopupOpen => popupPanel != null && popupPanel.activeSelf;
@@ -99,10 +91,10 @@ public class OptionPopupManager : MonoBehaviour
     // INTERNAL UI
     // -------------------------------------------------------------------------
 
-    private void CreateButton(
-        PopupOption option,
-        bool useSlider,
-        System.Action<int> onConfirmWithNumber)
+    /*
+     * Creates a button for a popup option.
+     */
+    private void CreateButton(PopupOption option)
     {
         if (buttonPrefab == null || popupPanel == null)
             return;
@@ -120,18 +112,13 @@ public class OptionPopupManager : MonoBehaviour
             if (popupPanel != null)
                 popupPanel.SetActive(false);
 
-            if (useSlider && onConfirmWithNumber != null && option.IsConfirm)
-            {
-                int value = popupSlider != null ? Mathf.RoundToInt(popupSlider.value) : 1;
-                onConfirmWithNumber(value);
-            }
-            else
-            {
-                option.Callback?.Invoke();
-            }
+            option.Callback?.Invoke();
         });
     }
 
+    /*
+     * Removes all active buttons from the popup.
+     */
     private void ClearButtons()
     {
         foreach (var btn in activeButtons)
@@ -143,40 +130,13 @@ public class OptionPopupManager : MonoBehaviour
         activeButtons.Clear();
     }
 
-    private void SetupSlider(bool useSlider, int sliderMax)
-    {
-        if (popupSlider == null || sliderLabel == null)
-        {
-            HideSlider();
-            return;
-        }
+    // -------------------------------------------------------------------------
+    // TIMED MESSAGE
+    // -------------------------------------------------------------------------
 
-        popupSlider.gameObject.SetActive(useSlider);
-        sliderLabel.gameObject.SetActive(useSlider);
-
-        if (!useSlider)
-            return;
-
-        popupSlider.minValue = 1;
-        popupSlider.maxValue = Mathf.Max(1, sliderMax);
-        popupSlider.value = 1;
-        sliderLabel.text = "1";
-
-        popupSlider.onValueChanged.RemoveAllListeners();
-        popupSlider.onValueChanged.AddListener(val =>
-        {
-            sliderLabel.text = Mathf.RoundToInt(val).ToString();
-        });
-    }
-
-    private void HideSlider()
-    {
-        if (popupSlider != null)
-            popupSlider.gameObject.SetActive(false);
-
-        if (sliderLabel != null)
-            sliderLabel.gameObject.SetActive(false);
-    }
+    /*
+     * Shows a popup message for a limited duration.
+     */
     public void ShowTimedMessage(string message, float duration)
     {
         if (popupPanel != null)
@@ -186,9 +146,7 @@ public class OptionPopupManager : MonoBehaviour
             popupText.text = message;
 
         ClearButtons();
-        HideSlider();
 
-        // Cerrar automáticamente después de X segundos
         StartCoroutine(AutoHide(duration));
     }
 
@@ -197,5 +155,4 @@ public class OptionPopupManager : MonoBehaviour
         yield return new WaitForSeconds(delay);
         HidePopup();
     }
-
 }

@@ -72,7 +72,6 @@ public class Spot : MonoBehaviour
 
                 player.lastTotalMovement += extra;
 
-                // Message does NOT mention gold
                 if (lantern)
                     player.lastSpotEffectText = "+" + extra + " pasos extra (Linterna Potenciadora)";
                 else
@@ -91,7 +90,6 @@ public class Spot : MonoBehaviour
 
                 int turns = effect.turnsBlocked;
 
-                // Message does NOT mention gold
                 if (lantern)
                     player.lastSpotEffectText = "Bloqueo enemigo (" + turns + " turnos, Linterna Potenciadora)";
                 else
@@ -126,13 +124,10 @@ public class Spot : MonoBehaviour
                 yield break;
             }
 
-            // CLOVER (LootBox aleatoria)
+            // CLOVER (random LootBox)
             if (ctrl.cloverActive)
             {
-                LootBoxSO box = ScriptableObject.CreateInstance<LootBoxSO>();
-                box.RandomizePolarity();
-
-                InventoryManager.Instance.AddItem(box, 1);
+                GiveRandomLootBox();
 
                 player.lastSpotEffectText =
                     "El Trébol ha transformado la casilla en una LootBox aleatoria.";
@@ -204,10 +199,30 @@ public class Spot : MonoBehaviour
         }
     }
 
+    // ============================================================
+    // LOOTBOX HELPERS (FIXED)
+    // ============================================================
+
     private void GiveLootBox(LootBoxSO.LootType polarity)
     {
-        LootBoxSO box = ScriptableObject.CreateInstance<LootBoxSO>();
-        box.ForcePolarity(polarity);
+        string path = polarity == LootBoxSO.LootType.Positive
+            ? "Items/LootBox/LootBox_Positive"
+            : "Items/LootBox/LootBox_Negative";
+
+        LootBoxSO template = Resources.Load<LootBoxSO>(path);
+        LootBoxSO box = Instantiate(template);
+
+        InventoryManager.Instance.AddItem(box, 1);
+    }
+
+    private void GiveRandomLootBox()
+    {
+        string path = Random.Range(0, 2) == 0
+            ? "Items/LootBox/LootBox_Positive"
+            : "Items/LootBox/LootBox_Negative";
+
+        LootBoxSO template = Resources.Load<LootBoxSO>(path);
+        LootBoxSO box = Instantiate(template);
 
         InventoryManager.Instance.AddItem(box, 1);
     }

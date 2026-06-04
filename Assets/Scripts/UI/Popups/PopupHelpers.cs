@@ -4,10 +4,13 @@ using UnityEngine;
 /*
  * PopupHelpers
  * ------------
- * High-level popup flows that combine UI (OptionPopupManager)
- * with game logic (Inventory, Characters, Shop, etc.).
+ * High-level helper class that connects UI popups (OptionPopupManager)
+ * with gameplay logic (Inventory, Characters, Shop, etc.).
  *
- * Keeps OptionPopupManager clean and UI-only.
+ * Purpose:
+ *   - Keep OptionPopupManager strictly UI-only.
+ *   - Centralize all popup flows that require game logic.
+ *   - Provide clean, readable, reusable popup patterns.
  */
 public static class PopupHelpers
 {
@@ -15,6 +18,11 @@ public static class PopupHelpers
     // CHARACTER SELECTION
     // -------------------------------------------------------------------------
 
+    /*
+     * Shows a confirmation popup when selecting a character.
+     * onConfirm -> executed if the player accepts.
+     * onCancel  -> executed if the player declines.
+     */
     public static void ShowConfirmCharacterPopup(string characterName, System.Action onConfirm, System.Action onCancel)
     {
         var options = new List<PopupOption>
@@ -24,7 +32,7 @@ public static class PopupHelpers
         };
 
         OptionPopupManager.Instance.ShowPopup(
-            "¿Estás seguro que quieres elegir " + characterName + " como tu personaje?",
+            "Estas seguro que quieres elegir " + characterName + " como tu personaje?",
             options
         );
     }
@@ -33,16 +41,23 @@ public static class PopupHelpers
     // INVENTORY FULL
     // -------------------------------------------------------------------------
 
+    /*
+     * Shows a popup when the inventory is full.
+     * Allows the player to replace an existing item or cancel.
+     */
     public static void ShowInventoryFullPopup(string itemName, int quantity)
     {
         var options = new List<PopupOption>
         {
             new("Si, reemplazar un objeto", () =>
             {
+                // Prepare replace mode with the item that could not be added
                 InventoryManager.Instance.PrepareReplace(
                     InventoryManager.Instance.GetItemSO(itemName),
                     quantity
                 );
+
+                // Open inventory so the player can choose a slot to replace
                 InventoryManager.Instance.OpenInventory();
             }, isConfirm: true),
 
@@ -50,7 +65,7 @@ public static class PopupHelpers
         };
 
         OptionPopupManager.Instance.ShowPopup(
-            "Inventario lleno. ¿Deseas reemplazar un objeto?",
+            "Inventario lleno. Deseas reemplazar un objeto?",
             options
         );
     }
@@ -59,9 +74,12 @@ public static class PopupHelpers
     // CONFIRM REPLACE
     // -------------------------------------------------------------------------
 
+    /*
+     * Shows a confirmation popup before replacing an item in a slot.
+     */
     public static void ShowConfirmReplacePopup(ItemSlot slot, System.Action onConfirm)
     {
-        string message = "¿Seguro que quieres reemplazar el objeto '" + slot.ItemName + "' en este hueco?";
+        string message = "Seguro que quieres reemplazar el objeto '" + slot.ItemName + "' en este hueco?";
 
         var options = new List<PopupOption>
         {
@@ -73,90 +91,12 @@ public static class PopupHelpers
     }
 
     // -------------------------------------------------------------------------
-    // REMOVE ITEMS
-    // -------------------------------------------------------------------------
-
-    public static void ShowRemoveItemPopup(ItemSlot[] itemSlots)
-    {
-        if (itemSlots == null || itemSlots.Length == 0)
-            return;
-
-        string itemName = itemSlots[0].ItemName;
-
-        var options = new List<PopupOption>
-        {
-            new("Eliminar 1 unidad", () =>
-            {
-                InventoryManager.Instance.RemoveItem(itemSlots[0], 1);
-            }, isConfirm: true),
-
-            new("Eliminar todo", () =>
-            {
-                foreach (var slot in itemSlots)
-                {
-                    if (slot.Quantity > 0)
-                        InventoryManager.Instance.RemoveItem(slot, slot.Quantity);
-                }
-            }),
-
-            new("Eliminar cantidad personalizada", () =>
-            {
-                int total = 0;
-                foreach (var slot in itemSlots)
-                    total += slot.Quantity;
-
-                ShowNumberSliderPopup(itemSlots, total);
-            }),
-
-            new("Cancelar", () => {})
-        };
-
-        OptionPopupManager.Instance.ShowPopup(
-            "¿Cómo quieres eliminar " + itemName + "?",
-            options
-        );
-    }
-
-    // -------------------------------------------------------------------------
-    // CUSTOM AMOUNT SLIDER
-    // -------------------------------------------------------------------------
-
-    private static void ShowNumberSliderPopup(ItemSlot[] itemSlots, int maxQuantity)
-    {
-        string itemName = itemSlots[0].ItemName;
-
-        var options = new List<PopupOption>
-        {
-            new("Confirmar", () => {}, isConfirm: true),
-            new("Cancelar", () => {})
-        };
-
-        OptionPopupManager.Instance.ShowPopup(
-            "Selecciona la cantidad de " + itemName + " a eliminar:",
-            options,
-            useSlider: true,
-            sliderMax: maxQuantity,
-            onConfirmWithNumber: amount =>
-            {
-                int remaining = amount;
-
-                foreach (var slot in itemSlots)
-                {
-                    if (remaining <= 0)
-                        break;
-
-                    int remove = Mathf.Min(slot.Quantity, remaining);
-                    InventoryManager.Instance.RemoveItem(slot, remove);
-                    remaining -= remove;
-                }
-            }
-        );
-    }
-
-    // -------------------------------------------------------------------------
     // EXIT SHOP
     // -------------------------------------------------------------------------
 
+    /*
+     * Shows a confirmation popup when exiting the shop.
+     */
     public static void ShowExitShopPopup(System.Action onConfirm, System.Action onCancel)
     {
         var options = new List<PopupOption>
@@ -166,16 +106,24 @@ public static class PopupHelpers
         };
 
         OptionPopupManager.Instance.ShowPopup(
-            "¿Seguro que quieres salir de la tienda?",
+            "Seguro que quieres salir de la tienda?",
             options
         );
     }
+
+    // -------------------------------------------------------------------------
+    // UNLOCK POPUP
+    // -------------------------------------------------------------------------
+
+    /*
+     * Shows a short timed popup when unlocking a new item.
+     * Duration intentionally short to avoid blocking gameplay flow.
+     */
     public static void ShowUnlockPopup(string itemName)
     {
         OptionPopupManager.Instance.ShowTimedMessage(
-            "¡Nuevo objeto desbloqueado!\n" + itemName,
-            5f // segundos
+            "Nuevo objeto desbloqueado!\n" + itemName,
+            2f // short duration to avoid blocking gameplay
         );
     }
-
 }
