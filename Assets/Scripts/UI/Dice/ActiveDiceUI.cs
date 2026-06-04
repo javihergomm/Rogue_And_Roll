@@ -2,20 +2,12 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
-using System.Collections.Generic;
 
 public class ActiveDiceUI : MonoBehaviour
 {
     [Header("UI")]
-    public RectTransform inventoryButton;
     public RectTransform resultsRoot;
     public GameObject rowPrefab;
-
-    [Header("Layout")]
-    public float extraRight = 6f;
-    public float extraDown = 34f;
-
-    private bool isPlayerTurn = true;
 
     private RectTransform diceBlock;
     private RectTransform summaryBlock;
@@ -23,15 +15,12 @@ public class ActiveDiceUI : MonoBehaviour
     private int lastMovement = 0;
     private string lastEffects = "";
     private bool lastWasEnemy = false;
+    private bool hasSummary = false;
 
     private void OnEnable()
     {
         StartCoroutine(DelayedInit());
-
-        TurnManager.OnPlayerTurnStarted += HandlePlayerTurn;
-        TurnManager.OnEnemyTurnStarted += HandleEnemyTurn;
         TurnManager.OnEnemyRollCalculated += HandleEnemyRoll;
-        TurnManager.OnPlayerRollCalculated += HandlePlayerRoll;
     }
 
     private void OnDisable()
@@ -39,17 +28,12 @@ public class ActiveDiceUI : MonoBehaviour
         if (InventoryManager.Instance != null)
             InventoryManager.Instance.OnActiveDiceChanged -= RefreshUI;
 
-        TurnManager.OnPlayerTurnStarted -= HandlePlayerTurn;
-        TurnManager.OnEnemyTurnStarted -= HandleEnemyTurn;
         TurnManager.OnEnemyRollCalculated -= HandleEnemyRoll;
-        TurnManager.OnPlayerRollCalculated -= HandlePlayerRoll;
     }
 
     private IEnumerator DelayedInit()
     {
         yield return null;
-
-        AlignUnderButton();
 
         diceBlock = CreateBlock("DiceBlock");
         summaryBlock = CreateBlock("SummaryBlock");
@@ -71,58 +55,9 @@ public class ActiveDiceUI : MonoBehaviour
         rt.pivot = new Vector2(0f, 1f);
 
         rt.anchoredPosition = Vector2.zero;
-        rt.sizeDelta = Vector2.zero;
+        rt.sizeDelta = new Vector2(420, 0);
 
         return rt;
-    }
-
-    private void Update()
-    {
-        if (!Application.isPlaying)
-            AlignUnderButton();
-    }
-
-    private void AlignUnderButton()
-    {
-        if (inventoryButton == null || resultsRoot == null)
-            return;
-
-        if (resultsRoot.parent != inventoryButton)
-            resultsRoot.SetParent(inventoryButton, false);
-
-        resultsRoot.anchorMin = new Vector2(0f, 1f);
-        resultsRoot.anchorMax = new Vector2(0f, 1f);
-        resultsRoot.pivot = new Vector2(0f, 1f);
-
-        float leftX = -inventoryButton.rect.width * inventoryButton.pivot.x;
-        float bottomY = -inventoryButton.rect.height * (1f - inventoryButton.pivot.y);
-
-        resultsRoot.anchoredPosition = new Vector2(
-            leftX + extraRight,
-            bottomY - extraDown
-        );
-
-        resultsRoot.localScale = Vector3.one;
-    }
-
-    private void HandlePlayerTurn()
-    {
-        isPlayerTurn = true;
-        RefreshUI();
-    }
-
-    private void HandleEnemyTurn()
-    {
-        isPlayerTurn = false;
-        RefreshUI();
-    }
-
-    private void HandlePlayerRoll(int total, List<string> efectos)
-    {
-        lastWasEnemy = false;
-        lastMovement = total;
-        lastEffects = efectos == null || efectos.Count == 0 ? "" : string.Join(", ", efectos);
-        RefreshUI();
     }
 
     private void HandleEnemyRoll(int total)
@@ -130,13 +65,30 @@ public class ActiveDiceUI : MonoBehaviour
         lastWasEnemy = true;
         lastMovement = total;
         lastEffects = "";
+        hasSummary = true;
+
+        RefreshUI();
+    }
+
+    public void SetLastTurnSummary(int movement, string effects, bool wasEnemy)
+    {
+        lastMovement = movement;
+        lastEffects = effects ?? "";
+        lastWasEnemy = wasEnemy;
+        hasSummary = true;
+
         RefreshUI();
     }
 
     private void RefreshUI()
     {
-        foreach (Transform t in diceBlock) Destroy(t.gameObject);
-        foreach (Transform t in summaryBlock) Destroy(t.gameObject);
+        if (diceBlock == null || summaryBlock == null)
+            return;
+
+        bool isPlayerTurn = TurnManager.Instance.IsPlayerTurn();
+
+        foreach (Transform t in diceBlock)
+            Destroy(t.gameObject);
 
         CreateHeader(isPlayerTurn ? "Jugador" : "Enemigo");
 
@@ -162,44 +114,49 @@ public class ActiveDiceUI : MonoBehaviour
                 CreateSimpleRow("Sin tirar");
         }
 
-        CreateLastTurnSummary();
+        RedrawSummary();
 
-        // Encontrar el ultimo hijo del bloque de dados
-        if (diceBlock.childCount > 0)
-        {
-            RectTransform lastRow = diceBlock.GetChild(diceBlock.childCount - 1).GetComponent<RectTransform>();
-
-            // Posicion Y real del ultimo row
-            float lastRowBottom = lastRow.anchoredPosition.y - lastRow.rect.height;
-
-            // Colocar el resumen justo debajo
-            summaryBlock.anchoredPosition = new Vector2(0, lastRowBottom - 20);
-        }
-        else
-        {
-            summaryBlock.anchoredPosition = new Vector2(0, -20);
-        }
-
+        StartCoroutine(RepositionNextFrame());
     }
 
-    private float GetBlockHeight(RectTransform block)
+    private IEnumerator RepositionNextFrame()
     {
-        float h = 0f;
-        foreach (RectTransform child in block)
-            h += child.rect.height;
-        return h;
+        yield return null;
+
+        RepositionDiceRows();
+        RepositionSummary();
+    }
+
+    private void RedrawSummary()
+    {
+        foreach (Transform t in summaryBlock)
+            Destroy(t.gameObject);
+
+        if (!hasSummary)
+            return;
+
+        var row = Instantiate(rowPrefab, summaryBlock);
+
+        string title = lastWasEnemy ? "Turno anterior (enemigo)" : "Turno anterior";
+        string text = "Mov: " + lastMovement + "  |  Efectos: " +
+                      (string.IsNullOrEmpty(lastEffects) ? "ninguno" : lastEffects);
+
+        SetupRow(row, title, text, false, true);
+
+        var nameTMP = row.transform.Find("NameText").GetComponent<TextMeshProUGUI>();
+        nameTMP.rectTransform.sizeDelta = new Vector2(380, nameTMP.rectTransform.sizeDelta.y);
     }
 
     private void CreateHeader(string text)
     {
         var row = Instantiate(rowPrefab, diceBlock);
-        SetupRow(row, text, "", false);
+        SetupRow(row, text, "", false, false);
     }
 
     private void CreateSimpleRow(string text)
     {
         var row = Instantiate(rowPrefab, diceBlock);
-        SetupRow(row, "", text, false);
+        SetupRow(row, "", text, false, false);
     }
 
     private void CreateDiceRow(ItemSlot slot)
@@ -210,14 +167,14 @@ public class ActiveDiceUI : MonoBehaviour
 
         if (!rollInfo.HasValue)
         {
-            SetupRow(row, "", "Sin tirar", false);
+            SetupRow(row, "", "Sin tirar", false, false);
             return;
         }
 
         DiceSO dice = slot.ItemSO as DiceSO;
         if (dice == null)
         {
-            SetupRow(row, "", "Error: dado no encontrado", false);
+            SetupRow(row, "", "Error: dado no encontrado", false, false);
             return;
         }
 
@@ -231,12 +188,13 @@ public class ActiveDiceUI : MonoBehaviour
         var effects = DiceRollManager.Instance.GetAppliedEffects(slot);
 
         string effText = effects.Count == 0 ? "- ninguno" : "";
-        foreach (var e in effects) effText += "- " + e + "\n";
+        foreach (var e in effects)
+            effText += "- " + e + "\n";
 
-        SetupRow(row, "", effText, true);
+        SetupRow(row, "", effText, true, false);
     }
 
-    private void SetupRow(GameObject row, string nameText, string effectsText, bool rolled)
+    private void SetupRow(GameObject row, string nameText, string effectsText, bool rolled, bool isSummary)
     {
         var nameTMP = row.transform.Find("NameText").GetComponent<TextMeshProUGUI>();
         var effTMP = row.transform.Find("EffectsText").GetComponent<TextMeshProUGUI>();
@@ -245,56 +203,73 @@ public class ActiveDiceUI : MonoBehaviour
         nameTMP.text = nameText;
         effTMP.text = effectsText;
 
-        nameTMP.lineSpacing = -15f;
-        effTMP.lineSpacing = -15f;
+        nameTMP.lineSpacing = -10f;
+        effTMP.lineSpacing = -10f;
 
         var rt = row.GetComponent<RectTransform>();
         rt.anchorMin = new Vector2(0f, 1f);
         rt.anchorMax = new Vector2(0f, 1f);
         rt.pivot = new Vector2(0f, 1f);
 
-        rt.sizeDelta = new Vector2(350, rolled ? 90 : 40);
+        rt.sizeDelta = new Vector2(420, rolled ? 55 : 28);
 
-        PositionRow(nameTMP.rectTransform, effTMP.rectTransform, img.rectTransform, rolled);
+        PositionRow(nameTMP.rectTransform, effTMP.rectTransform, img.rectTransform, rolled, isSummary);
     }
 
-    private void PositionRow(RectTransform nameRT, RectTransform effRT, RectTransform imgRT, bool rolled)
+    private void PositionRow(RectTransform nameRT, RectTransform effRT, RectTransform imgRT, bool rolled, bool isSummary)
     {
         imgRT.anchorMin = imgRT.anchorMax = imgRT.pivot = new Vector2(0f, 1f);
         nameRT.anchorMin = nameRT.anchorMax = nameRT.pivot = new Vector2(0f, 1f);
         effRT.anchorMin = effRT.anchorMax = effRT.pivot = new Vector2(0f, 1f);
 
+        // SUMMARY FIX: independent layout
+        if (isSummary)
+        {
+            imgRT.sizeDelta = Vector2.zero;
+            nameRT.anchoredPosition = new Vector2(4, -2);
+            effRT.anchoredPosition = new Vector2(4, -30); // guaranteed separation
+            return;
+        }
+
         if (rolled)
         {
-            imgRT.sizeDelta = new Vector2(50, 50);
-            imgRT.anchoredPosition = new Vector2(0, -26);
+            imgRT.sizeDelta = new Vector2(40, 40);
+            imgRT.anchoredPosition = new Vector2(0, -14);
 
-            nameRT.anchoredPosition = new Vector2(60, -10);
-            effRT.anchoredPosition = new Vector2(60, -42);
+            nameRT.anchoredPosition = new Vector2(60, -4);
+            effRT.anchoredPosition = new Vector2(60, -22);
         }
         else
         {
             imgRT.sizeDelta = Vector2.zero;
 
-            nameRT.anchoredPosition = new Vector2(0, -2);
-            effRT.anchoredPosition = new Vector2(0, -22);
+            nameRT.anchoredPosition = new Vector2(4, -2);
+            effRT.anchoredPosition = new Vector2(4, -14);
         }
     }
 
-    private void CreateLastTurnSummary()
+    private void RepositionDiceRows()
     {
-        if (lastMovement == 0 && string.IsNullOrEmpty(lastEffects))
-            return;
+        float y = 0f;
 
-        var row = Instantiate(rowPrefab, summaryBlock);
+        for (int i = 0; i < diceBlock.childCount; i++)
+        {
+            RectTransform rt = diceBlock.GetChild(i).GetComponent<RectTransform>();
+            rt.anchoredPosition = new Vector2(0, -y);
+            y += rt.rect.height + 4f;
+        }
+    }
 
-        string title = lastWasEnemy ? "Turno anterior (enemigo)" : "Turno anterior";
-        string text = "Mov: " + lastMovement + "  |  Efectos: " +
-                      (string.IsNullOrEmpty(lastEffects) ? "ninguno" : lastEffects);
+    private void RepositionSummary()
+    {
+        float totalHeight = 0f;
 
-        SetupRow(row, title, text, false);
+        for (int i = 0; i < diceBlock.childCount; i++)
+        {
+            RectTransform rt = diceBlock.GetChild(i).GetComponent<RectTransform>();
+            totalHeight += rt.rect.height + 4f;
+        }
 
-        var nameTMP = row.transform.Find("NameText").GetComponent<TextMeshProUGUI>();
-        nameTMP.rectTransform.sizeDelta = new Vector2(300, nameTMP.rectTransform.sizeDelta.y);
+        summaryBlock.anchoredPosition = new Vector2(0, -totalHeight - 4f);
     }
 }

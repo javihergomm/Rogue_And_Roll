@@ -1,117 +1,116 @@
-using UnityEngine;
+using System;
 using System.Linq;
+using UnityEngine;
 
 /*
  * SpotController
  * --------------
- * Responsible for:
- * - Assigning random spot types at the start of the game
- * - Assigning checkpoint spots based on a selected color pattern
- * - Providing helper methods to access spots by index or order
- *
- * Notes:
- * - Checkpoints are always forced to be Neutral type
- * - GoodSpot() and BadSpot() return 1 or 2
- *   Movement triggers effects only when the result is 1
+ * Controls all board spots:
+ * - Random type assignment (Normal / Good / Bad)
+ * - Checkpoint assignment based on player color
+ * - Stores global modifiers (Exit Shield, Lantern Boost, Clover)
  */
 public class SpotController : MonoBehaviour
 {
+    public static SpotController Instance;
+
+    // Cached array of all spots on the board
     private Spot[] spots;
-    private Spot spot;
+
+    [Header("Probabilidades de tipo de casilla")]
+    [Range(0, 100)] public int probNormal = 60;
+    [Range(0, 100)] public int probGood = 20;
+    [Range(0, 100)] public int probBad = 20;
+
+    [Header("GOOD Spot Probabilities")]
+    public int probGoodExtraSteps = 50;
+    public int probGoodBlockEnemy = 50;
+    public int probGoodLootBox = 0;
+
+    [Header("BAD Spot Probabilities")]
+    public int probBadNegativeSteps = 50;
+    public int probBadBlockPlayer = 50;
+    public int probBadLootBox = 0;
+
+    // Exit Shield (Escudo de salida)
+    public bool exitShieldActive = false;
+
+    // Lantern Boost (Linterna potenciadora)
+    public bool lanternBoostActive = false;
+
+    // Trebol
+    public bool cloverActive = false;
+    public int savedBadSteps;
+    public int savedBadBlock;
+    public int savedBadLoot;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
-        spot = GetComponent<Spot>();
+        /*
+         * Updated Unity API:
+         * FindObjectsByType<T>(FindObjectsInactive) replaces the deprecated overload
+         * that used FindObjectsSortMode.
+         * We only want active objects, so we use Exclude.
+         */
+        spots = FindObjectsByType<Spot>(FindObjectsInactive.Exclude);
 
-        // Find all spots in the scene
-        spots = FindObjectsByType<Spot>(FindObjectsSortMode.None);
+        // Clear all checkpoints before assigning new ones
+        foreach (Spot s in spots)
+            s.checkpoint = false;
 
-        // Assign random types to all spots
         AssignRandomTypes();
-
-        // Assign checkpoint spots (color pattern 1 by default)
-        AssignCheckpoints(1);
     }
 
     /*
-     * AssignRandomTypes
-     * -----------------
-     * Assigns a random SpotType to every spot.
-     * Checkpoints will later be overwritten to Neutral.
+     * Assigns a random type (Normal / Good / Bad) to each spot
+     * based on the configured probability weights.
      */
     private void AssignRandomTypes()
     {
         foreach (Spot s in spots)
         {
-            s.AssignType(Spot.SpotType.Normal);
+            int roll = UnityEngine.Random.Range(0, 100);
+
+            if (roll < probNormal)
+                s.AssignType(Spot.SpotType.Normal);
+            else if (roll < probNormal + probGood)
+                s.AssignType(Spot.SpotType.Good);
+            else
+                s.AssignType(Spot.SpotType.Bad);
         }
     }
 
     /*
-     * AssignCheckpoints
-     * -----------------
-     * Marks specific indices as checkpoints based on the selected color pattern.
-     * Checkpoints are always forced to be Neutral type.
+     * Assigns checkpoint spots depending on the player's color.
+     * Checkpoints are fixed board positions.
      */
-    private void AssignCheckpoints(int color)
+    public void AssignCheckpoints(int color)
     {
+        // Clear previous checkpoints
+        foreach (Spot s in spots)
+            s.checkpoint = false;
+
         int[] checkpoints;
 
         if (color == 1)
-        {
             checkpoints = new int[] { 12, 22, 34, 46, 56, 68 };
-        }
         else if (color == 2)
-        {
             checkpoints = new int[] { 29, 39, 51, 63, 5, 17 };
-        }
         else if (color == 3)
-        {
             checkpoints = new int[] { 46, 56, 68, 12, 22, 34 };
-        }
         else
-        {
             checkpoints = new int[] { 63, 5, 17, 29, 39, 51 };
-        }
 
         foreach (Spot s in spots)
-        {
-            if (System.Array.Exists(checkpoints, x => x == s.index))
-            {
-                s.checkpoint = true;
-                s.AssignType(Spot.SpotType.Normal);
-            }
-        }
+            s.checkpoint = checkpoints.Contains(s.index);
     }
 
     /*
-     * RandomType
-     * ----------
-     * Returns a random SpotType.
-     */
-    private Spot.SpotType RandomType()
-    {
-        int value = Random.Range(0, System.Enum.GetValues(typeof(Spot.SpotType)).Length);
-        return (Spot.SpotType)value;
-    }
-
-    /*
-     * GetSpot
-     * -------
-     * Returns the Spot component attached to this GameObject.
-     */
-    public Spot GetSpot() { return spot; }
-
-    /*
-     * GetAllSpots
-     * -----------
-     * Returns all spots in the scene.
-     */
-    public Spot[] GetAllSpots() { return spots; }
-
-    /*
-     * GetSpotsOrdered
-     * ----------------
      * Returns all spots ordered by their index.
      */
     public Spot[] GetSpotsOrdered()
@@ -120,44 +119,10 @@ public class SpotController : MonoBehaviour
     }
 
     /*
-     * GetSpotByIndex
-     * --------------
-     * Returns a spot by its board index.
+     * Returns a specific spot by index.
      */
     public Spot GetSpotByIndex(int index)
     {
         return spots.FirstOrDefault(s => s.index == index);
-    }
-
-    /*
-     * GetSpotCount
-     * ------------
-     * Returns the total number of spots.
-     */
-    public int GetSpotCount()
-    {
-        return spots.Length;
-    }
-
-    /*
-     * GoodSpot
-     * --------
-     * Returns 1 or 2.
-     * Movement triggers GOOD effects only when the result is 1.
-     */
-    public static int GoodSpot()
-    {
-        return Random.Range(1, 3);
-    }
-
-    /*
-     * BadSpot
-     * -------
-     * Returns 1 or 2.
-     * Movement triggers BAD effects only when the result is 1.
-     */
-    public static int BadSpot()
-    {
-        return Random.Range(1, 3);
     }
 }

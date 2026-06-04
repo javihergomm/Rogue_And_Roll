@@ -5,6 +5,7 @@ using System.Collections.Generic;
  * DiceRollManager
  * ----------------
  * Handles dice spawning, rolling, result processing and final roll calculation.
+ * Integrates with TurnManager to enforce roll limits per turn.
  * Tracks applied effects (sync + async) for UI display.
  */
 public class DiceRollManager : MonoBehaviour
@@ -24,12 +25,15 @@ public class DiceRollManager : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private Movement playerMovement;
 
+    // Dice instances and cached components
     private readonly Dictionary<ItemSlot, GameObject> worldDice = new();
     private readonly Dictionary<ItemSlot, DiceCached> cachedDice = new();
+
+    // Roll history and applied effects
     private readonly Dictionary<ItemSlot, (int baseRoll, int finalRoll)> rollHistory = new();
     private readonly Dictionary<ItemSlot, List<string>> appliedEffects = new();
 
-    // Efectos globales del turno
+    // Global effects applied this turn
     private List<string> lastTurnEffects = new();
 
     private struct DiceCached
@@ -58,6 +62,10 @@ public class DiceRollManager : MonoBehaviour
     // DICE SPAWNING
     // -------------------------------------------------------------------------
 
+    /*
+     * Spawns a dice prefab in the world for the given slot.
+     * Ensures each slot has exactly one dice instance.
+     */
     public GameObject SpawnDiceInWorld(DiceSO dice, ItemSlot slot)
     {
         if (slot == null || dice == null || InventoryManager.Instance == null)
@@ -102,6 +110,13 @@ public class DiceRollManager : MonoBehaviour
 
         AdjustSpawnHeight(instance, cache.col);
         ResetPhysics(cache.body);
+
+        DiceBoundary boundary = instance.GetComponent<DiceBoundary>();
+        if (boundary != null)
+        {
+            Transform playerDiceArea = InventoryManager.Instance.PlayerDiceArea;
+            boundary.Init(spawnPoint, playerDiceArea);
+        }
 
         worldDice[slot] = instance;
         return instance;
@@ -155,11 +170,23 @@ public class DiceRollManager : MonoBehaviour
     }
 
     // -------------------------------------------------------------------------
-    // ROLLING
+    // ROLLING (LIMITED BY TURN MANAGER)
     // -------------------------------------------------------------------------
 
+    /*
+     * Rolls all active dice.
+     * Enforces roll limits per turn using TurnManager.
+     */
     public void RollAllActiveDice()
     {
+        if (TurnManager.Instance.IsPlayerTurn())
+        {
+            if (!TurnManager.Instance.CanPlayerRoll())
+                return;
+
+            TurnManager.Instance.RegisterPlayerRoll();
+        }
+
         lastTurnEffects.Clear();
 
         foreach (ItemSlot slot in InventoryManager.Instance.ActiveDice.GetNonEmptySlots())
@@ -181,6 +208,10 @@ public class DiceRollManager : MonoBehaviour
     // ROLL PROCESSING
     // -------------------------------------------------------------------------
 
+    /*
+     * Called by DiceRoller when a dice finishes rolling.
+     * Applies sync and async effects and stores final results.
+     */
     public void OnDiceResult(ItemSlot slot, int baseRoll)
     {
         appliedEffects[slot] = new List<string>();
@@ -199,6 +230,14 @@ public class DiceRollManager : MonoBehaviour
             return;
 
         rollHistory[slot] = (baseRoll, finalRoll);
+
+        string slotName = slot.ItemName;
+        string effects = appliedEffects.ContainsKey(slot)
+            ? string.Join(", ", appliedEffects[slot])
+            : "Sin efectos";
+
+        Debug.Log("[DADO] " + slotName + " -> Base: " + baseRoll + " | Final: " + finalRoll + " | Efectos: " + effects);
+
         FinalizeRoll(finalRoll);
     }
 
@@ -323,7 +362,6 @@ public class DiceRollManager : MonoBehaviour
 
     // -------------------------------------------------------------------------
     // RANGE MODIFICATION HELPERS
-    // These apply min/max range modifications from dice, character and consumables
     // -------------------------------------------------------------------------
 
     private void ApplyEffectsToRange(BaseEffect[] effects, ref int min, ref int max, DiceContext ctx)
@@ -352,7 +390,6 @@ public class DiceRollManager : MonoBehaviour
                 diceEff.ApplyToRange(ref min, ref max, ctx);
         }
     }
-
 
     // -------------------------------------------------------------------------
     // FACE CORRECTION HELPERS
@@ -456,11 +493,29 @@ public class DiceRollManager : MonoBehaviour
 
     private void FinalizeRoll(int finalRoll)
     {
-        Debug.Log("Final roll result: " + finalRoll);
+        Debug.Log("Resultado final de la tirada: " + finalRoll);
         StatManager.Instance.OnDiceFinalResult(finalRoll);
 
-        if (playerMovement != null)
-            playerMovement.StartMoving();
+        if (InventoryManager.Instance.AllDiceFinishedRolling())
+        {
+            Debug.Log("=== RESUMEN DE TIRADA ===");
+
+            foreach (var kvp in rollHistory)
+            {
+                ItemSlot slot = kvp.Key;
+                int baseRoll = kvp.Value.baseRoll;
+                int finalRollValue = kvp.Value.finalRoll;
+
+                string effects = appliedEffects.ContainsKey(slot)
+                    ? string.Join(", ", appliedEffects[slot])
+                    : "Sin efectos";
+
+                Debug.Log("* " + slot.ItemName + ": " + baseRoll + " -> " + finalRollValue + " | " + effects);
+            }
+
+            if (playerMovement != null)
+                playerMovement.StartMoving();
+        }
     }
 
     public void ResetDiceTurnState()
@@ -508,4 +563,8 @@ public class DiceRollManager : MonoBehaviour
         return total;
     }
 
+    public Movement GetPlayerMovement()
+    {
+        return playerMovement;
+    }
 }

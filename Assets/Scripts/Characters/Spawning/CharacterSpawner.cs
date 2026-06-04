@@ -77,7 +77,15 @@ public class CharacterSpawner : MonoBehaviour
         if (character.applyColor)
         {
             (Color light, Color dark) = GetPalette(character.spawnPointName);
-            ApplyPaletteToCup(currentCup, light, dark);
+
+            // NUEVO: recolor flexible por listas
+            ApplyPaletteToCupFlexible(
+                currentCup,
+                character.cupLightMaterials,
+                character.cupDarkMaterials,
+                light,
+                dark
+            );
         }
     }
 
@@ -128,10 +136,8 @@ public class CharacterSpawner : MonoBehaviour
 
         if (mov != null)
         {
-            // Register movement
             DiceRollManager.Instance.RegisterPlayerMovement(mov);
-            
-            // Set initial board position
+
             mov.ActualPos = lastCharacter.tileSpotIndex;
 
             if (mov.Positions != null &&
@@ -170,9 +176,10 @@ public class CharacterSpawner : MonoBehaviour
         return (Color.white, Color.white);
     }
 
-    private void ApplyPaletteToCup(GameObject obj, Color light, Color dark)
+    // NUEVO: recolor flexible por listas (light/dark)
+    private void ApplyPaletteToCupFlexible(GameObject cup, Material[] lightMats, Material[] darkMats, Color light, Color dark)
     {
-        Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+        Renderer[] renderers = cup.GetComponentsInChildren<Renderer>();
 
         foreach (Renderer r in renderers)
         {
@@ -180,8 +187,21 @@ public class CharacterSpawner : MonoBehaviour
 
             for (int i = 0; i < mats.Length; i++)
             {
-                if (mats[i].HasProperty("_BaseColor"))
-                    mats[i].SetColor("_BaseColor", i == 0 ? light : dark);
+                string cleanName = mats[i].name.Replace(" (Instance)", "");
+
+                // Light materials
+                foreach (var lm in lightMats)
+                {
+                    if (lm != null && cleanName == lm.name && mats[i].HasProperty("_BaseColor"))
+                        mats[i].SetColor("_BaseColor", light);
+                }
+
+                // Dark materials
+                foreach (var dm in darkMats)
+                {
+                    if (dm != null && cleanName == dm.name && mats[i].HasProperty("_BaseColor"))
+                        mats[i].SetColor("_BaseColor", dark);
+                }
             }
 
             r.materials = mats;

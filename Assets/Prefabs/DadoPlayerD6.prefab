@@ -73,6 +73,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f46a7b136cc93ee44a2b43817e562a06, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1677734583523650191}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f46a7b136cc93ee44a2b43817e562a06, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -4214651088070892408}
   m_SourcePrefab: {fileID: 100100000, guid: f46a7b136cc93ee44a2b43817e562a06, type: 3}
 --- !u!1 &3941340506404730363 stripped
 GameObject:
@@ -153,3 +156,15 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.16799998, y: 0.16799998, z: 0.16799998}
   m_Center: {x: 0, y: 0.000000011175871, z: 0}
+--- !u!114 &-4214651088070892408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941340506404730363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 590fbc65f5d72e54da5e170894c38ba6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DiceBoundary

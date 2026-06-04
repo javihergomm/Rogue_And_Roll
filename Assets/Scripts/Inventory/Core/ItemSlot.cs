@@ -1,29 +1,37 @@
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-/*
- * ItemSlot
- * --------
- * Represents a single inventory slot in the UI.
- * Handles item display, selection, dragging, dropping,
- * and placing consumables onto board Spots or ColorSpots.
- */
+public enum SlotType
+{
+    ActiveDice,
+    Dice,
+    Consumable,
+    Permanent
+}
+
 public class ItemSlot : MonoBehaviour,
     IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler,
     IPointerEnterHandler, IPointerExitHandler
-
 {
     [SerializeField] private string itemName = "";
     [SerializeField] private int quantity = 0;
     [SerializeField] private Sprite itemSprite;
     [SerializeField] private string itemDescription = "";
     [SerializeField] private Sprite emptySprite;
+
+    [SerializeField] private SlotType slotType;
+
     private BaseItemSO itemSO;
     public BaseItemSO ItemSO => itemSO;
+    public SlotType SlotType => slotType;
+
+    public void SetSlotType(SlotType type)
+    {
+        slotType = type;
+    }
 
     public string ItemName => itemName;
     public int Quantity => quantity;
@@ -97,7 +105,6 @@ public class ItemSlot : MonoBehaviour,
         RefreshUI();
     }
 
-
     public void DeselectSlot()
     {
         ThisItemSelected = false;
@@ -117,6 +124,25 @@ public class ItemSlot : MonoBehaviour,
 
         BaseItemSO item = itemSO;
 
+        switch (slotType)
+        {
+            case SlotType.ActiveDice:
+            case SlotType.Dice:
+                if (!(item is DiceSO))
+                    return;
+                break;
+
+            case SlotType.Consumable:
+                if (!(item is ConsumableSO))
+                    return;
+                break;
+
+            case SlotType.Permanent:
+                if (!(item is PermanentSO))
+                    return;
+                break;
+        }
+
         if (item is PermanentSO)
             return;
 
@@ -124,39 +150,8 @@ public class ItemSlot : MonoBehaviour,
         canvasGroup.alpha = 0.6f;
         itemImage.enabled = false;
 
-        if (item is DiceSO)
-        {
-            if (!InventoryManager.Instance.IsOpen)
-            {
-                canvasGroup.blocksRaycasts = true;
-                canvasGroup.alpha = 1f;
-                itemImage.enabled = true;
-                return;
-            }
-
-            CreateDragIcon();
-            eventData.pointerDrag = gameObject;
-            return;
-        }
-
-        if (item is ConsumableSO consumable)
-        {
-            if (!consumable.CanBeUsedOnSpot)
-            {
-                canvasGroup.blocksRaycasts = true;
-                canvasGroup.alpha = 1f;
-                itemImage.enabled = true;
-                return;
-            }
-
-            CreateDragIcon();
-            eventData.pointerDrag = gameObject;
-            return;
-        }
-
-        canvasGroup.blocksRaycasts = true;
-        canvasGroup.alpha = 1f;
-        itemImage.enabled = true;
+        CreateDragIcon();
+        eventData.pointerDrag = gameObject;
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -203,25 +198,23 @@ public class ItemSlot : MonoBehaviour,
         if (target == null)
             return;
 
-        // Normal Spot
-        if (target is Spot spot)
+        // PRIORIDAD: COLORSPOT PRIMERO 
+        if (target is ColorSpot colorSpot)
         {
-            InventoryManager.Instance.PlaceConsumableOnSpot(this, spot);
-            InventoryManager.Instance.CloseInventory();   // FULL CLOSE
+            InventoryManager.Instance.PlaceConsumableOnColorSpot(this, colorSpot);
+            InventoryManager.Instance.CloseInventory();
             return;
         }
 
-        // ColorSpot with 3D support
-        if (target is ColorSpot colorSpot)
+        // SI NO ES COLORSPOT, ENTONCES SPOT NORMAL 
+        if (target is Spot spot)
         {
-            if (consumable.AppearsIn3D)
-            {
-                InventoryManager.Instance.PlaceConsumableOnColorSpot(this, colorSpot);
-                InventoryManager.Instance.CloseInventory();   // FULL CLOSE
-            }
+            InventoryManager.Instance.PlaceConsumableOnSpot(this, spot);
+            InventoryManager.Instance.CloseInventory();
             return;
         }
     }
+
 
     public void OnDrop(PointerEventData eventData)
     {
@@ -229,13 +222,33 @@ public class ItemSlot : MonoBehaviour,
         if (draggedObject == null)
             return;
 
-        if (!draggedObject.TryGetComponent<ItemSlot>(out var from))
+        ItemSlot from;
+        if (!draggedObject.TryGetComponent<ItemSlot>(out from))
             return;
+
+        BaseItemSO draggedItem = from.ItemSO;
+
+        switch (slotType)
+        {
+            case SlotType.ActiveDice:
+            case SlotType.Dice:
+                if (!(draggedItem is DiceSO))
+                    return;
+                break;
+
+            case SlotType.Consumable:
+                if (!(draggedItem is ConsumableSO))
+                    return;
+                break;
+
+            case SlotType.Permanent:
+                if (!(draggedItem is PermanentSO))
+                    return;
+                break;
+        }
 
         InventoryManager.Instance.HandleSlotDrop(from, this);
     }
-
-
 
     private void CreateDragIcon()
     {
@@ -272,16 +285,18 @@ public class ItemSlot : MonoBehaviour,
         SpotController controller = Object.FindFirstObjectByType<SpotController>();
         List<MonoBehaviour> all = new();
 
+        // 1. Primero añadimos ColorSpot (PRIORIDAD MÁXIMA)
+        ColorSpot[] colorSpots = Object.FindObjectsByType<ColorSpot>(FindObjectsSortMode.None);
+        if (colorSpots != null && colorSpots.Length > 0)
+            all.AddRange(colorSpots);
+
+        // 2. Luego añadimos Spot normales
         if (controller != null)
         {
-            Spot[] normalSpots = controller.GetAllSpots();
+            Spot[] normalSpots = controller.GetSpotsOrdered();
             if (normalSpots != null && normalSpots.Length > 0)
                 all.AddRange(normalSpots);
         }
-
-        ColorSpot[] colorSpots = FindObjectsByType<ColorSpot>(FindObjectsSortMode.None);
-        if (colorSpots != null && colorSpots.Length > 0)
-            all.AddRange(colorSpots);
 
         if (all.Count == 0)
             return null;
@@ -308,6 +323,7 @@ public class ItemSlot : MonoBehaviour,
         return closest;
     }
 
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (quantity <= 0)
@@ -322,5 +338,4 @@ public class ItemSlot : MonoBehaviour,
         InventoryDescriptionUI ui = InventoryManager.Instance.DescriptionUI;
         ui.Clear();
     }
-
 }

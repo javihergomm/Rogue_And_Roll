@@ -26,9 +26,6 @@ public class CharacterSelectManager : MonoBehaviour
     [SerializeField] private CharacterSO[] characters;
     [SerializeField] private List<CharacterSlot> slots;
 
-    [Header("Cup Prefab")]
-    [SerializeField] private GameObject cupPrefab;
-
     private CharacterSO selectedCharacter;
     private GameObject spawnedCup;
 
@@ -130,6 +127,9 @@ public class CharacterSelectManager : MonoBehaviour
     public void ConfirmCharacter(CharacterSO character)
     {
         selectedCharacter = character;
+        int checkpointColor = GetCheckpointColorFromCharacter(selectedCharacter);
+        Debug.Log("COLOR DETECTADO = " + checkpointColor);
+        SpotController.Instance.AssignCheckpoints(checkpointColor);
 
         // DEBUGS IMPORTANTES
         Debug.Log("=== CHARACTER SELECTED ===");
@@ -155,6 +155,11 @@ public class CharacterSelectManager : MonoBehaviour
 
         // DEBUG: Confirmación final
         Debug.Log("=== CHARACTER CONFIRMATION COMPLETE ===");
+        var ui = FindFirstObjectByType<ActiveDiceUI>();
+        if (ui != null && ui.resultsRoot != null)
+            ui.resultsRoot.gameObject.SetActive(true);
+
+
     }
 
 
@@ -179,4 +184,17 @@ public class CharacterSelectManager : MonoBehaviour
 
         return false;
     }
+    public int GetCheckpointColorFromCharacter(CharacterSO character)
+    {
+        string id = character.characterID.ToLower();
+
+        if (id.Contains("rojo")) return 1;
+        if (id.Contains("verde")) return 2;
+        if (id.Contains("azul")) return 3;
+        if (id.Contains("amarillo")) return 4;
+
+        Debug.LogWarning("No se pudo determinar el color del personaje, usando color 1 por defecto.");
+        return 1;
+    }
+
 }

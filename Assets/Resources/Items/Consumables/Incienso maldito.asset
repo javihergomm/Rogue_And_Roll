@@ -14,19 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: Incienso Maldito
   icon: {fileID: 0}
-  lockedIcon: {fileID: 0}
-  itemDescription: 
+  itemDescription: Impide moverse durante varios turnos.
   prefab3D: {fileID: 646729421180538869, guid: 19330aff26f4fc54fbb126fe7f905147, type: 3}
   itemID: item_consumables_cursed_incense
   buyPrice: 0
   sellPrice: 0
-  polarity: 1
+  polarity: 2
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0
   StoreScaleMultiplier: 1
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  ConsumeOnUse: 1
   AppearsIn3D: 0
   AutoUseOnPickup: 1
   canBeUsedOnSpot: 0

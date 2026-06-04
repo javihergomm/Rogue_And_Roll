@@ -3,21 +3,21 @@ using System;
 using System.Collections.Generic;
 
 /*
- * Controls the turn cycle between the player and enemies, including player turn start,
- * enemy sequencing, and integration with movement and shop logic. The turn only ends
- * when the player movement explicitly indicates that the turn should end.
+ * TurnManager
+ * -----------
+ * Controls the turn flow between player and enemies.
+ * Tracks turn number, enemy order, and player roll limits per turn.
+ * Ensures the player can only roll a limited number of times each turn,
+ * unless passive effects grant additional rolls.
  */
 public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance { get; private set; }
 
-    public static event Action OnPlayerTurnStarted;
-    public static event Action OnEnemyTurnStarted;
+    // Event fired when an enemy roll is calculated
     public static event Action<int> OnEnemyRollCalculated;
 
-    // NUEVO: notificar el movimiento total del jugador
-    public static event Action<int, List<string>> OnPlayerRollCalculated;
-
+    // Internal turn state
     private enum TurnState
     {
         PlayerTurn,
@@ -26,10 +26,19 @@ public class TurnManager : MonoBehaviour
 
     private TurnState state = TurnState.PlayerTurn;
 
+    // Current turn number
+    public int TurnNumber { get; private set; } = 0;
+
+    // Active enemies in the scene
     private List<EnemyBase> activeEnemies = new();
     private int currentEnemyIndex = 0;
 
+    // Reference to the player movement component
     private Movement playerMovement;
+
+    // Roll tracking for the current turn
+    private int rollsUsedThisTurn = 0;
+    private int rollsAllowedThisTurn = 1;
 
     private void Awake()
     {
@@ -47,16 +56,21 @@ public class TurnManager : MonoBehaviour
         StartCoroutine(WaitForPlayer());
     }
 
+    // Returns true if it's currently the player's turn
     public bool IsPlayerTurn()
     {
         return state == TurnState.PlayerTurn;
     }
 
+    /*
+     * Waits until the player Movement component is found in the scene.
+     * Uses the updated Unity API without deprecated parameters.
+     */
     private System.Collections.IEnumerator WaitForPlayer()
     {
         while (playerMovement == null)
         {
-            Movement[] allMovements = FindObjectsByType<Movement>(FindObjectsSortMode.None);
+            Movement[] allMovements = FindObjectsByType<Movement>(FindObjectsInactive.Exclude);
 
             foreach (Movement m in allMovements)
             {
@@ -70,57 +84,66 @@ public class TurnManager : MonoBehaviour
             yield return null;
         }
 
+        // Subscribe to movement finished event
         playerMovement.OnMovementFinished += OnPlayerFinishedMovement;
+
+        // Register player movement in DiceRollManager
         DiceRollManager.Instance.RegisterPlayerMovement(playerMovement);
 
+        // Start the first player turn
         StartPlayerTurn();
     }
 
-    public bool IsEnemyRegistered(EnemyBase enemy)
-    {
-        return activeEnemies.Contains(enemy);
-    }
+    // ============================================================
+    // PLAYER TURN
+    // ============================================================
 
-    public void RegisterEnemy(EnemyBase enemy)
-    {
-        if (!activeEnemies.Contains(enemy))
-            activeEnemies.Add(enemy);
-    }
-
-    public void UnregisterEnemy(EnemyBase enemy)
-    {
-        if (activeEnemies.Contains(enemy))
-            activeEnemies.Remove(enemy);
-    }
-
+    /*
+     * Starts the player's turn:
+     * - Increments turn number
+     * - Resets roll counters
+     * - Notifies passive effects
+     * - Handles special passives (e.g., AvoidBadSpot)
+     */
     public void StartPlayerTurn()
     {
+        TurnNumber++;
         state = TurnState.PlayerTurn;
 
-        StatManager.Instance.NextTurn();
+        // Reset roll counters
+        rollsUsedThisTurn = 0;
+        rollsAllowedThisTurn = 1;
 
-        Debug.Log("=== PLAYER TURN ===");
-        OnPlayerTurnStarted?.Invoke();
+        StatManager.Instance.NextTurn();
+        var ctx = StatManager.Instance.PassiveCtx;
+
+        CharacterEffectManager.Instance.NotifyTurnStart();
+
+        if (ctx.AvoidBadSpotEvery3TurnsActive)
+        {
+            ctx.AvoidBadSpotTurnCounter++;
+
+            if (ctx.AvoidBadSpotTurnCounter >= 3)
+            {
+                ctx.AvoidBadSpotBoostReady = true;
+                ctx.AvoidBadSpotTurnCounter = 0;
+            }
+        }
     }
 
+    /*
+     * Called when the player finishes movement.
+     * Ends the player's turn if movement rules allow it.
+     */
     private void OnPlayerFinishedMovement()
     {
         if (state != TurnState.PlayerTurn)
             return;
 
         if (!playerMovement.turnShouldEnd)
-        {
-            Debug.Log("Player movement finished but turn should not end.");
             return;
-        }
 
-        Debug.Log("Player finished movement.");
-
-        // NUEVO: notificar el movimiento total del jugador
-        int totalMovement = playerMovement.lastTotalMovement;
-        List<string> efectos = DiceRollManager.Instance.GetLastAppliedEffects();
-
-        OnPlayerRollCalculated?.Invoke(totalMovement, efectos);
+        CharacterEffectManager.Instance.NotifyTurnEnd();
 
         StartEnemyTurns();
     }
@@ -130,18 +153,14 @@ public class TurnManager : MonoBehaviour
         OnPlayerFinishedMovement();
     }
 
-    public void NotifyEnemyFinishedMovement()
-    {
-        OnEnemyFinishedMovement();
-    }
+    // ============================================================
+    // ENEMY TURNS
+    // ============================================================
 
     public void StartEnemyTurns()
     {
-        Debug.Log("=== ENEMY TURN ===");
-
         if (activeEnemies.Count == 0)
         {
-            Debug.Log("No enemies available. Returning to player.");
             StartPlayerTurn();
             return;
         }
@@ -149,18 +168,23 @@ public class TurnManager : MonoBehaviour
         state = TurnState.EnemyTurn;
         currentEnemyIndex = 0;
 
-        OnEnemyTurnStarted?.Invoke();
-
         StartNextEnemyTurn();
     }
 
+    /*
+     * Starts the next enemy's turn.
+     * Skips invalid or disabled enemies.
+     */
     private void StartNextEnemyTurn()
     {
-        Debug.Log($"Processing enemy index {currentEnemyIndex}/{activeEnemies.Count}");
-
-        if (currentEnemyIndex >= activeEnemies.Count)
+        if (activeEnemies.Count == 0)
         {
-            Debug.Log("All enemies completed their actions.");
+            StartPlayerTurn();
+            return;
+        }
+
+        if (currentEnemyIndex < 0 || currentEnemyIndex >= activeEnemies.Count)
+        {
             StartPlayerTurn();
             return;
         }
@@ -169,7 +193,6 @@ public class TurnManager : MonoBehaviour
 
         if (enemy == null || !enemy.isActiveAndEnabled)
         {
-            Debug.Log("Enemy missing or disabled. Skipping.");
             currentEnemyIndex++;
             StartNextEnemyTurn();
             return;
@@ -177,13 +200,12 @@ public class TurnManager : MonoBehaviour
 
         if (StatManager.Instance.PreventEnemyMovementThisTurn)
         {
-            Debug.Log($"Enemy movement blocked: {enemy.name}");
             currentEnemyIndex++;
             StartNextEnemyTurn();
             return;
         }
 
-        Debug.Log($"Starting turn for enemy: {enemy.name}");
+        CharacterEffectManager.Instance.NotifyEnemyTurnStart(enemy);
 
         enemy.movement.OnMovementFinished -= OnEnemyFinishedMovement;
         enemy.movement.OnMovementFinished += OnEnemyFinishedMovement;
@@ -191,19 +213,111 @@ public class TurnManager : MonoBehaviour
         enemy.StartTurn();
     }
 
+    /*
+     * Called when an enemy finishes movement.
+     * Moves to the next enemy or returns to the player turn.
+     */
     private void OnEnemyFinishedMovement()
     {
-        Debug.Log("Enemy finished movement.");
+        if (activeEnemies.Count == 0)
+        {
+            StartPlayerTurn();
+            return;
+        }
+
+        if (currentEnemyIndex < 0 || currentEnemyIndex >= activeEnemies.Count)
+        {
+            StartPlayerTurn();
+            return;
+        }
 
         EnemyBase enemy = activeEnemies[currentEnemyIndex];
-        enemy.movement.OnMovementFinished -= OnEnemyFinishedMovement;
+
+        if (enemy != null && enemy.movement != null)
+            enemy.movement.OnMovementFinished -= OnEnemyFinishedMovement;
+
+        CharacterEffectManager.Instance.NotifyEnemyTurnEnd(enemy);
 
         currentEnemyIndex++;
+
+        if (currentEnemyIndex >= activeEnemies.Count)
+        {
+            StartPlayerTurn();
+            return;
+        }
+
         StartNextEnemyTurn();
+    }
+
+    public void ForceEnemyTurnEnd()
+    {
+        OnEnemyFinishedMovement();
     }
 
     public static void NotifyEnemyRoll(int total)
     {
         OnEnemyRollCalculated?.Invoke(total);
+    }
+
+    // ============================================================
+    // ENEMY REGISTRATION (FIXED)
+    // ============================================================
+
+    /*
+     * Returns true if the given enemy is already registered
+     * in the active enemy list.
+     */
+    public bool IsEnemyRegistered(EnemyBase enemy)
+    {
+        return enemy != null && activeEnemies.Contains(enemy);
+    }
+
+    /*
+     * Registers an enemy into the active enemy list
+     * so it participates in enemy turns.
+     */
+    public void RegisterEnemy(EnemyBase enemy)
+    {
+        if (enemy == null)
+            return;
+
+        if (!activeEnemies.Contains(enemy))
+            activeEnemies.Add(enemy);
+    }
+
+    /*
+     * Removes an enemy from the active enemy list
+     * so it no longer participates in enemy turns.
+     */
+    public void UnregisterEnemy(EnemyBase enemy)
+    {
+        if (enemy == null)
+            return;
+
+        if (activeEnemies.Contains(enemy))
+            activeEnemies.Remove(enemy);
+    }
+
+    // ============================================================
+    // ROLL CONTROL
+    // ============================================================
+
+    public int GetRollsUsed() => rollsUsedThisTurn;
+
+    public int GetRollsAllowed() => rollsAllowedThisTurn;
+
+    public void AddExtraRolls(int amount)
+    {
+        rollsAllowedThisTurn += amount;
+    }
+
+    public bool CanPlayerRoll()
+    {
+        return rollsUsedThisTurn < rollsAllowedThisTurn;
+    }
+
+    public void RegisterPlayerRoll()
+    {
+        rollsUsedThisTurn++;
     }
 }

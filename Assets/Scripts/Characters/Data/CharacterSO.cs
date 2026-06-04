@@ -7,18 +7,23 @@ public class CharacterSO : ScriptableObject
     public string characterID;
     public string characterName;
     [TextArea] public string description;
+    [Header("Unlock Info")]
+    public string unlockHint;
     public Sprite icon;
-    public Sprite lockedIcon;
+    
 
     [Header("Visuals")]
     public Color characterColor = Color.white;
     public bool applyColor = true;
 
-    // Determines whether the tile should be recolored
     public bool applyTileColor;
 
-    // The specific material inside the tile that should receive the palette color
     public Material tileMaterial;
+
+    [Header("Cup Materials")]
+    public Material[] cupLightMaterials;   // materiales que deben recibir el color claro
+    public Material[] cupDarkMaterials;    // materiales que deben recibir el color oscuro
+
 
     [Header("Prefabs")]
     public GameObject cupPrefab;

@@ -4,9 +4,8 @@ using UnityEngine;
  * BaseEffect
  * ----------
  * Root class for all effect types.
- * Effects can be aligned as Positive or Negative so items/characters
- * can restrict which effects they accept.
  */
+
 public enum EffectAlignment
 {
     Positive,
@@ -17,4 +16,19 @@ public abstract class BaseEffect : ScriptableObject
 {
     [Header("Effect Alignment")]
     public EffectAlignment alignment;
+
+    // ============================
+    // CALLBACKS OPCIONALES
+    // ============================
+
+    // Turno del jugador
+    public virtual void OnTurnStart() { }
+    public virtual void OnTurnEnd() { }
+
+    // Movimiento del jugador
+    public virtual void OnMovementStart(Movement m) { }
+    public virtual void OnMovementEnd(Movement m) { }
+
+    public virtual void OnEnemyTurnStart(EnemyBase enemy) { }
+    public virtual void OnEnemyTurnEnd(EnemyBase enemy) { }
 }

@@ -38,11 +38,26 @@ public class CharacterSlot : MonoBehaviour, IPointerClickHandler
     {
         bool unlocked = Unlocks.IsUnlocked(characterData.characterID);
 
-        characterIcon = unlocked ? characterData.icon : characterData.lockedIcon;
+        // Siempre usar el icono real
+        characterIcon = characterData.icon;
 
         if (iconImage != null)
+        {
             iconImage.sprite = characterIcon;
+
+            if (!unlocked)
+            {
+                // Personaje bloqueado -> icono completamente negro
+                iconImage.color = Color.black;
+            }
+            else
+            {
+                // Personaje desbloqueado -> icono normal
+                iconImage.color = Color.white;
+            }
+        }
     }
+
     public void SetFlow(CharacterSelectionFlow f)
     {
         flow = f;
@@ -50,8 +65,12 @@ public class CharacterSlot : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-     
-        if (!Unlocks.IsUnlocked(characterData.characterID))
+        bool unlocked = Unlocks.IsUnlocked(characterData.characterID);
+
+       
+        selectionUI.UpdateInfo(characterData);
+
+        if (!unlocked)
         {
             Debug.Log("Character locked: " + characterData.characterID);
             return;
@@ -59,4 +78,5 @@ public class CharacterSlot : MonoBehaviour, IPointerClickHandler
 
         flow.HandleClick(this);
     }
+
 }

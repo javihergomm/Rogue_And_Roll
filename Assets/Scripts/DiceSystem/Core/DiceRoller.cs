@@ -286,4 +286,9 @@ public class DiceRoller : MonoBehaviour
         rb.angularVelocity = Vector3.zero;
         rb.Sleep();
     }
+    public bool IsRolling()
+    {
+        return isRolling;
+    }
+
 }

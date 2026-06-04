@@ -25,7 +25,7 @@ public class DestinyChoiceEffect : BaseDiceEffect
         while (alt == currentRoll && safety-- > 0)
             alt = allowed[UnityEngine.Random.Range(0, allowed.Count)];
 
-        // Nuevo sistema de opciones
+        
         var options = new List<PopupOption>
         {
             new($"Tirada actual: {currentRoll}", () => callback(currentRoll), isConfirm: true),

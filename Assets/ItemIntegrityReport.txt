@@ -1,0 +1,21 @@
+Item Integrity Report
+---------------------
+
+Falta Sprite (7)
+ - EscudoSalida
+ - Incienso maldito
+ - Mapa roto
+ - Poción del Azar
+ - Varita de Cambio
+ - Gafas Destruidas
+ - LinternaPotenciadora
+
+Falta Prefab 3D (2)
+ - EspejoMaldito
+ - GatoNueveVidas
+
+Faltan Ambos (3)
+ - Bendicion del Clerigo
+ - Cofre Mortal
+ - Trebol4Hojas
+

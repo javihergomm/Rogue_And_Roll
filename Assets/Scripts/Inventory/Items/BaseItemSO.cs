@@ -12,18 +12,19 @@ public abstract class BaseItemSO : ScriptableObject
 {
     public enum ItemPolarity
     {
-        Positive,
-        Negative
+        Neutral,   
+        Positive,  
+        Negative,  
+        Especial   
     }
 
     // Basic item information
     [Header("Basic Info")]
     [SerializeField] private string itemName;
     [SerializeField] private Sprite icon;
-    public Sprite lockedIcon;
     [SerializeField][TextArea] private string itemDescription;
     [SerializeField] private GameObject prefab3D;
-    
+
     [Header("Unlockable ID")]
     public string itemID; // ASCII-only, único
 
@@ -38,19 +39,10 @@ public abstract class BaseItemSO : ScriptableObject
 
     // Store display adjustments
     [Header("Store Display Overrides")]
-    [Tooltip("Extra rotation applied ONLY in the shop display.")]
     public Vector3 StoreRotationOffset = Vector3.zero;
-
-    [Tooltip("Extra height offset applied ONLY in the shop display.")]
     public float StoreHeightOffset = 0f;
-
-    [Tooltip("Scale multiplier applied ONLY in the shop display.")]
     public float StoreScaleMultiplier = 1f;
-
-    [Tooltip("Extra Z offset applied ONLY in the shop display.")]
     public float StoreZPositionOffset = 0f;
-
-    [Tooltip("Extra X offset applied ONLY in the shop display.")]
     public float StoreXPositionOffset = 0f;
 
     // Public accessors
@@ -61,9 +53,6 @@ public abstract class BaseItemSO : ScriptableObject
 
     public int BuyPrice => buyPrice;
     public int SellPrice => sellPrice;
-
-    // Controls whether the item is consumed immediately when used
-    public bool ConsumeOnUse = true;
 
     public ItemPolarity Polarity => polarity;
 

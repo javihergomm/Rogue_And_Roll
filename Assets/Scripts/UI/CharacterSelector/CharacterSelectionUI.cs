@@ -13,10 +13,24 @@ public class CharacterSelectionUI
 
     public void UpdateInfo(CharacterSO data)
     {
+        bool unlocked = Unlocks.IsUnlocked(data.characterID);
+
         if (nameText != null)
-            nameText.text = data.characterName;
+            nameText.text = unlocked ? data.characterName : "????";
 
         if (descText != null)
-            descText.text = data.description;
+        {
+            if (unlocked)
+            {
+                descText.text = data.description;
+            }
+            else
+            {
+                // Si no has puesto un unlockHint, muestra un texto por defecto
+                descText.text = string.IsNullOrEmpty(data.unlockHint)
+                    ? "Este personaje está bloqueado."
+                    : data.unlockHint;
+            }
+        }
     }
 }

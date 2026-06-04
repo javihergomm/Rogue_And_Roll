@@ -2,6 +2,15 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+/*
+ * EnemyManager
+ * ------------
+ * Handles enemy spawning, despawning, activation and registration
+ * with the TurnManager. Also manages special spawn rules such as
+ * DemonBoss (spawn by laps or by roll 666).
+ * 
+ * All player-visible text must remain in Spanish.
+ */
 public class EnemyManager : MonoBehaviour
 {
     public static EnemyManager Instance { get; private set; }
@@ -30,11 +39,15 @@ public class EnemyManager : MonoBehaviour
         StartCoroutine(WaitForPlayer());
     }
 
+    /*
+     * Waits until the player Movement component is found.
+     * Uses the updated Unity API without deprecated parameters.
+     */
     private IEnumerator WaitForPlayer()
     {
         while (playerMovement == null)
         {
-            Movement[] allMovements = FindObjectsByType<Movement>(FindObjectsSortMode.None);
+            Movement[] allMovements = FindObjectsByType<Movement>(FindObjectsInactive.Exclude);
 
             foreach (Movement m in allMovements)
             {
@@ -81,26 +94,26 @@ public class EnemyManager : MonoBehaviour
                 Destroy(e.gameObject);
 
                 RemoveEnemy(e);
-
-
-                RemoveEnemy(e);
             }
         }
+
+        // ============================================================
+        // SPAWN DE ENEMIGOS
+        // ============================================================
         foreach (var enemySO in enemyDefinitions)
         {
             if (enemySO == null)
                 continue;
 
-            // Buscar si ya existe una instancia activa de este enemigo
             EnemyBase existing = enemies.Find(e => e.data == enemySO);
             bool alreadySpawned = existing != null && existing.isActive;
+
             if (enemySO.spawnOnlyOnce && enemySO.hasSpawnedOnce)
                 continue;
 
             // ====================================================
             // 1. DEMONIO — Spawn por vueltas o por tirada 666
             // ====================================================
-
             if (enemySO.enemyPrefab.TryGetComponent<DemonBoss>(out var demonPrefab))
             {
                 int lastRoll = StatManager.Instance.PreviousRoll;
@@ -110,13 +123,7 @@ public class EnemyManager : MonoBehaviour
                     currentLap >= enemySO.lapsToActivate &&
                     (!enemySO.requiresPlayerLap || playerMovement.Round > 1);
 
-                // NEW — Buscar instancia previa del demonio
                 EnemyBase existingDemon = enemies.Find(e => e.data == enemySO);
-
-                // NEW — Respetar Spawn Only Once
-                if (enemySO.spawnOnlyOnce && enemySO.hasSpawnedOnce)
-                    continue;
-
                 bool demonIsActive = existingDemon != null && existingDemon.isActive;
 
                 if (!demonIsActive && (spawnByRoll || spawnByLaps))
@@ -128,8 +135,6 @@ public class EnemyManager : MonoBehaviour
                 continue;
             }
 
-
-
             // ====================================================
             // 2. ENEMIGOS NORMALES — Spawn por vueltas
             // ====================================================
@@ -138,9 +143,6 @@ public class EnemyManager : MonoBehaviour
                 (!enemySO.requiresPlayerLap || playerMovement.Round > 1);
 
             if (!canSpawnByLaps)
-                continue;
-
-            if (enemySO.spawnOnlyOnce && enemySO.hasSpawnedOnce)
                 continue;
 
             if (!alreadySpawned)
@@ -169,6 +171,8 @@ public class EnemyManager : MonoBehaviour
         enemy.isActive = true;
 
         enemies.Add(enemy);
+
+        // Register enemy in TurnManager
         TurnManager.Instance.RegisterEnemy(enemy);
 
         enemy.SpawnEnemy();

@@ -3,11 +3,6 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
-/*
- * Handles all board movement logic, including checkpoints, shop entry,
- * pending steps, lap counting only on player-controlled forward movement,
- * and ignoring lap count on enemy-forced movement.
- */
 public class Movement : MonoBehaviour
 {
     private Spot[] spots;
@@ -18,6 +13,8 @@ public class Movement : MonoBehaviour
     private ShopExitManager shopExitManager;
 
     public bool ignoreBridgeThisMove = false;
+
+    public string lastSpotEffectText = "";
 
     public void SetPositions(Transform[] newPositions)
     {
@@ -43,32 +40,46 @@ public class Movement : MonoBehaviour
 
     private Renderer cachedRenderer;
     private bool wasHiddenByEffect = false;
+
+    private bool isExtraMovement = false;
+    private bool ignoreInitialCheckpoint = true;
+
     public int Round { get; private set; } = 1;
     public float LapProgress { get; private set; } = 0f;
 
     public int startPos;
     public int lastPos;
 
-    private bool effectAlreadyTriggered = false;
-
-    public int probabilityExtraSteps = 50;
-    public int probabilityBlockEnemy = 50;
-
-    public int probabilityNegativeSteps = 50;
-    public int probabilityBlockPlayer = 50;
+    public bool effectAlreadyTriggered = false;
 
     public int pendingSteps = 0;
     public bool turnShouldEnd = true;
     public bool movementIsPlayerControlled = true;
 
-    // NUEVO: total de movimiento del turno
     public int lastTotalMovement = 0;
 
     private void Start()
     {
-        spots = FindObjectsByType<Spot>(FindObjectsSortMode.None);
+        // ============================
+        // Cargar Spots del tablero
+        // ============================
+        spots = GameObject.FindObjectsByType<Spot>();
+
+        Debug.Log("========== DEBUG SPOTS ENCONTRADOS ==========");
+        Debug.Log("[DEBUG] Total Spots encontrados: " + spots.Length);
+
+        foreach (var s in spots)
+        {
+            Debug.Log("[DEBUG] Spot encontrado: " + s.name + " | index=" + s.index + " | activo=" + s.gameObject.activeInHierarchy);
+        }
+        Debug.Log("==============================================");
+
+        // Ordenar por índice
         Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
+        // ============================
+        // Asignar posiciones
+        // ============================
         if (positions == null || positions.Length == 0)
         {
             positions = new Transform[spots.Length];
@@ -76,32 +87,46 @@ public class Movement : MonoBehaviour
                 positions[i] = spots[i].transform;
         }
 
-        shopExitManager = FindFirstObjectByType<ShopExitManager>();
+        shopExitManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ShopExitManager>();
         cachedRenderer = GetComponentInChildren<Renderer>();
 
+        // ============================
+        // Posición inicial
+        // ============================
         if (actualPos >= 1 && actualPos <= positions.Length)
             transform.position = positions[actualPos - 1].position;
 
         startPos = actualPos;
         lastPos = actualPos;
+
+        Debug.Log($"[DEBUG] Movement iniciado. actualPos={actualPos}, totalPositions={positions.Length}");
     }
+
 
     public void StartMoving()
     {
+        startPos = actualPos;
         nextCheckpoint = GetNextCheckpoint();
         effectAlreadyTriggered = false;
         turnShouldEnd = true;
         movementIsPlayerControlled = true;
-
-        // Reiniciar el total del movimiento del turno
         lastTotalMovement = 0;
+        lastSpotEffectText = "";
+        ignoreBridgeThisMove = false;
 
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
         {
             OnMovementFinished?.Invoke();
+            SendRealMovementToUI("Movimiento bloqueado");
             return;
         }
 
+        // ============================================================
+        // Notificar inicio de movimiento
+        // ============================================================
+        if (isPlayer)
+            CharacterEffectManager.Instance.NotifyMovementStart(this);
+        ignoreInitialCheckpoint = false;
         StartCoroutine(MoveWithVisibilityCheck());
     }
 
@@ -110,9 +135,13 @@ public class Movement : MonoBehaviour
         nextCheckpoint = int.MaxValue;
         effectAlreadyTriggered = false;
         turnShouldEnd = true;
+        ignoreBridgeThisMove = false;
 
-        // Reiniciar el total del movimiento del turno
-        lastTotalMovement = 0;
+        // ============================================================
+        // Notificar inicio de movimiento fijo
+        // ============================================================
+        if (isPlayer)
+            CharacterEffectManager.Instance.NotifyMovementStart(this);
 
         StartCoroutine(MoveWithVisibilityCheck(steps));
     }
@@ -137,6 +166,10 @@ public class Movement : MonoBehaviour
 
         int steps = fixedSteps ?? InventoryManager.Instance.GetFinalDiceNumber();
 
+        Debug.Log("[MOVE] Steps recibidos del dado: " + steps);
+        Debug.Log("[MOVE] Round actual: " + Round);
+
+
         int divisor = 1;
         if (Round >= 3)
             divisor = ((Round - 3) / 2) + 2;
@@ -144,25 +177,43 @@ public class Movement : MonoBehaviour
         if (isPlayer)
             steps /= divisor;
 
+        Debug.Log("[MOVE] Divisor aplicado: " + divisor);
+        Debug.Log("[MOVE] Steps despues de divisor: " + steps);
+
+
         yield return StartCoroutine(Move(steps));
     }
 
     private IEnumerator Move(int steps)
     {
+        Debug.Log("[MOVE] Iniciando movimiento con steps = " + steps + " desde pos " + actualPos);
+
         if (actualPos <= 0)
         {
             OnMovementFinished?.Invoke();
+            SendRealMovementToUI(lastSpotEffectText);
+
+            // ============================================================
+            // Notificar fin de movimiento
+            // ============================================================
+            if (isPlayer)
+                CharacterEffectManager.Instance.NotifyMovementEnd(this);
+
             yield break;
         }
 
-        // Guardar movimiento base
-        lastTotalMovement += Mathf.Abs(steps);
+        if (!isExtraMovement)
+            lastTotalMovement += steps;
 
         if (isPlayer && nextCheckpoint > 0)
         {
             int hypotheticalSpot = actualPos + steps;
+            hypotheticalSpot %= spots.Length + 1;
             if (hypotheticalSpot > nextCheckpoint)
                 steps = nextCheckpoint - actualPos;
+            Debug.Log("[MOVE] Recorte por checkpoint. Hypothetical: " + hypotheticalSpot + " checkpoint: " + nextCheckpoint);
+            Debug.Log("[MOVE] Steps recortados a: " + steps);
+
         }
 
         if (!isPlayer)
@@ -176,7 +227,7 @@ public class Movement : MonoBehaviour
             int previousPos = actualPos;
 
             actualPos += direction;
-
+            Debug.Log($"[MOVEMENT] De {previousPos} -> {actualPos}");
             if (actualPos > positions.Length)
                 actualPos = 1;
             if (actualPos < 1)
@@ -199,10 +250,7 @@ public class Movement : MonoBehaviour
                     Round++;
 
                     if (Round == 2)
-                    {
                         Unlocks.Unlock("ID_DEL_OBJETO");
-                        Debug.Log("Objeto desbloqueado por completar 1 vuelta");
-                    }
 
                     if (EnemyManager.Instance != null)
                         EnemyManager.Instance.CheckSpawnConditions();
@@ -231,6 +279,7 @@ public class Movement : MonoBehaviour
                 int targetSpot = connections[0];
                 int prev = actualPos;
                 actualPos = targetSpot;
+                Debug.Log("[MOVE] Puente detectado. De " + prev + " -> " + targetSpot);
 
                 Vector3 bridgeTarget = positions[targetSpot - 1].position;
 
@@ -260,72 +309,38 @@ public class Movement : MonoBehaviour
                 }
             }
 
-            if (spots[actualPos - 1].checkpoint && isPlayer)
+            if (direction > 0 && spots[actualPos - 1].checkpoint && isPlayer && movementIsPlayerControlled)
             {
-                int remaining = totalSteps - (i + 1);
-                pendingSteps = remaining;
-                turnShouldEnd = false;
+                if (ignoreInitialCheckpoint)
+                {
+                    Debug.Log("[MOVE] Ignorando checkpoint inicial en pos " + actualPos);
+                    ignoreInitialCheckpoint = false;
+                }
+                else
+                {
+                    int remaining = totalSteps - (i + 1);
+                    pendingSteps = remaining;
+                    turnShouldEnd = false;
 
-                shopExitManager.EnterShop();
+                    Debug.Log("[MOVE] Entrando en checkpoint. Quedan " + remaining + " pasos pendientes.");
 
-                yield break;
+                    shopExitManager.EnterShop();
+                    yield break;
+                }
             }
+
 
             yield return new WaitForSeconds(0.1f);
         }
 
         ignoreBridgeThisMove = false;
 
-        var type = spots[actualPos - 1].GetSpotType();
+        var type = spots[actualPos - 1].type;
 
         if (isPlayer && TurnManager.Instance.IsPlayerTurn() && !effectAlreadyTriggered)
         {
-            if (type == Spot.SpotType.Good)
-            {
-                effectAlreadyTriggered = true;
-
-                int roll = UnityEngine.Random.Range(0, 100);
-
-                if (roll < probabilityExtraSteps)
-                {
-                    int extra = UnityEngine.Random.Range(3, 6);
-
-                    // Acumular movimiento extra
-                    lastTotalMovement += Mathf.Abs(extra);
-
-                    yield return StartCoroutine(ExtraMovementRoutine(extra));
-                }
-                else
-                {
-                    ScriptableObject.CreateInstance<BlockEnemyMovementEffect>().Activate();
-                }
-
-                OnMovementFinished?.Invoke();
-                yield break;
-            }
-            else if (type == Spot.SpotType.Bad)
-            {
-                effectAlreadyTriggered = true;
-
-                int roll = UnityEngine.Random.Range(0, 100);
-
-                if (roll < probabilityNegativeSteps)
-                {
-                    int extra = UnityEngine.Random.Range(-3, -6);
-
-                    // Acumular movimiento extra
-                    lastTotalMovement += Mathf.Abs(extra);
-
-                    yield return StartCoroutine(ExtraMovementRoutine(extra));
-                }
-                else
-                {
-                    ScriptableObject.CreateInstance<BlockPlayerMovementEffect>().Activate();
-                }
-
-                OnMovementFinished?.Invoke();
-                yield break;
-            }
+            yield return StartCoroutine(spots[actualPos - 1].TriggerSpotEffect(this));
+            effectAlreadyTriggered = true;
         }
 
         if (isPlayer && cachedRenderer != null && wasHiddenByEffect)
@@ -338,17 +353,70 @@ public class Movement : MonoBehaviour
             DiceRollManager.Instance.ResetDiceTurnState();
 
         lastPos = actualPos;
+
         OnMovementFinished?.Invoke();
+        Debug.Log("[MOVE] Movimiento finalizado. Posicion final: " + actualPos + " | StartPos: " + startPos);
+        Debug.Log("[MOVE] Movimiento real enviado a UI: " + (actualPos - startPos));
+
+        SendRealMovementToUI(lastSpotEffectText);
+
+        // ============================================================
+        // Notificar fin de movimiento
+        // ============================================================
+        if (isPlayer)
+            CharacterEffectManager.Instance.NotifyMovementEnd(this);
     }
 
-    private IEnumerator ExtraMovementRoutine(int extraSteps)
+    public IEnumerator ExtraMovementRoutine(int extraSteps)
     {
         if (extraSteps != 0)
+        {
+            isExtraMovement = true;
             yield return StartCoroutine(Move(extraSteps));
+            isExtraMovement = false;
+        }
 
         lastPos = actualPos;
+
         OnMovementFinished?.Invoke();
+        SendRealMovementToUI(lastSpotEffectText);
+
+        // ============================================================
+        // Notificar fin de movimiento extra
+        // ============================================================
+        if (isPlayer)
+            CharacterEffectManager.Instance.NotifyMovementEnd(this);
     }
+
+    public void SendRealMovementToUI(string effectText = "")
+    {
+        int total = positions.Length;
+        int realMovement = actualPos - startPos;
+
+        if (realMovement > total / 2)
+            realMovement -= total;
+        if (realMovement < -total / 2)
+            realMovement += total;
+
+        // ================================
+        // Incluir efectos de dados
+        // ================================
+        var diceEffects = DiceRollManager.Instance.GetLastAppliedEffects();
+        string allEffects = effectText;
+
+        if (diceEffects.Count > 0)
+        {
+            if (!string.IsNullOrEmpty(allEffects))
+                allEffects += " | ";
+
+            allEffects += string.Join(", ", diceEffects);
+        }
+
+        var ui = FindFirstObjectByType<ActiveDiceUI>();
+        if (ui != null)
+            ui.SetLastTurnSummary(realMovement, allEffects, false);
+    }
+
 
     public int GetNextCheckpoint()
     {
@@ -383,6 +451,13 @@ public class Movement : MonoBehaviour
         transform.position = positions[index - 1].position;
     }
 
+    public void ResetAfterShop()
+    {
+        ignoreInitialCheckpoint = true;
+        isExtraMovement = false;
+        lastPos = actualPos;
+    }
+
 #if UNITY_EDITOR
 
     [ContextMenu("TEST: +0.05 Lap")]
@@ -400,27 +475,17 @@ public class Movement : MonoBehaviour
     private void AddLapProgressTest(float amount)
     {
         if (!isPlayer)
-        {
-            Debug.LogWarning("Solo funciona en el jugador.");
             return;
-        }
 
         LapProgress += amount;
-
-        Debug.Log("TEST: LapProgress = " + LapProgress);
 
         if (LapProgress >= 1f)
         {
             LapProgress -= 1f;
             Round++;
 
-            Debug.Log("TEST: Vuelta completada! Round = " + Round);
-
             if (Round == 2)
-            {
                 Unlocks.Unlock("ID_DEL_OBJETO");
-                Debug.Log("TEST: Objeto desbloqueado por completar 1 vuelta");
-            }
 
             if (EnemyManager.Instance != null)
                 EnemyManager.Instance.CheckSpawnConditions();
@@ -431,5 +496,4 @@ public class Movement : MonoBehaviour
     }
 
 #endif
-
 }

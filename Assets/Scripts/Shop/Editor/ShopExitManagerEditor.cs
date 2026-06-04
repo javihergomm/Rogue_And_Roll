@@ -13,14 +13,33 @@ public class ShopExitManagerEditor : Editor
         GUILayout.Space(10);
         GUILayout.Label("Debug Shop Controls", EditorStyles.boldLabel);
 
-        if (GUILayout.Button("Enter Shop"))
+        if (GUILayout.Button("Enter Shop (Play Mode Only)"))
         {
-            manager.EnterShop();
+            if (Application.isPlaying)
+                manager.EnterShop();
+            else
+                Debug.LogWarning("Solo funciona en Play Mode.");
         }
 
-        if (GUILayout.Button("Exit Shop"))
+        if (GUILayout.Button("Exit Shop (Play Mode Only)"))
         {
-            manager.ConfirmExit();
+            if (Application.isPlaying)
+                manager.ConfirmExit();
+            else
+                Debug.LogWarning("Solo funciona en Play Mode.");
+        }
+
+        GUILayout.Space(10);
+        GUILayout.Label("Editor Preview", EditorStyles.boldLabel);
+
+        if (GUILayout.Button("Preview Shop in Scene"))
+        {
+            manager.EditorPreviewShop();
+        }
+
+        if (GUILayout.Button("Exit Shop (Editor Preview)"))
+        {
+            manager.EditorExitShop();
         }
     }
 }

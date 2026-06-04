@@ -2,13 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-/*
- * InventorySlots
- * --------------
- * Handles all inventory slot groups and item operations.
- * Manages adding, removing, swapping, selecting, and replacing items.
- * Provides access to item data and organizes items by category.
- */
 [System.Serializable]
 public class InventorySlots
 {
@@ -27,9 +20,6 @@ public class InventorySlots
     public IReadOnlyList<ItemSlot> AllSlots => allSlots;
     public List<ItemSlot> ActiveDiceSlots => activeDiceSlots;
 
-    /*
-     * Initializes the slot system and builds the item lookup table.
-     */
     public void Initialize()
     {
         lookup = new Dictionary<string, BaseItemSO>();
@@ -37,25 +27,38 @@ public class InventorySlots
             lookup[item.ItemName] = item;
 
         allSlots.Clear();
-        allSlots.AddRange(activeDiceSlots);
-        allSlots.AddRange(diceSlots);
-        allSlots.AddRange(permanentSlots);
-        allSlots.AddRange(consumableSlots);
+
+        // Assign slot types
+        foreach (var s in activeDiceSlots)
+        {
+            s.SetSlotType(SlotType.ActiveDice);
+            allSlots.Add(s);
+        }
+
+        foreach (var s in diceSlots)
+        {
+            s.SetSlotType(SlotType.Dice);
+            allSlots.Add(s);
+        }
+
+        foreach (var s in permanentSlots)
+        {
+            s.SetSlotType(SlotType.Permanent);
+            allSlots.Add(s);
+        }
+
+        foreach (var s in consumableSlots)
+        {
+            s.SetSlotType(SlotType.Consumable);
+            allSlots.Add(s);
+        }
     }
 
-    /*
-     * Returns the ScriptableObject for an item by name.
-     * (Now delegated to InventoryManager’s catalog)
-     */
     public BaseItemSO GetItemSO(string name)
     {
         return InventoryManager.Instance.GetItemSO(name);
     }
 
-    /*
-     * Adds an item to the correct category of slots.
-     * Fills existing stacks first, then empty slots.
-     */
     public void AddItem(BaseItemSO item, int qty)
     {
         List<ItemSlot> target = GetCategory(item);
@@ -73,10 +76,6 @@ public class InventorySlots
         PopupHelpers.ShowInventoryFullPopup(item.ItemName, qty);
     }
 
-    /*
-     * Removes a quantity of an item from a slot.
-     * Clears the slot if quantity reaches zero.
-     */
     public void RemoveItem(ItemSlot slot, int qty)
     {
         if (slot == null)
@@ -94,9 +93,6 @@ public class InventorySlots
         }
     }
 
-    /*
-     * Removes an item by name (used for auto-use consumables)
-     */
     public void RemoveItemByName(string itemName, int qty)
     {
         foreach (var slot in allSlots)
@@ -111,9 +107,6 @@ public class InventorySlots
         Debug.LogWarning("[InventorySlots] Tried to remove '" + itemName + "' but no slot contains it.");
     }
 
-    /*
-     * Returns the correct slot group for an item type.
-     */
     private List<ItemSlot> GetCategory(BaseItemSO item)
     {
         if (item is DiceSO)
@@ -128,9 +121,6 @@ public class InventorySlots
         return diceSlots;
     }
 
-    /*
-     * Handles clicking a slot depending on the item type.
-     */
     public void HandleSlotClick(ItemSlot slot)
     {
         BaseItemSO item = slot.ItemSO;
@@ -168,9 +158,6 @@ public class InventorySlots
         }
     }
 
-    /*
-     * Swaps the contents of two slots.
-     */
     public void SwapSlots(ItemSlot a, ItemSlot b)
     {
         BaseItemSO soA = a.ItemSO;
@@ -198,9 +185,6 @@ public class InventorySlots
 
     public bool IsWaitingForReplace => waitingForReplace;
 
-    /*
-     * Stores data for replacing an item in a slot.
-     */
     public void PrepareReplace(BaseItemSO item, int quantity)
     {
         waitingForReplace = true;
@@ -208,35 +192,51 @@ public class InventorySlots
         pendingQuantity = quantity;
     }
 
-    /*
-     * Replaces the contents of a slot with the pending item.
-     */
-    public void ReplaceInSlot(ItemSlot slot)
+    public void ReplaceInSlot(ItemSlot targetSlot)
     {
         if (!waitingForReplace)
             return;
 
-        slot.ClearSlot();
-        slot.AddItem(pendingItem, pendingQuantity);
+        if (pendingItem is ConsumableSO)
+        {
+            ItemSlot consumableSlot = GetSlotHoldingPendingItem();
+            InventoryManager.Instance.PlaceConsumableOnSlot(consumableSlot, targetSlot);
+
+            waitingForReplace = false;
+            pendingItem = null;
+            pendingQuantity = 0;
+
+            return;
+        }
+
+        targetSlot.ClearSlot();
+        targetSlot.AddItem(pendingItem, pendingQuantity);
 
         waitingForReplace = false;
         pendingItem = null;
         pendingQuantity = 0;
 
-        slot.RefreshUI();
+        targetSlot.RefreshUI();
 
-        bool isActiveSlot = InventoryManager.Instance.ActiveDice.Contains(slot);
+        bool isActiveSlot = InventoryManager.Instance.ActiveDice.Contains(targetSlot);
 
         if (isActiveSlot)
-            InventoryManager.Instance.ActiveDice.SyncSlot(slot);
+            InventoryManager.Instance.ActiveDice.SyncSlot(targetSlot);
     }
 
-    /*
-     * Deselects all slots in the inventory.
-     */
     public void DeselectAll()
     {
         foreach (var slot in allSlots)
             slot.DeselectSlot();
+    }
+
+    private ItemSlot GetSlotHoldingPendingItem()
+    {
+        foreach (var slot in allSlots)
+        {
+            if (slot.ItemSO == pendingItem)
+                return slot;
+        }
+        return null;
     }
 }

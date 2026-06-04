@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bd3dc40917a57e40920014beee12295, type: 3}
+  m_Name: EscudoSalida
+  m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
+  itemName: Escudo de Salida
+  icon: {fileID: 0}
+  itemDescription: Anula el efecto de la proxima casilla mala y se consume.
+  prefab3D: {fileID: 8592708307953126093, guid: 1605472ed2e19fe469172a73246f0832, type: 3}
+  itemID: item_consumable_escudo_salida
+  buyPrice: 0
+  sellPrice: 0
+  polarity: 1
+  StoreRotationOffset: {x: 0, y: 0, z: 0}
+  StoreHeightOffset: 0
+  StoreScaleMultiplier: 1
+  StoreZPositionOffset: 0
+  StoreXPositionOffset: 0
+  AppearsIn3D: 0
+  AutoUseOnPickup: 0
+  canBeUsedOnSpot: 0
+  effects:
+  - {fileID: 11400000, guid: 686355bf9c7c3b84380d10743eb3f668, type: 2}

@@ -8,6 +8,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewPermanent", menuName = "Inventory/Permanent")]
 public class PermanentSO : BaseItemSO
 {
+    [Header("Permanent Settings")]
+    public bool CannotBeUnequipped = false;
+
     [Header("Effects")]
     [SerializeField] private BaseEffect[] effects;
 

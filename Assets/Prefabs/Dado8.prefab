@@ -69,6 +69,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 823ccf9f999cde146a54165244191a49, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8064264470807687545}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 823ccf9f999cde146a54165244191a49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -7887295545462579357}
   m_SourcePrefab: {fileID: 100100000, guid: 823ccf9f999cde146a54165244191a49, type: 3}
 --- !u!1 &3245075456472946614 stripped
 GameObject:
@@ -140,25 +143,29 @@ MonoBehaviour:
   serializedFaceMap:
   - normal: {x: -0.8164966, y: 0, z: -0.5773503}
     value: 3
-    debugColor: {r: 1, g: 0, b: 0, a: 1}
   - normal: {x: 0.8164966, y: 0, z: -0.5773503}
     value: 4
-    debugColor: {r: 1, g: 0.75, b: 0, a: 1}
   - normal: {x: 0, y: -0.8944272, z: -0.4472136}
     value: 1
-    debugColor: {r: 0.5, g: 1, b: 0, a: 1}
   - normal: {x: 0, y: 0.8944272, z: -0.4472136}
     value: 2
-    debugColor: {r: 0, g: 1, b: 0.25, a: 1}
   - normal: {x: -0.8164966, y: 0, z: 0.5773503}
     value: 5
-    debugColor: {r: 0, g: 1, b: 1, a: 1}
   - normal: {x: 0.8164966, y: 0, z: 0.5773503}
     value: 6
-    debugColor: {r: 0, g: 0.25, b: 1, a: 1}
   - normal: {x: 0, y: -0.8944272, z: 0.4472136}
     value: 7
-    debugColor: {r: 0.5, g: 0, b: 1, a: 1}
   - normal: {x: 0, y: 0.8944272, z: 0.4472136}
     value: 8
-    debugColor: {r: 1, g: 0, b: 0.75, a: 1}
+--- !u!114 &-7887295545462579357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3245075456472946614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 590fbc65f5d72e54da5e170894c38ba6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DiceBoundary

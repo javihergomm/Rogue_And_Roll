@@ -13,21 +13,18 @@ MonoBehaviour:
   m_Name: Puente de Catan
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: "Puente de Cat\xE1n"
-  icon: {fileID: 21300000, guid: e5fd13576b849fd4fa809ea7dad1ea2b, type: 3}
-  lockedIcon: {fileID: 0}
-  itemDescription: "Invoca un atajo temporal entre dos casillas. Durante una ronda
-    completa, cualquiera que pase por \xE9l ser\xE1 arrastrado por el camino abreviado."
-  prefab3D: {fileID: 5774364267047174808, guid: d313e14225492c543b48fe5f9a319218, type: 3}
+  icon: {fileID: 21300000, guid: a0e9e0b03122b3c40984299eea12e23b, type: 3}
+  itemDescription: Crea un atajo durante la ronda.
+  prefab3D: {fileID: 5683758079633837136, guid: 262904a93677e5e44a17178dc8164e71, type: 3}
   itemID: item_consumables_catan_bridge
   buyPrice: 4
   sellPrice: 2
-  polarity: 0
+  polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: -0.15
   StoreScaleMultiplier: 0.2
   StoreZPositionOffset: 0
   StoreXPositionOffset: 0
-  ConsumeOnUse: 1
   AppearsIn3D: 1
   AutoUseOnPickup: 0
   canBeUsedOnSpot: 1

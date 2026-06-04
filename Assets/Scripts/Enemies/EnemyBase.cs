@@ -222,8 +222,10 @@ public abstract class EnemyBase : MonoBehaviour
             return;
         }
 
-        if (player != null)
+        if (player != null){
             Destroy(player.gameObject);
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Muerte");
+            }
     }
 
     // Checks if enemy movement is blocked by tile effects
