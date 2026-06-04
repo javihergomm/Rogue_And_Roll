@@ -21,7 +21,7 @@ public class BoardHider : MonoBehaviour
 
     private void Start()
     {
-        ShopExitManager shop = FindFirstObjectByType<ShopExitManager>();
+        ShopExitManager shop = Object.FindAnyObjectByType<ShopExitManager>();
         if (shop != null)
             shop.OnShopStateChanged += HandleShopState;
     }

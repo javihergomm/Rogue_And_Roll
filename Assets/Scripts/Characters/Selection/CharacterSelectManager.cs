@@ -29,11 +29,9 @@ public class CharacterSelectManager : MonoBehaviour
     private CharacterSO selectedCharacter;
     private GameObject spawnedCup;
 
-    // Exposes the selected character so other systems can read its data
     public CharacterSO SelectedCharacter => selectedCharacter;
 
     private bool selectorDisabledForever = false;
-
 
     // -------------------------------------------------------------------------
     // INITIALIZATION
@@ -55,10 +53,8 @@ public class CharacterSelectManager : MonoBehaviour
 
     private void Start()
     {
-        // Opens the selector when the game starts
         ShowSelector();
     }
-
 
     // -------------------------------------------------------------------------
     // SLOT SETUP
@@ -72,7 +68,6 @@ public class CharacterSelectManager : MonoBehaviour
             slots[i].SetFlow(slots[i].GetComponent<CharacterSelectionFlow>());
         }
     }
-
 
     // -------------------------------------------------------------------------
     // PANEL CONTROL
@@ -105,7 +100,6 @@ public class CharacterSelectManager : MonoBehaviour
         selectorPanel.SetActive(false);
     }
 
-
     // -------------------------------------------------------------------------
     // SLOT CONTROL
     // -------------------------------------------------------------------------
@@ -119,7 +113,6 @@ public class CharacterSelectManager : MonoBehaviour
         }
     }
 
-
     // -------------------------------------------------------------------------
     // CHARACTER CONFIRMATION
     // -------------------------------------------------------------------------
@@ -127,15 +120,9 @@ public class CharacterSelectManager : MonoBehaviour
     public void ConfirmCharacter(CharacterSO character)
     {
         selectedCharacter = character;
-        int checkpointColor = GetCheckpointColorFromCharacter(selectedCharacter);
-        Debug.Log("COLOR DETECTADO = " + checkpointColor);
-        SpotController.Instance.AssignCheckpoints(checkpointColor);
 
-        // DEBUGS IMPORTANTES
-        Debug.Log("=== CHARACTER SELECTED ===");
-        Debug.Log("Character ID: " + character.characterID);
-        Debug.Log("Character Name: " + character.characterName);
-        Debug.Log("Character SpawnPointName: " + character.spawnPointName);
+        int checkpointColor = GetCheckpointColorFromCharacter(selectedCharacter);
+        SpotController.Instance.AssignCheckpoints(checkpointColor);
 
         PlayerPrefs.SetString("SelectedCharacterID", character.characterID);
         PlayerPrefs.SetInt("HasSelectedCharacter", 1);
@@ -143,26 +130,13 @@ public class CharacterSelectManager : MonoBehaviour
         selectorPanel.SetActive(false);
         Time.timeScale = 1f;
 
-        // DEBUG: Antes de spawnear
-        Debug.Log("Calling CharacterSpawner.Instance.Spawn() with spawnPointName = " + character.spawnPointName);
-
         CharacterSpawner.Instance.Spawn(selectedCharacter);
-
-        // DEBUG: Después de spawnear
-        Debug.Log("CharacterSpawner finished. Player should now be at: " + character.spawnPointName);
-
         CharacterEffectManager.Instance.ActivateCharacter(selectedCharacter);
 
-        // DEBUG: Confirmación final
-        Debug.Log("=== CHARACTER CONFIRMATION COMPLETE ===");
-        var ui = FindFirstObjectByType<ActiveDiceUI>();
+        var ui = FindAnyObjectByType<ActiveDiceUI>();
         if (ui != null && ui.resultsRoot != null)
             ui.resultsRoot.gameObject.SetActive(true);
-
-
     }
-
-
 
     // -------------------------------------------------------------------------
     // UI STATE CHECKS
@@ -184,6 +158,7 @@ public class CharacterSelectManager : MonoBehaviour
 
         return false;
     }
+
     public int GetCheckpointColorFromCharacter(CharacterSO character)
     {
         string id = character.characterID.ToLower();
@@ -193,8 +168,6 @@ public class CharacterSelectManager : MonoBehaviour
         if (id.Contains("azul")) return 3;
         if (id.Contains("amarillo")) return 4;
 
-        Debug.LogWarning("No se pudo determinar el color del personaje, usando color 1 por defecto.");
         return 1;
     }
-
 }

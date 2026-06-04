@@ -9,9 +9,11 @@ public class MirrorTeleportEffect : BaseConsumableEffect
 {
     public override void Activate(ConsumableContext ctx)
     {
-        // Encontrar al jugador real
+        // Find the real player Movement component
         Movement player = null;
-        foreach (var m in Object.FindObjectsByType<Movement>(FindObjectsSortMode.None))
+
+        // Search active Movement components
+        foreach (var m in Object.FindObjectsByType<Movement>(FindObjectsInactive.Exclude))
         {
             if (m.isPlayer)
             {
@@ -19,17 +21,19 @@ public class MirrorTeleportEffect : BaseConsumableEffect
                 break;
             }
         }
+
         if (player == null)
             return;
 
-        SpotController controller = Object.FindFirstObjectByType<SpotController>();
+        // Find the SpotController instance
+        SpotController controller = Object.FindAnyObjectByType<SpotController>();
         if (controller == null)
             return;
 
         Spot[] spots = controller.GetSpotsOrdered();
         int playerPos = player.ActualPos;
 
-        // 1. Buscar casilla Good hacia delante
+        // 1. Search for the next Good spot ahead
         Spot positive = FindNextPositiveSpot(spots, playerPos);
 
         if (positive != null)
@@ -39,7 +43,7 @@ public class MirrorTeleportEffect : BaseConsumableEffect
             return;
         }
 
-        // 2. Si no hay Good, buscar tienda mas cercana
+        // 2. If no Good spot exists, search for the nearest shop checkpoint
         Spot shop = FindNearestShopSpot(spots, playerPos);
 
         if (shop != null)
@@ -54,6 +58,7 @@ public class MirrorTeleportEffect : BaseConsumableEffect
     {
         int count = spots.Length;
 
+        // Searches forward in circular order
         for (int i = 1; i < count; i++)
         {
             int idx = (startIndex - 1 + i) % count;
@@ -69,6 +74,7 @@ public class MirrorTeleportEffect : BaseConsumableEffect
     {
         int count = spots.Length;
 
+        // Searches forward in circular order for a checkpoint
         for (int i = 1; i < count; i++)
         {
             int idx = (startIndex - 1 + i) % count;
@@ -82,22 +88,22 @@ public class MirrorTeleportEffect : BaseConsumableEffect
 
     private void TeleportAndTrigger(Movement player, Spot target)
     {
-        // Teletransporte
+        // Teleport the player to the target tile
         player.TeleportToPosition(target.index);
 
-        // IMPORTANTE: activar efecto real de la casilla
+        // Trigger the tile effect after teleporting
         player.StartCoroutine(TriggerAfterTeleport(player, target));
     }
 
     private IEnumerator TriggerAfterTeleport(Movement player, Spot target)
     {
-        // Esperar un frame para que el teletransporte se aplique
+        // Wait one frame to ensure teleportation is applied
         yield return null;
 
-        // Activar efecto real de la casilla
+        // Execute the tile's effect
         yield return player.StartCoroutine(target.TriggerSpotEffect(player));
 
-        // Notificar fin de movimiento
+        // Notify movement completion
         player.OnMovementFinished?.Invoke();
     }
 }

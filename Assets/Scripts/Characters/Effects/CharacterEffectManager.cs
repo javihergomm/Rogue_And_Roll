@@ -8,7 +8,7 @@ using System.Collections.Generic;
  * - Dice effects (modify dice rolls)
  * - Passive effects (trigger each turn)
  * - Temporary consumable effects
- * 
+ *
  * Maintains a unified list so all callbacks (turn, movement, enemy turn)
  * are dispatched in a consistent and predictable order.
  */
@@ -38,7 +38,7 @@ public class CharacterEffectManager : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+
     }
 
     // ============================================================
@@ -52,33 +52,22 @@ public class CharacterEffectManager : MonoBehaviour
     public void ActivateCharacter(CharacterSO character)
     {
         if (character == null)
-        {
-            Debug.LogError("CharacterEffectManager: Se intentó activar un personaje nulo.");
             return;
-        }
 
-        // Remove previous character effects
         if (activeCharacter != null)
             CharacterEffectApplier.RemoveEffects(activeCharacter);
 
         activeCharacter = character;
 
-        // Apply new character effects
         CharacterEffectApplier.ApplyEffects(character);
 
-        // Rebuild unified list
         RebuildUnifiedEffectList();
-
-        Debug.Log("[CharacterEffectManager] Personaje activado: " + character.characterName);
     }
 
     // ============================================================
     // EFFECT REGISTRATION
     // ============================================================
 
-    /*
-     * Registers a dice effect and rebuilds the unified list.
-     */
     public void AddDiceEffect(BaseDiceEffect eff)
     {
         if (eff != null && !ActiveDiceEffects.Contains(eff))
@@ -87,9 +76,6 @@ public class CharacterEffectManager : MonoBehaviour
         RebuildUnifiedEffectList();
     }
 
-    /*
-     * Registers a passive effect and rebuilds the unified list.
-     */
     public void AddPassiveEffect(BasePassiveEffect eff)
     {
         if (eff != null && !ActivePassiveEffects.Contains(eff))
@@ -98,9 +84,6 @@ public class CharacterEffectManager : MonoBehaviour
         RebuildUnifiedEffectList();
     }
 
-    /*
-     * Registers a temporary consumable effect.
-     */
     public void AddTemporaryEffect(BaseConsumableEffect eff)
     {
         if (eff != null && !activeTemporaryEffects.Contains(eff))
@@ -109,9 +92,6 @@ public class CharacterEffectManager : MonoBehaviour
         RebuildUnifiedEffectList();
     }
 
-    /*
-     * Removes a dice effect.
-     */
     public void RemoveDiceEffect(BaseDiceEffect eff)
     {
         if (eff != null)
@@ -120,9 +100,6 @@ public class CharacterEffectManager : MonoBehaviour
         RebuildUnifiedEffectList();
     }
 
-    /*
-     * Removes a passive effect.
-     */
     public void RemovePassiveEffect(BasePassiveEffect eff)
     {
         if (eff != null)
@@ -131,9 +108,6 @@ public class CharacterEffectManager : MonoBehaviour
         RebuildUnifiedEffectList();
     }
 
-    /*
-     * Removes a temporary consumable effect.
-     */
     public void RemoveTemporaryEffect(BaseConsumableEffect eff)
     {
         if (eff != null)
@@ -148,7 +122,7 @@ public class CharacterEffectManager : MonoBehaviour
 
     /*
      * Rebuilds the unified list of all effects.
-     * This ensures callbacks run in a consistent order.
+     * Ensures callbacks run in a consistent order.
      */
     private void RebuildUnifiedEffectList()
     {
@@ -168,37 +142,24 @@ public class CharacterEffectManager : MonoBehaviour
     // TURN CALLBACKS
     // ============================================================
 
-    /*
-     * Calls OnTurnStart on all effects.
-     * Reverse iteration protects against effects removing themselves.
-     */
     public void NotifyTurnStart()
     {
         for (int i = allEffects.Count - 1; i >= 0; i--)
             allEffects[i].OnTurnStart();
     }
 
-    /*
-     * Calls OnTurnEnd on all effects.
-     */
     public void NotifyTurnEnd()
     {
         for (int i = allEffects.Count - 1; i >= 0; i--)
             allEffects[i].OnTurnEnd();
     }
 
-    /*
-     * Calls OnEnemyTurnStart on all effects.
-     */
     public void NotifyEnemyTurnStart(EnemyBase enemy)
     {
         for (int i = allEffects.Count - 1; i >= 0; i--)
             allEffects[i].OnEnemyTurnStart(enemy);
     }
 
-    /*
-     * Calls OnEnemyTurnEnd on all effects.
-     */
     public void NotifyEnemyTurnEnd(EnemyBase enemy)
     {
         for (int i = allEffects.Count - 1; i >= 0; i--)
@@ -209,18 +170,12 @@ public class CharacterEffectManager : MonoBehaviour
     // MOVEMENT CALLBACKS
     // ============================================================
 
-    /*
-     * Calls OnMovementStart on all effects.
-     */
     public void NotifyMovementStart(Movement m)
     {
         for (int i = allEffects.Count - 1; i >= 0; i--)
             allEffects[i].OnMovementStart(m);
     }
 
-    /*
-     * Calls OnMovementEnd on all effects.
-     */
     public void NotifyMovementEnd(Movement m)
     {
         for (int i = allEffects.Count - 1; i >= 0; i--)

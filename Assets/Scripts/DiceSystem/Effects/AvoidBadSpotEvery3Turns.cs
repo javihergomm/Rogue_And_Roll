@@ -6,7 +6,7 @@ public class AvoidBadSpotEvery3Turns : BaseDiceEffect
     public override bool RequiresAsyncResolution => false;
 
     // ============================================================
-    // 1) LÓGICA DE TURNO (gracias a tu nueva arquitectura)
+    // 1) TURN LOGIC
     // ============================================================
     public override void OnTurnStart()
     {
@@ -25,17 +25,17 @@ public class AvoidBadSpotEvery3Turns : BaseDiceEffect
     }
 
     // ============================================================
-    // 2) LÓGICA DE TIRADA (BaseDiceEffect)
+    // 2) ROLL MODIFICATION LOGIC
     // ============================================================
     public override int ModifyRoll(int roll, DiceContext diceCtx)
     {
         var ctx = StatManager.Instance.PassiveCtx;
 
-        // Si no hay boost, no hacemos nada
+        // No boost available
         if (!ctx.AvoidBadSpotBoostReady)
             return roll;
 
-        // Consumimos el boost SIEMPRE
+        // Consume boost
         ctx.AvoidBadSpotBoostReady = false;
 
         Movement player = DiceRollManager.Instance.GetPlayerMovement();
@@ -45,18 +45,18 @@ public class AvoidBadSpotEvery3Turns : BaseDiceEffect
         int currentIndex = player.ActualPos;
         int total = player.Positions.Length;
 
-        // Calcular destinos
+        // Calculate destinations
         int normalDest = (currentIndex + roll - 1) % total + 1;
         int boostedDest = (currentIndex + roll) % total + 1;
 
-        // Obtener spots reales
-        Spot[] spots = FindObjectsByType<Spot>(FindObjectsSortMode.None);
+        // Retrieve ordered spots
+        Spot[] spots = FindObjectsByType<Spot>(FindObjectsInactive.Exclude);
         System.Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
         bool normalIsBad = spots[normalDest - 1].type == Spot.SpotType.Bad;
         bool boostedIsBad = spots[boostedDest - 1].type == Spot.SpotType.Bad;
 
-        // Si el +1 evita casilla mala -> aplicamos boost
+        // Apply +1 only if it avoids a bad spot
         if (normalIsBad && !boostedIsBad)
             return roll + 1;
 

@@ -1,30 +1,45 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/*
+ * MenuManager
+ * -----------
+ * Handles scene transitions for:
+ *   - Starting the game
+ *   - Returning to the main menu
+ *   - Quitting the application
+ *
+ * Ensures the game always resumes normal time when changing scenes.
+ */
 public class MenuManager : MonoBehaviour
 {
-    // Nombre de la escena del juego
-    public string gameSceneName = "GameScene";
-
-    // Nombre de la escena del menu
+    public string gameSceneName = "Juego";
     public string menuSceneName = "Menu";
 
-    // Entrar al juego
+    /*
+     * Loads the game scene and ensures time is running normally.
+     */
     public void StartGame()
     {
+        Time.timeScale = 1f;
         SceneManager.LoadScene(gameSceneName);
     }
 
-    // Volver al menu
+    /*
+     * Returns to the main menu and restores normal time.
+     */
     public void ReturnToMenu()
     {
+        Time.timeScale = 1f;
         SceneManager.LoadScene(menuSceneName);
     }
 
-    // Salir de la aplicacion
+    /*
+     * Quits the application.
+     */
     public void QuitGame()
     {
-        // En el editor no funciona, pero no da error
+        Time.timeScale = 1f;
         Application.Quit();
     }
 }

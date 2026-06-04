@@ -3,17 +3,20 @@ using UnityEngine;
 /*
  * BendicionClerigoEffect
  * ----------------------
- * Passive effect that grants the player extra dice rolls per turn.
- * Each turn while active, it adds +1 to the allowed rolls for that turn.
- * When its duration expires, the effect removes itself.
+ * Passive effect that grants the player +1 extra roll per turn.
+ * The effect lasts a configurable number of turns.
+ * Each turn:
+ *   - Adds +1 to the allowed rolls for that turn
+ *   - Decreases remaining duration
+ * When duration reaches zero, the effect removes itself.
  */
 [CreateAssetMenu(menuName = "Effects/Passive/Bendicion del Clerigo")]
 public class BendicionClerigoEffect : BasePassiveEffect
 {
-    [Header("Duración en turnos")]
+    [Header("Duration in turns")]
     [SerializeField] private int turnsActive = 1;
 
-    // Internal counter for remaining turns
+    // Runtime counter for remaining turns
     private int remaining;
 
     /*
@@ -22,31 +25,35 @@ public class BendicionClerigoEffect : BasePassiveEffect
      */
     public override void Activate()
     {
-        // Create a clone so the ScriptableObject asset is not modified
         var clone = Instantiate(this);
         clone.remaining = turnsActive;
 
-        // Register the clone as an active passive effect
         CharacterEffectManager.Instance.AddPassiveEffect(clone);
+
+        // Update UI after registering the effect
+        StatManager.Instance.TriggerStatsChanged();
     }
 
     /*
      * Called at the start of each player turn.
-     * Grants +1 roll this turn and decreases remaining duration.
+     * Grants +1 roll and decreases remaining duration.
      */
     public override void OnTurnStart()
     {
         if (remaining > 0)
         {
-            // Adds +1 roll allowed this turn
             TurnManager.Instance.AddExtraRolls(1);
-
             remaining--;
+
+            // Update UI so the new roll count is visible
+            StatManager.Instance.TriggerStatsChanged();
         }
         else
         {
-            // Remove the effect when duration ends
             CharacterEffectManager.Instance.RemovePassiveEffect(this);
+
+            // Update UI after removal
+            StatManager.Instance.TriggerStatsChanged();
         }
     }
 }

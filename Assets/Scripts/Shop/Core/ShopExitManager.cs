@@ -1,14 +1,19 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Object = UnityEngine.Object;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 /*
- * Manages entering and exiting the shop, enabling and disabling gameplay systems,
- * and resuming pending player movement after leaving the shop if needed.
+ * ShopExitManager
+ * ----------------
+ * Handles entering and exiting the shop, enabling and disabling gameplay systems,
+ * spawning ghosts, managing Ouija pointer behavior, and restoring pending movement
+ * after leaving the shop.
  */
 public class ShopExitManager : MonoBehaviour
 {
@@ -22,7 +27,7 @@ public class ShopExitManager : MonoBehaviour
     [SerializeField] private GameObject specialGhostPrefab;
 
     [Header("Special Ghost Settings")]
-    [SerializeField] private float specialGhostChance = 0.05f; 
+    [SerializeField] private float specialGhostChance = 0.05f;
 
     [SerializeField] private int ghostCount = 5;
     [SerializeField] private Transform ghostSpawnCenter;
@@ -51,12 +56,14 @@ public class ShopExitManager : MonoBehaviour
 
     private void Start()
     {
+        // Cache initial pointer transform
         if (tableroOuijaPuntero != null)
         {
             punteroInitialLocalPos = tableroOuijaPuntero.transform.localPosition;
             punteroInitialLocalRot = tableroOuijaPuntero.transform.localRotation;
         }
 
+        // Hide shop elements if starting outside the shop
         if (!inShop)
         {
             foreach (var pedestal in shopPedestals)
@@ -70,6 +77,9 @@ public class ShopExitManager : MonoBehaviour
         }
     }
 
+    // ---------------------------------------------------------
+    // ENTER SHOP
+    // ---------------------------------------------------------
     public void EnterShop()
     {
         if (inShop)
@@ -80,6 +90,7 @@ public class ShopExitManager : MonoBehaviour
         if (animator != null)
             animator.SetTrigger("TiendaEntrar");
 
+        // Disable enemies and hide their visuals
         if (EnemyManager.Instance != null)
         {
             foreach (var enemy in EnemyManager.Instance.enemies)
@@ -96,13 +107,16 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
-        Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
+        // Disable player movement
+        Movement playerMovement = Object.FindAnyObjectByType<Movement>();
         if (playerMovement != null)
             playerMovement.enabled = false;
 
+        // Disable dice system
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = false;
 
+        // Reset pointer to its initial position
         if (tableroOuijaPuntero != null)
         {
             tableroOuijaPuntero.transform.SetLocalPositionAndRotation(
@@ -111,6 +125,7 @@ public class ShopExitManager : MonoBehaviour
             );
         }
 
+        // Prepare pedestals for a new visit
         ShopPedestalRandomizer.PrepareForReroll();
         ShopPedestalRandomizer.ClearVisitMemory();
 
@@ -124,17 +139,23 @@ public class ShopExitManager : MonoBehaviour
                 pedestal.GenerateIfNeeded();
             }
         }
-        
+
         OnShopStateChanged?.Invoke(true);
     }
 
+    // ---------------------------------------------------------
+    // EXIT CONFIRMATION
+    // ---------------------------------------------------------
     public void ConfirmExit()
     {
         if (!inShop)
             return;
+
         ClearGhosts();
+
         if (ghostSpawnRoot != null)
             ghostSpawnRoot.SetActive(false);
+
         if (animator != null)
             animator.SetTrigger("TiendaSalir");
     }
@@ -171,12 +192,17 @@ public class ShopExitManager : MonoBehaviour
         return inShop;
     }
 
+    // ---------------------------------------------------------
+    // ENTER ANIMATION EVENTS
+    // ---------------------------------------------------------
     public void OnEnterStart()
     {
-        Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
+        Movement playerMovement = Object.FindAnyObjectByType<Movement>();
         if (playerMovement != null)
             playerMovement.enabled = false;
+
         BridgeOfCatanEffect.HideVisual();
+
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = false;
 
@@ -199,12 +225,14 @@ public class ShopExitManager : MonoBehaviour
 
     public void OnEnterEnd()
     {
+        // Show pedestals and decision markers
         foreach (var pedestal in shopPedestals)
             if (pedestal != null) pedestal.SetActive(true);
 
         foreach (var empty in decisionEmpties)
             if (empty != null) empty.SetActive(true);
 
+        // Activate pointer in fixed position
         if (tableroOuijaPuntero != null)
         {
             tableroOuijaPuntero.SetActive(true);
@@ -212,34 +240,43 @@ public class ShopExitManager : MonoBehaviour
             tableroOuijaPuntero.transform.localEulerAngles = punteroFixedLocalRot;
         }
 
+        // Spawn ghosts
         if (ghostSpawnRoot != null)
             ghostSpawnRoot.SetActive(true);
 
         SpawnGhosts();
+
+        // First-time unlock
         if (!hasTriggeredFirstShopUnlock && !Unlocks.IsUnlocked("item_dice_d4"))
         {
             Unlocks.Unlock("item_dice_d4");
             hasTriggeredFirstShopUnlock = true;
-            Debug.Log("D4 desbloqueado al terminar la animación de entrada");
         }
     }
 
+    // ---------------------------------------------------------
+    // EXIT ANIMATION EVENTS
+    // ---------------------------------------------------------
     public void OnExitStart()
     {
         ClearGhosts();
+
         if (ghostSpawnRoot != null)
             ghostSpawnRoot.SetActive(false);
+
         inShop = false;
         OnShopStateChanged?.Invoke(false);
+
         BridgeOfCatanEffect.ShowVisual();
 
-        Movement playerMovement = FindFirstObjectByType<Movement>(FindObjectsInactive.Include);
+        Movement playerMovement = Object.FindAnyObjectByType<Movement>();
         if (playerMovement != null)
             playerMovement.enabled = true;
 
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = true;
 
+        // Reactivate enemies
         if (EnemyManager.Instance != null)
         {
             foreach (var enemy in EnemyManager.Instance.enemies)
@@ -256,6 +293,7 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
+        // Resume pending movement if needed
         if (playerMovement != null)
         {
             if (playerMovement.pendingSteps > 0)
@@ -274,8 +312,6 @@ public class ShopExitManager : MonoBehaviour
                 playerMovement.turnShouldEnd = true;
                 TurnManager.Instance.ForcePlayerTurnEnd();
             }
-
-
         }
     }
 
@@ -291,6 +327,9 @@ public class ShopExitManager : MonoBehaviour
             tableroOuijaPuntero.SetActive(false);
     }
 
+    // ---------------------------------------------------------
+    // GHOST SPAWNING
+    // ---------------------------------------------------------
     private void SpawnGhosts()
     {
         ClearGhosts();
@@ -314,16 +353,12 @@ public class ShopExitManager : MonoBehaviour
             {
                 wander.center = ghostSpawnCenter;
                 wander.maxDistance = ghostSpawnRadius;
-
-                // El prefab especial ya define su comportamiento especial
                 wander.isSpecial = isThisSpecial;
             }
 
             activeGhosts.Add(g);
         }
     }
-
-
 
     private void ClearGhosts()
     {
@@ -333,21 +368,18 @@ public class ShopExitManager : MonoBehaviour
         activeGhosts.Clear();
     }
 
-    // ---------------------------------------------------------
-    // -------------------- EDITOR PREVIEW ----------------------
-    // ---------------------------------------------------------
-
 #if UNITY_EDITOR
+    /*
+     * Editor-only preview helpers for testing shop layout and camera.
+     */
     public void EditorPreviewShop()
     {
         Debug.Log("=== SHOP EDITOR PREVIEW ===");
 
-        // 1. Activar pedestales
         foreach (var pedestal in shopPedestals)
             if (pedestal != null)
                 pedestal.SetActive(true);
 
-        // 2. Intentar previsualizar items si existe el componente
         foreach (var pedestal in shopPedestals)
         {
             if (pedestal == null) continue;
@@ -360,19 +392,19 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
-        // 3. Intentar mover la cámara si existe un objeto llamado "ShopCameraPoint"
         var shopCameraPoint = GameObject.Find("ShopCameraPoint");
         if (Camera.main != null && shopCameraPoint != null)
         {
-            Camera.main.transform.SetPositionAndRotation(shopCameraPoint.transform.position, shopCameraPoint.transform.rotation);
+            Camera.main.transform.SetPositionAndRotation(
+                shopCameraPoint.transform.position,
+                shopCameraPoint.transform.rotation
+            );
         }
 
-        // 4. Ocultar jugador si existe un objeto llamado "Player"
         var player = GameObject.Find("Player");
         if (player != null)
             player.SetActive(false);
 
-        // 5. Ocultar enemigos si existe un objeto raíz llamado "Enemies"
         var enemiesRoot = GameObject.Find("Enemies");
         if (enemiesRoot != null)
         {
@@ -387,12 +419,10 @@ public class ShopExitManager : MonoBehaviour
     {
         Debug.Log("=== SHOP EDITOR EXIT ===");
 
-        // 1. Desactivar pedestales
         foreach (var pedestal in shopPedestals)
             if (pedestal != null)
                 pedestal.SetActive(false);
 
-        // 2. Borrar previews de items si existe el componente
         foreach (var pedestal in shopPedestals)
         {
             if (pedestal == null) continue;
@@ -405,12 +435,10 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
-        // 3. Restaurar jugador si existe
         var player = GameObject.Find("Player");
         if (player != null)
             player.SetActive(true);
 
-        // 4. Restaurar enemigos si existe el root "Enemies"
         var enemiesRoot = GameObject.Find("Enemies");
         if (enemiesRoot != null)
         {
@@ -418,11 +446,13 @@ public class ShopExitManager : MonoBehaviour
                 child.gameObject.SetActive(true);
         }
 
-        // 5. Restaurar cámara si existe un punto original
         var originalPoint = GameObject.Find("OriginalCameraPoint");
         if (Camera.main != null && originalPoint != null)
         {
-            Camera.main.transform.SetPositionAndRotation(originalPoint.transform.position, originalPoint.transform.rotation);
+            Camera.main.transform.SetPositionAndRotation(
+                originalPoint.transform.position,
+                originalPoint.transform.rotation
+            );
         }
 
         Debug.Log("Shop editor preview exited. Scene restored.");

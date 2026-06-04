@@ -4,10 +4,10 @@ using UnityEngine.InputSystem;
 /*
  * ShopRerollManager
  * -----------------
- * Handles global reroll input for the shop.
- * Uses StatManager.ShopRerolls to track available rerolls.
- * Allows the player to reroll all pedestals at once using a customizable hotkey.
- * Ensures pedestal state and global item memory are fully reset before rerolling.
+ * Handles global reroll input inside the shop.
+ * Uses StatManager.ShopRerolls to track how many rerolls the player has.
+ * Allows the player to reroll ALL pedestals at once using a hotkey.
+ * Ensures pedestal state and global item memory are reset before generating new items.
  */
 public class ShopRerollManager : MonoBehaviour
 {
@@ -20,24 +20,41 @@ public class ShopRerollManager : MonoBehaviour
     [SerializeField] private int globalRerollCost = 2;
 
     [Header("Shop State")]
-    [Tooltip("Flag to indicate if the player is currently inside the shop.")]
+    [Tooltip("Indicates whether the player is currently inside the shop.")]
     [SerializeField] private bool inShop = true;
 
     private void Update()
     {
+        // Only allow rerolling while inside the shop
         if (!inShop)
             return;
 
+        // Check if the reroll hotkey was pressed this frame
         if (Keyboard.current[rerollKey].wasPressedThisFrame)
             TryRerollAllPedestals();
     }
 
+    /*
+     * TryRerollAllPedestals
+     * ---------------------
+     * Attempts to reroll all pedestals if:
+     *  - The player has at least one shop reroll available
+     *  - The player has enough gold to pay the reroll cost
+     * 
+     * If successful:
+     *  - Gold is consumed
+     *  - A shop reroll is consumed
+     *  - Global item memory is cleared
+     *  - All pedestals are regenerated
+     */
     private void TryRerollAllPedestals()
     {
+        // Check available rerolls
         int shopRerolls = StatManager.Instance.GetCurrentValue(StatType.ShopRerolls);
         if (shopRerolls <= 0)
             return;
 
+        // Check gold
         int currentGold = StatManager.Instance.GetCurrentValue(StatType.Gold);
         if (currentGold < globalRerollCost)
             return;
@@ -46,12 +63,14 @@ public class ShopRerollManager : MonoBehaviour
         StatManager.Instance.ChangeStat(StatType.Gold, -globalRerollCost);
         StatManager.Instance.UseShopReroll();
 
-        // Reset global item memory
+        // Reset global item memory so pedestals can generate new items
         ShopPedestalRandomizer.PrepareForReroll();
         ShopPedestalRandomizer.ClearVisitMemory();
 
+        // Find all pedestals in the scene (active only)
+        var pedestals = UnityEngine.Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsInactive.Exclude);
+
         // Reset and regenerate each pedestal
-        var pedestals = Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsSortMode.None);
         foreach (var pedestal in pedestals)
         {
             pedestal.ResetForNextVisit();
@@ -60,12 +79,18 @@ public class ShopRerollManager : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    /*
+     * EditorForceReroll
+     * -----------------
+     * Forces a full reroll in the editor without needing gold or rerolls.
+     * Useful for testing shop item generation.
+     */
     public void EditorForceReroll()
     {
         ShopPedestalRandomizer.PrepareForReroll();
         ShopPedestalRandomizer.ClearVisitMemory();
 
-        var pedestals = Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsSortMode.None);
+        var pedestals = UnityEngine.Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsInactive.Exclude);
 
         foreach (var pedestal in pedestals)
         {
@@ -76,9 +101,15 @@ public class ShopRerollManager : MonoBehaviour
         UnityEditor.SceneView.RepaintAll();
     }
 
+    /*
+     * EditorClearAll
+     * --------------
+     * Clears all pedestal previews in the editor.
+     * Useful when resetting the shop layout.
+     */
     public void EditorClearAll()
     {
-        var pedestals = Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsSortMode.None);
+        var pedestals = UnityEngine.Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsInactive.Exclude);
 
         foreach (var pedestal in pedestals)
             pedestal.EditorClearPreview();

@@ -3,6 +3,18 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
+/*
+ * Movement
+ * --------
+ * Handles all board movement logic for both players and enemies.
+ * Responsibilities:
+ * - Moving step-by-step across board spots
+ * - Handling checkpoints, bridges, and lap progression
+ * - Triggering spot effects
+ * - Managing visibility effects
+ * - Integrating with shop entry logic
+ * - Reporting real movement to UI
+ */
 public class Movement : MonoBehaviour
 {
     private Spot[] spots;
@@ -13,7 +25,6 @@ public class Movement : MonoBehaviour
     private ShopExitManager shopExitManager;
 
     public bool ignoreBridgeThisMove = false;
-
     public string lastSpotEffectText = "";
 
     public void SetPositions(Transform[] newPositions)
@@ -60,26 +71,19 @@ public class Movement : MonoBehaviour
 
     private void Start()
     {
-        // ============================
-        // Cargar Spots del tablero
-        // ============================
-        spots = GameObject.FindObjectsByType<Spot>();
+        /*
+         * Load all board spots dynamically.
+         * Spots define checkpoints, effects, and board structure.
+         */
+        spots = UnityEngine.Object.FindObjectsByType<Spot>(FindObjectsInactive.Exclude);
 
-        Debug.Log("========== DEBUG SPOTS ENCONTRADOS ==========");
-        Debug.Log("[DEBUG] Total Spots encontrados: " + spots.Length);
-
-        foreach (var s in spots)
-        {
-            Debug.Log("[DEBUG] Spot encontrado: " + s.name + " | index=" + s.index + " | activo=" + s.gameObject.activeInHierarchy);
-        }
-        Debug.Log("==============================================");
-
-        // Ordenar por índice
+        // Sort spots by index to ensure correct board order
         Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
-        // ============================
-        // Asignar posiciones
-        // ============================
+        /*
+         * If no positions were assigned manually,
+         * use the transforms of the detected spots.
+         */
         if (positions == null || positions.Length == 0)
         {
             positions = new Transform[spots.Length];
@@ -90,19 +94,21 @@ public class Movement : MonoBehaviour
         shopExitManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ShopExitManager>();
         cachedRenderer = GetComponentInChildren<Renderer>();
 
-        // ============================
-        // Posición inicial
-        // ============================
+        /*
+         * Initial placement on the board.
+         */
         if (actualPos >= 1 && actualPos <= positions.Length)
             transform.position = positions[actualPos - 1].position;
 
         startPos = actualPos;
         lastPos = actualPos;
-
-        Debug.Log($"[DEBUG] Movement iniciado. actualPos={actualPos}, totalPositions={positions.Length}");
     }
 
-
+    /*
+     * StartMoving
+     * -----------
+     * Begins a normal movement sequence based on the dice roll.
+     */
     public void StartMoving()
     {
         startPos = actualPos;
@@ -114,22 +120,27 @@ public class Movement : MonoBehaviour
         lastSpotEffectText = "";
         ignoreBridgeThisMove = false;
 
+        // Player movement may be blocked by effects
         if (isPlayer && StatManager.Instance.PreventMovementThisTurn)
         {
             OnMovementFinished?.Invoke();
-            SendRealMovementToUI("Movimiento bloqueado");
+            SendRealMovementToUI("Movement blocked");
             return;
         }
 
-        // ============================================================
-        // Notificar inicio de movimiento
-        // ============================================================
+        // Notify effect system
         if (isPlayer)
             CharacterEffectManager.Instance.NotifyMovementStart(this);
+
         ignoreInitialCheckpoint = false;
         StartCoroutine(MoveWithVisibilityCheck());
     }
 
+    /*
+     * StartMovingFixed
+     * ----------------
+     * Moves a fixed number of steps (used after leaving the shop).
+     */
     public void StartMovingFixed(int steps)
     {
         nextCheckpoint = int.MaxValue;
@@ -137,19 +148,22 @@ public class Movement : MonoBehaviour
         turnShouldEnd = true;
         ignoreBridgeThisMove = false;
 
-        // ============================================================
-        // Notificar inicio de movimiento fijo
-        // ============================================================
         if (isPlayer)
             CharacterEffectManager.Instance.NotifyMovementStart(this);
 
         StartCoroutine(MoveWithVisibilityCheck(steps));
     }
 
+    /*
+     * MoveWithVisibilityCheck
+     * ------------------------
+     * Applies visibility effects before movement (e.g., invisibility).
+     */
     private IEnumerator MoveWithVisibilityCheck(int? fixedSteps = null)
     {
         yield return null;
 
+        // Apply visibility effects
         if (isPlayer && cachedRenderer != null)
         {
             if (StatManager.Instance.HidePieceThisTurn)
@@ -166,10 +180,10 @@ public class Movement : MonoBehaviour
 
         int steps = fixedSteps ?? InventoryManager.Instance.GetFinalDiceNumber();
 
-        Debug.Log("[MOVE] Steps recibidos del dado: " + steps);
-        Debug.Log("[MOVE] Round actual: " + Round);
-
-
+        /*
+         * Apply round-based movement divisor.
+         * Movement becomes slower as rounds increase.
+         */
         int divisor = 1;
         if (Round >= 3)
             divisor = ((Round - 3) / 2) + 2;
@@ -177,25 +191,22 @@ public class Movement : MonoBehaviour
         if (isPlayer)
             steps /= divisor;
 
-        Debug.Log("[MOVE] Divisor aplicado: " + divisor);
-        Debug.Log("[MOVE] Steps despues de divisor: " + steps);
-
-
         yield return StartCoroutine(Move(steps));
     }
 
+    /*
+     * Move
+     * ----
+     * Core movement routine: moves step-by-step, handles bridges,
+     * checkpoints, lap progression, and spot effects.
+     */
     private IEnumerator Move(int steps)
     {
-        Debug.Log("[MOVE] Iniciando movimiento con steps = " + steps + " desde pos " + actualPos);
-
         if (actualPos <= 0)
         {
             OnMovementFinished?.Invoke();
             SendRealMovementToUI(lastSpotEffectText);
 
-            // ============================================================
-            // Notificar fin de movimiento
-            // ============================================================
             if (isPlayer)
                 CharacterEffectManager.Instance.NotifyMovementEnd(this);
 
@@ -205,15 +216,18 @@ public class Movement : MonoBehaviour
         if (!isExtraMovement)
             lastTotalMovement += steps;
 
+        /*
+         * Checkpoint logic:
+         * If the player would pass a checkpoint, movement is cut short
+         * and the shop is entered.
+         */
         if (isPlayer && nextCheckpoint > 0)
         {
             int hypotheticalSpot = actualPos + steps;
             hypotheticalSpot %= spots.Length + 1;
+
             if (hypotheticalSpot > nextCheckpoint)
                 steps = nextCheckpoint - actualPos;
-            Debug.Log("[MOVE] Recorte por checkpoint. Hypothetical: " + hypotheticalSpot + " checkpoint: " + nextCheckpoint);
-            Debug.Log("[MOVE] Steps recortados a: " + steps);
-
         }
 
         if (!isPlayer)
@@ -222,17 +236,23 @@ public class Movement : MonoBehaviour
         int direction = steps >= 0 ? 1 : -1;
         int totalSteps = Mathf.Abs(steps);
 
+        /*
+         * Step-by-step movement loop.
+         */
         for (int i = 0; i < totalSteps; i++)
         {
             int previousPos = actualPos;
 
             actualPos += direction;
-            Debug.Log($"[MOVEMENT] De {previousPos} -> {actualPos}");
+
             if (actualPos > positions.Length)
                 actualPos = 1;
             if (actualPos < 1)
                 actualPos = positions.Length;
 
+            /*
+             * Lap progression and enemy spawn checks.
+             */
             if (isPlayer && direction > 0)
             {
                 LapProgress += 1f / positions.Length;
@@ -241,6 +261,9 @@ public class Movement : MonoBehaviour
                     EnemyManager.Instance.CheckSpawnConditions();
             }
 
+            /*
+             * Round progression when crossing the start position.
+             */
             if (isPlayer && direction > 0 && movementIsPlayerControlled)
             {
                 bool crossedSpawn = previousPos < startPos && actualPos >= startPos;
@@ -257,6 +280,9 @@ public class Movement : MonoBehaviour
                 }
             }
 
+            /*
+             * Move toward the next board position.
+             */
             Vector3 target = positions[actualPos - 1].position;
             PlayMovementSound();
 
@@ -272,6 +298,9 @@ public class Movement : MonoBehaviour
 
             transform.position = target;
 
+            /*
+             * Bridge logic: instantly teleport to connected spot.
+             */
             var connections = SpotConnectionManager.Instance.GetConnections(actualPos);
 
             if (!ignoreBridgeThisMove && connections.Count > 0)
@@ -279,7 +308,6 @@ public class Movement : MonoBehaviour
                 int targetSpot = connections[0];
                 int prev = actualPos;
                 actualPos = targetSpot;
-                Debug.Log("[MOVE] Puente detectado. De " + prev + " -> " + targetSpot);
 
                 Vector3 bridgeTarget = positions[targetSpot - 1].position;
 
@@ -309,11 +337,13 @@ public class Movement : MonoBehaviour
                 }
             }
 
+            /*
+             * Checkpoint entry: enter shop and pause movement.
+             */
             if (direction > 0 && spots[actualPos - 1].checkpoint && isPlayer && movementIsPlayerControlled)
             {
                 if (ignoreInitialCheckpoint)
                 {
-                    Debug.Log("[MOVE] Ignorando checkpoint inicial en pos " + actualPos);
                     ignoreInitialCheckpoint = false;
                 }
                 else
@@ -322,27 +352,28 @@ public class Movement : MonoBehaviour
                     pendingSteps = remaining;
                     turnShouldEnd = false;
 
-                    Debug.Log("[MOVE] Entrando en checkpoint. Quedan " + remaining + " pasos pendientes.");
-
                     shopExitManager.EnterShop();
                     yield break;
                 }
             }
-
 
             yield return new WaitForSeconds(0.1f);
         }
 
         ignoreBridgeThisMove = false;
 
-        var type = spots[actualPos - 1].type;
-
+        /*
+         * Trigger spot effect if applicable.
+         */
         if (isPlayer && TurnManager.Instance.IsPlayerTurn() && !effectAlreadyTriggered)
         {
             yield return StartCoroutine(spots[actualPos - 1].TriggerSpotEffect(this));
             effectAlreadyTriggered = true;
         }
 
+        /*
+         * Restore visibility if it was hidden by an effect.
+         */
         if (isPlayer && cachedRenderer != null && wasHiddenByEffect)
         {
             cachedRenderer.enabled = true;
@@ -355,18 +386,17 @@ public class Movement : MonoBehaviour
         lastPos = actualPos;
 
         OnMovementFinished?.Invoke();
-        Debug.Log("[MOVE] Movimiento finalizado. Posicion final: " + actualPos + " | StartPos: " + startPos);
-        Debug.Log("[MOVE] Movimiento real enviado a UI: " + (actualPos - startPos));
-
         SendRealMovementToUI(lastSpotEffectText);
 
-        // ============================================================
-        // Notificar fin de movimiento
-        // ============================================================
         if (isPlayer)
             CharacterEffectManager.Instance.NotifyMovementEnd(this);
     }
 
+    /*
+     * ExtraMovementRoutine
+     * --------------------
+     * Handles additional movement granted by effects.
+     */
     public IEnumerator ExtraMovementRoutine(int extraSteps)
     {
         if (extraSteps != 0)
@@ -381,13 +411,16 @@ public class Movement : MonoBehaviour
         OnMovementFinished?.Invoke();
         SendRealMovementToUI(lastSpotEffectText);
 
-        // ============================================================
-        // Notificar fin de movimiento extra
-        // ============================================================
         if (isPlayer)
             CharacterEffectManager.Instance.NotifyMovementEnd(this);
     }
 
+    /*
+     * SendRealMovementToUI
+     * ---------------------
+     * Reports the actual movement (including wrap-around logic)
+     * and all applied effects to the UI.
+     */
     public void SendRealMovementToUI(string effectText = "")
     {
         int total = positions.Length;
@@ -398,9 +431,7 @@ public class Movement : MonoBehaviour
         if (realMovement < -total / 2)
             realMovement += total;
 
-        // ================================
-        // Incluir efectos de dados
-        // ================================
+        // Include dice effects
         var diceEffects = DiceRollManager.Instance.GetLastAppliedEffects();
         string allEffects = effectText;
 
@@ -412,12 +443,17 @@ public class Movement : MonoBehaviour
             allEffects += string.Join(", ", diceEffects);
         }
 
-        var ui = FindFirstObjectByType<ActiveDiceUI>();
+        // Modern API: FindAnyObjectByType
+        var ui = UnityEngine.Object.FindAnyObjectByType<ActiveDiceUI>();
         if (ui != null)
             ui.SetLastTurnSummary(realMovement, allEffects, false);
     }
 
-
+    /*
+     * GetNextCheckpoint
+     * -----------------
+     * Finds the next checkpoint ahead of the current position.
+     */
     public int GetNextCheckpoint()
     {
         int total = spots.Length;
@@ -439,6 +475,11 @@ public class Movement : MonoBehaviour
             audioSource.PlayOneShot(moveSound);
     }
 
+    /*
+     * TeleportToPosition
+     * ------------------
+     * Instantly moves the piece to a board position.
+     */
     public void TeleportToPosition(int index)
     {
         if (positions == null || positions.Length == 0)
@@ -451,6 +492,11 @@ public class Movement : MonoBehaviour
         transform.position = positions[index - 1].position;
     }
 
+    /*
+     * ResetAfterShop
+     * --------------
+     * Called after leaving the shop to restore movement state.
+     */
     public void ResetAfterShop()
     {
         ignoreInitialCheckpoint = true;
@@ -459,19 +505,9 @@ public class Movement : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-
-    [ContextMenu("TEST: +0.05 Lap")]
-    private void TestAddLap005() => AddLapProgressTest(0.05f);
-
-    [ContextMenu("TEST: +0.10 Lap")]
-    private void TestAddLap010() => AddLapProgressTest(0.10f);
-
-    [ContextMenu("TEST: +0.25 Lap")]
-    private void TestAddLap025() => AddLapProgressTest(0.25f);
-
-    [ContextMenu("TEST: +0.50 Lap")]
-    private void TestAddLap050() => AddLapProgressTest(0.50f);
-
+    /*
+     * Editor-only lap progression test helpers.
+     */
     private void AddLapProgressTest(float amount)
     {
         if (!isPlayer)
@@ -494,6 +530,5 @@ public class Movement : MonoBehaviour
                 StatManager.Instance.TriggerStatsChanged();
         }
     }
-
 #endif
 }

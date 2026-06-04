@@ -3,11 +3,11 @@ using UnityEngine;
 /*
  * OuijaAnswerZone
  * ---------------
- * Detects when the playerObject enters a specific zone on the ouija board.
+ * Detects when the player enters a specific zone on the ouija board.
  * Zones can represent Yes, No, or Goodbye.
  * Responsibilities:
  * - Handle buy/sell pedestal decisions (Yes/No)
- * - Trigger shop exit confirmation popup when Goodbye zone is entered
+ * - Trigger shop exit confirmation popup when the Goodbye zone is entered
  */
 public class OuijaAnswerZone : MonoBehaviour
 {
@@ -20,7 +20,7 @@ public class OuijaAnswerZone : MonoBehaviour
     private void Awake()
     {
         // Cache reference to avoid repeated scene lookups
-        exitManager = FindFirstObjectByType<ShopExitManager>();
+        exitManager = Object.FindAnyObjectByType<ShopExitManager>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -49,7 +49,6 @@ public class OuijaAnswerZone : MonoBehaviour
         {
             if (exitManager != null)
                 exitManager.TriggerGoodbye();
-            return;
         }
     }
 }

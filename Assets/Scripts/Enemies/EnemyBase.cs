@@ -31,14 +31,13 @@ public abstract class EnemyBase : MonoBehaviour
 
     public bool isActive;
 
-    // Track if this enemy has already spawned once
+    // Tracks if this enemy has already spawned once
     public bool HasSpawnedOnce { get; private set; } = false;
 
     public void MarkAsSpawned()
     {
         HasSpawnedOnce = true;
     }
-
 
     // Durability tracking
     private float spawnLap;
@@ -65,7 +64,7 @@ public abstract class EnemyBase : MonoBehaviour
     {
         if (player == null)
         {
-            Movement[] allMovements = FindObjectsByType<Movement>(FindObjectsSortMode.None);
+            Movement[] allMovements = FindObjectsByType<Movement>(FindObjectsInactive.Exclude);
 
             foreach (Movement m in allMovements)
             {
@@ -120,10 +119,7 @@ public abstract class EnemyBase : MonoBehaviour
         CachePlayerMovement();
 
         if (playerMovement == null)
-        {
-            Debug.LogError("EnemyBase: PlayerMovement not found.");
             yield break;
-        }
 
         // Get player spawn
         string playerSpawnName = CharacterSelectManager.Instance.SelectedCharacter.spawnPointName;
@@ -143,10 +139,7 @@ public abstract class EnemyBase : MonoBehaviour
         movement = TokenInstance.GetComponent<Movement>();
 
         if (movement == null)
-        {
-            Debug.LogError("EnemyBase: tilePrefab has no Movement component!");
             yield break;
-        }
 
         // Configure movement
         movement.SetPositions(playerMovement.Positions);
@@ -166,6 +159,7 @@ public abstract class EnemyBase : MonoBehaviour
         data.hasSpawnedOnce = true;
         RegisterEnemy();
         MarkAsSpawned();
+
         // Durability setup
         spawnLap = playerMovement.Round - 1;
         despawnLap = spawnLap + data.durabilityLaps;
@@ -222,10 +216,11 @@ public abstract class EnemyBase : MonoBehaviour
             return;
         }
 
-        if (player != null){
+        if (player != null)
+        {
             Destroy(player.gameObject);
             UnityEngine.SceneManagement.SceneManager.LoadScene("Muerte");
-            }
+        }
     }
 
     // Checks if enemy movement is blocked by tile effects

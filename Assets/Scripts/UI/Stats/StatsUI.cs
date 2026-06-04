@@ -7,14 +7,14 @@ using UnityEngine.UI;
  * StatsUI
  * -------
  * Displays player stats in the HUD.
- * Rows are dynamically created each time stats change.
+ * Rebuilds the panel every time stats change.
  */
 public class StatsUI : MonoBehaviour
 {
     [Header("Prefab (DiceResultRow)")]
     [SerializeField] private GameObject rowPrefab;
 
-    [Header("Root (usa StatText como contenedor)")]
+    [Header("Root container")]
     [SerializeField] private RectTransform statsRoot;
 
     [Header("Icons")]
@@ -23,19 +23,19 @@ public class StatsUI : MonoBehaviour
     [SerializeField] private Sprite lapsIcon;
     [SerializeField] private Sprite rerollsIcon;
 
-    [Header("Ajustes visuales")]
+    [Header("Visual settings")]
     [SerializeField] private float rowHeight = 40f;
     [SerializeField] private float rowSpacing = 2f;
     [SerializeField] private int fontSize = 40;
 
-    [Header("Layout interno")]
+    [Header("Layout")]
     [SerializeField] private float rowWidth = 650f;
     [SerializeField] private float iconSize = 48f;
     [SerializeField] private float nameOffsetX = 40f;
     [SerializeField] private float valueOffsetX = 225f;
     [SerializeField] private float nameWidth = 250f;
 
-    [Header("Animación")]
+    [Header("Animation")]
     [SerializeField] private float coinAnimationSpeed = 0.25f;
 
     private void OnEnable()
@@ -45,7 +45,7 @@ public class StatsUI : MonoBehaviour
 
     /*
      * Waits two frames to ensure UI layout is initialized,
-     * then subscribes to stat updates.
+     * then subscribes to stat updates and forces an initial refresh.
      */
     private IEnumerator DelayedInit()
     {
@@ -57,7 +57,8 @@ public class StatsUI : MonoBehaviour
         if (StatManager.Instance != null)
             StatManager.Instance.OnStatsChanged += RefreshUI;
 
-        RefreshUI();
+        // Ensures UI starts with correct values
+        StatManager.Instance.TriggerStatsChanged();
     }
 
     private void OnDisable()
@@ -80,7 +81,6 @@ public class StatsUI : MonoBehaviour
 
     /*
      * Rebuilds the entire stats panel.
-     * Removes old rows and creates new ones.
      */
     private void RefreshUI()
     {
@@ -93,23 +93,17 @@ public class StatsUI : MonoBehaviour
         var sm = StatManager.Instance;
         float currentY = 0f;
 
-        // ---------------------------------------------------------
-        // TIRADAS (usadas / permitidas)
-        // ---------------------------------------------------------
-        int usadas = TurnManager.Instance.GetRollsUsed();
-        int permitidas = TurnManager.Instance.GetRollsAllowed();
-        CreateRow("Tiradas", rollsIcon, usadas + "/" + permitidas, ref currentY);
+        // Rolls (used / allowed)
+        int used = TurnManager.Instance.GetRollsUsed();
+        int allowed = TurnManager.Instance.GetRollsAllowed();
+        CreateRow("Tiradas", rollsIcon, used + "/" + allowed, ref currentY);
 
-        // ---------------------------------------------------------
-        // PESETAS
-        // ---------------------------------------------------------
+        // Gold
         int gold = sm.GetCurrentValue(StatType.Gold);
         int maxGold = sm.GetMaxValue(StatType.Gold);
         CreateRow("Pesetas", goldIcon, gold + "/" + maxGold, ref currentY);
 
-        // ---------------------------------------------------------
-        // VUELTAS
-        // ---------------------------------------------------------
+        // Laps
         Movement player = FindAnyObjectByType<Movement>();
         if (player != null && player.isPlayer)
         {
@@ -117,9 +111,7 @@ public class StatsUI : MonoBehaviour
             CreateRow("Vueltas", lapsIcon, laps.ToString(), ref currentY);
         }
 
-        // ---------------------------------------------------------
-        // REROLLS (solo en tienda)
-        // ---------------------------------------------------------
+        // Shop rerolls
         if (sm.IsPlayerInShop())
         {
             int rerolls = sm.GetCurrentValue(StatType.ShopRerolls);
@@ -129,7 +121,7 @@ public class StatsUI : MonoBehaviour
     }
 
     /*
-     * Creates a single stat row in the UI.
+     * Creates a single stat row.
      */
     private void CreateRow(string name, Sprite icon, string value, ref float currentY)
     {
@@ -153,7 +145,7 @@ public class StatsUI : MonoBehaviour
         nameTMP.lineSpacing = 0f;
         effTMP.lineSpacing = 0f;
 
-        // Special animation for Pesetas
+        // Gold animation
         if (name == "Pesetas")
         {
             if (!img.TryGetComponent<Animator>(out Animator anim))

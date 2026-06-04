@@ -1908,7 +1908,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Resetear dados
+  m_text: Pausar
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e9b307b904cad4849b432e4c5675dc2d, type: 2}
   m_sharedMaterial: {fileID: 1867055714457158432, guid: e9b307b904cad4849b432e4c5675dc2d, type: 2}
@@ -1935,8 +1935,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -7847,7 +7847,7 @@ GameObject:
   - component: {fileID: 1129223450}
   - component: {fileID: 1129223449}
   m_Layer: 5
-  m_Name: ResetDieButton
+  m_Name: PauseButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7862,15 +7862,15 @@ RectTransform:
   m_GameObject: {fileID: 1129223447}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.5, y: 3, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 298923549}
   m_Father: {fileID: 841464102}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 299.5, y: -1617.75}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 300, y: 450}
   m_SizeDelta: {x: 151, y: 41.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1129223449
@@ -7918,8 +7918,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 841464105}
-        m_TargetAssemblyTypeName: DiceResetButton, Assembly-CSharp
-        m_MethodName: ResetAllDice
+        m_TargetAssemblyTypeName: PauseButton, Assembly-CSharp
+        m_MethodName: OpenPauseMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

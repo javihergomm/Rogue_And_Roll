@@ -3,10 +3,16 @@ using UnityEngine;
 /*
  * CharacterSpawner
  * ----------------
- * Handles spawning of the selected character's cup and tile,
- * applies color palettes when needed, registers the Movement
- * component, and sets the initial board position before any
- * movement logic begins.
+ * Responsible for spawning the selected character into the scene.
+ * Handles:
+ *   - Cup instantiation
+ *   - Tile instantiation
+ *   - Palette application
+ *   - Movement registration
+ *   - Initial board positioning
+ *
+ * This component is recreated each time the game scene loads,
+ * ensuring a clean and predictable initialization flow.
  */
 public class CharacterSpawner : MonoBehaviour
 {
@@ -25,7 +31,6 @@ public class CharacterSpawner : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     /*
@@ -50,8 +55,8 @@ public class CharacterSpawner : MonoBehaviour
     }
 
     /*
-     * Spawns the character's cup at the assigned spawn point
-     * and applies the palette if required.
+     * Instantiates the character's cup at the assigned spawn point.
+     * Applies palette colors if enabled in the CharacterSO.
      */
     private void SpawnCup(CharacterSO character)
     {
@@ -78,7 +83,6 @@ public class CharacterSpawner : MonoBehaviour
         {
             (Color light, Color dark) = GetPalette(character.spawnPointName);
 
-            // NUEVO: recolor flexible por listas
             ApplyPaletteToCupFlexible(
                 currentCup,
                 character.cupLightMaterials,
@@ -90,15 +94,15 @@ public class CharacterSpawner : MonoBehaviour
     }
 
     /*
-     * Spawns the character's tile at the specified board index
-     * and recolors the selected material if enabled.
+     * Instantiates the character's tile at the specified board index.
+     * Applies tile color if enabled in the CharacterSO.
      */
     private void SpawnTile(CharacterSO character)
     {
         if (character.tilePrefab == null)
             return;
 
-        Spot[] spots = Object.FindObjectsByType<Spot>(FindObjectsSortMode.None);
+        Spot[] spots = Object.FindObjectsByType<Spot>(FindObjectsInactive.Exclude);
         System.Array.Sort(spots, (a, b) => a.index.CompareTo(b.index));
 
         if (character.tileSpotIndex < 0 || character.tileSpotIndex >= spots.Length)
@@ -121,8 +125,8 @@ public class CharacterSpawner : MonoBehaviour
     }
 
     /*
-     * Registers the Movement component and assigns the initial board
-     * position before any movement logic is executed.
+     * Registers the Movement component from the spawned objects.
+     * Sets the initial board position before any movement logic begins.
      */
     private void RegisterMovementFromSpawnedObjects()
     {
@@ -157,6 +161,9 @@ public class CharacterSpawner : MonoBehaviour
     //  PALETTE SYSTEM
     // ---------------------------------------------------------
 
+    /*
+     * Returns a light/dark color pair based on the spawn point name.
+     */
     private (Color light, Color dark) GetPalette(string spawnName)
     {
         spawnName = spawnName.ToLower();
@@ -176,7 +183,9 @@ public class CharacterSpawner : MonoBehaviour
         return (Color.white, Color.white);
     }
 
-    // NUEVO: recolor flexible por listas (light/dark)
+    /*
+     * Applies palette colors to the cup using flexible material lists.
+     */
     private void ApplyPaletteToCupFlexible(GameObject cup, Material[] lightMats, Material[] darkMats, Color light, Color dark)
     {
         Renderer[] renderers = cup.GetComponentsInChildren<Renderer>();
@@ -189,14 +198,12 @@ public class CharacterSpawner : MonoBehaviour
             {
                 string cleanName = mats[i].name.Replace(" (Instance)", "");
 
-                // Light materials
                 foreach (var lm in lightMats)
                 {
                     if (lm != null && cleanName == lm.name && mats[i].HasProperty("_BaseColor"))
                         mats[i].SetColor("_BaseColor", light);
                 }
 
-                // Dark materials
                 foreach (var dm in darkMats)
                 {
                     if (dm != null && cleanName == dm.name && mats[i].HasProperty("_BaseColor"))
@@ -208,6 +215,9 @@ public class CharacterSpawner : MonoBehaviour
         }
     }
 
+    /*
+     * Applies a single color to the tile material.
+     */
     private void ApplyPaletteToTile(GameObject tile, Material targetMat, Color color)
     {
         string baseName = targetMat.name;
@@ -228,6 +238,9 @@ public class CharacterSpawner : MonoBehaviour
         }
     }
 
+    /*
+     * Converts a hex string into a Unity Color.
+     */
     private Color HexToColor(string hex)
     {
         ColorUtility.TryParseHtmlString(hex, out Color c);

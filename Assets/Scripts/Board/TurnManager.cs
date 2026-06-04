@@ -49,6 +49,21 @@ public class TurnManager : MonoBehaviour
         }
 
         Instance = this;
+
+        // ---------------------------------------------------------
+        // FULL STATE RESET (critical for returning from pause menu)
+        // ---------------------------------------------------------
+        state = TurnState.PlayerTurn;
+        TurnNumber = 0;
+
+        activeEnemies.Clear();
+        currentEnemyIndex = 0;
+
+        playerMovement = null;
+
+        rollsUsedThisTurn = 0;
+        rollsAllowedThisTurn = 1;
+        // ---------------------------------------------------------
     }
 
     private void Start()
@@ -84,13 +99,10 @@ public class TurnManager : MonoBehaviour
             yield return null;
         }
 
-        // Subscribe to movement finished event
         playerMovement.OnMovementFinished += OnPlayerFinishedMovement;
 
-        // Register player movement in DiceRollManager
         DiceRollManager.Instance.RegisterPlayerMovement(playerMovement);
 
-        // Start the first player turn
         StartPlayerTurn();
     }
 
@@ -98,19 +110,11 @@ public class TurnManager : MonoBehaviour
     // PLAYER TURN
     // ============================================================
 
-    /*
-     * Starts the player's turn:
-     * - Increments turn number
-     * - Resets roll counters
-     * - Notifies passive effects
-     * - Handles special passives (e.g., AvoidBadSpot)
-     */
     public void StartPlayerTurn()
     {
         TurnNumber++;
         state = TurnState.PlayerTurn;
 
-        // Reset roll counters
         rollsUsedThisTurn = 0;
         rollsAllowedThisTurn = 1;
 
@@ -131,10 +135,6 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    /*
-     * Called when the player finishes movement.
-     * Ends the player's turn if movement rules allow it.
-     */
     private void OnPlayerFinishedMovement()
     {
         if (state != TurnState.PlayerTurn)
@@ -171,10 +171,6 @@ public class TurnManager : MonoBehaviour
         StartNextEnemyTurn();
     }
 
-    /*
-     * Starts the next enemy's turn.
-     * Skips invalid or disabled enemies.
-     */
     private void StartNextEnemyTurn()
     {
         if (activeEnemies.Count == 0)
@@ -213,10 +209,6 @@ public class TurnManager : MonoBehaviour
         enemy.StartTurn();
     }
 
-    /*
-     * Called when an enemy finishes movement.
-     * Moves to the next enemy or returns to the player turn.
-     */
     private void OnEnemyFinishedMovement()
     {
         if (activeEnemies.Count == 0)
@@ -260,22 +252,14 @@ public class TurnManager : MonoBehaviour
     }
 
     // ============================================================
-    // ENEMY REGISTRATION (FIXED)
+    // ENEMY REGISTRATION
     // ============================================================
 
-    /*
-     * Returns true if the given enemy is already registered
-     * in the active enemy list.
-     */
     public bool IsEnemyRegistered(EnemyBase enemy)
     {
         return enemy != null && activeEnemies.Contains(enemy);
     }
 
-    /*
-     * Registers an enemy into the active enemy list
-     * so it participates in enemy turns.
-     */
     public void RegisterEnemy(EnemyBase enemy)
     {
         if (enemy == null)
@@ -285,10 +269,6 @@ public class TurnManager : MonoBehaviour
             activeEnemies.Add(enemy);
     }
 
-    /*
-     * Removes an enemy from the active enemy list
-     * so it no longer participates in enemy turns.
-     */
     public void UnregisterEnemy(EnemyBase enemy)
     {
         if (enemy == null)
