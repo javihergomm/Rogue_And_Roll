@@ -45,5 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DemonBoss
   data: {fileID: 11400000, guid: 66faf68494507c9448c4bfbdb8be7ba5, type: 2}
+  movement: {fileID: 8580833200976862543, guid: 4725713aefe17a141a811387680fdc66, type: 3}
   player: {fileID: 0}
-  movement: {fileID: 0}
+  CupInstance: {fileID: 0}
+  TokenInstance: {fileID: 0}
+  isActive: 0

@@ -4,33 +4,42 @@ using UnityEngine;
  * SellPedestal
  * ------------
  * Handles the selling flow using Ouija confirmation.
- *
- * Flow:
- * 1) When the playerObject enters this pedestal, the inventory opens in selling mode (game does not pause).
- * 2) When the playerObject clicks an item, the inventory closes immediately and a message-only popup appears.
- * 3) The playerObject walks to the YES/NO Ouija zones, which call HandleOuijaAnswer.
+ * When the player enters the pedestal, the inventory opens in selling mode.
+ * After selecting an item, the player must confirm the sale by moving to YES or NO.
  */
 public class SellPedestal : MonoBehaviour
 {
-    private bool sellingMode = false;
+    // Global selling flag to ensure only one selling interaction at a time
+    public static bool sellingMode = false;
 
-    // Item and slot pending to be sold after Ouija confirmation
+    // Item and slot pending confirmation
     private BaseItemSO pendingItem;
     private ItemSlot pendingSlot;
 
-    // Static reference so Ouija zones know which pedestal to notify
+    // Reference to the pedestal currently waiting for YES/NO
     public static SellPedestal currentSellPedestal;
 
-    // True while waiting for the playerObject's YES/NO decision
+    // True while waiting for the player to confirm the sale
     public bool isAwaitingDecision = false;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
+        // Prevent selling if another selling interaction is active
+        if (sellingMode)
+            return;
+
+        // Prevent selling if a buying interaction is active
+        if (ShopPedestalRandomizer.buyingMode)
+            return;
+
+        // Activate selling mode
         sellingMode = true;
+        currentSellPedestal = this;
 
-        // Register this pedestal so InventoryManager routes item clicks to it
+        // Enable selling mode in the inventory
         InventoryManager.Instance.SetActiveSellPedestal(this);
 
         // Open inventory without pausing the game
@@ -40,29 +49,29 @@ public class SellPedestal : MonoBehaviour
     }
 
     /*
-     * Called by InventoryManager when an item slot is clicked in selling mode.
-     * Stores the pending sale, closes the inventory, and shows a message-only popup.
+     * Called when the player clicks an item in selling mode.
+     * Stores the pending sale and shows the confirmation popup.
      */
     public void OnItemClicked(ItemSlot slot)
     {
-        if (!sellingMode) return;
-        if (slot == null || slot.Quantity <= 0) return;
+        if (!sellingMode)
+            return;
 
-        BaseItemSO item = InventoryManager.Instance.GetItemSO(slot.ItemName);
-        if (item == null) return;
+        if (slot == null || slot.Quantity <= 0)
+            return;
 
-        // Store pending sale data
+        BaseItemSO item = slot.ItemSO;
+        if (item == null)
+            return;
+
         pendingItem = item;
         pendingSlot = slot;
 
-        // Mark this pedestal as active for Ouija confirmation
-        currentSellPedestal = this;
         isAwaitingDecision = true;
 
-        // Close inventory so the playerObject can walk to YES/NO
+        // Close inventory so the player can walk to YES/NO
         InventoryManager.Instance.CloseInventory();
 
-        // Show message-only popup
         if (OptionPopupManager.Instance != null)
         {
             OptionPopupManager.Instance.ShowMessage(
@@ -75,14 +84,14 @@ public class SellPedestal : MonoBehaviour
     }
 
     /*
-     * Called by OuijaAnswerZone when the playerObject steps into YES or NO.
-     * Completes or cancels the sale based on the answer.
+     * Called when the player enters the YES or NO Ouija zone.
+     * Completes or cancels the sale.
      */
     public void HandleOuijaAnswer(OuijaAnswerZone.AnswerType answer)
     {
-        Debug.Log("SellPedestal.HandleOuijaAnswer: " + answer);
+        if (!isAwaitingDecision)
+            return;
 
-        if (!isAwaitingDecision) return;
         if (pendingItem == null || pendingSlot == null)
         {
             isAwaitingDecision = false;
@@ -93,11 +102,9 @@ public class SellPedestal : MonoBehaviour
         {
             // Remove from active dice if needed
             if (pendingItem is DiceSO)
-            {
                 InventoryManager.Instance.TryRemoveActiveDice(pendingSlot);
-            }
 
-            // Remove the item from the exact slot
+            // Remove the item
             InventoryManager.Instance.RemoveItem(pendingSlot, 1);
 
             // Add gold
@@ -118,6 +125,7 @@ public class SellPedestal : MonoBehaviour
         pendingItem = null;
         pendingSlot = null;
         isAwaitingDecision = false;
+
         if (currentSellPedestal == this)
             currentSellPedestal = null;
 
@@ -125,11 +133,12 @@ public class SellPedestal : MonoBehaviour
     }
 
     /*
-     * Ends the selling process and closes the inventory if it is still open.
+     * Ends the selling process and closes the inventory.
      */
     private void EndSelling()
     {
         sellingMode = false;
+
         InventoryManager.Instance.ClearActiveSellPedestal();
         InventoryManager.Instance.CloseInventory();
 
@@ -137,17 +146,18 @@ public class SellPedestal : MonoBehaviour
     }
 
     /*
-     * Clears the pedestal when the playerObject exits the trigger,
-     * but only if no Ouija decision is pending.
+     * Clears the pedestal when the player exits the trigger.
      */
     private void OnTriggerExit(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         if (!isAwaitingDecision && currentSellPedestal == this)
         {
             currentSellPedestal = null;
             sellingMode = false;
+
             Debug.Log("Sell pedestal deactivated (no decision pending).");
         }
     }

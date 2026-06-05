@@ -2,13 +2,16 @@ using UnityEngine;
 using System.Collections.Generic;
 using static BaseItemSO;
 
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 /*
- * Handles item selection, model spawning, and pedestal refresh logic.
+ * ShopPedestalRandomizer
+ * ----------------------
+ * Handles item selection, model spawning, and purchase confirmation.
+ * Each pedestal displays one item and waits for the player to confirm
+ * the purchase by moving to the YES or NO Ouija zones.
  */
 public class ShopPedestalRandomizer : MonoBehaviour
 {
@@ -20,24 +23,38 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
     private bool hasGeneratedThisVisit = false;
 
+    // Reference to the pedestal currently waiting for a YES/NO decision
     public static ShopPedestalRandomizer currentPedestal;
+
+    // True while waiting for the player to confirm the purchase
     public bool isAwaitingDecision = false;
 
+    // Global flag to ensure only one pedestal can be in buying mode at a time
+    public static bool buyingMode = false;
+
+    // Memory of items used during this shop visit and reroll
     public static HashSet<BaseItemSO> UsedItemsThisVisit { get; private set; } = new HashSet<BaseItemSO>();
     public static HashSet<BaseItemSO> UsedItemsThisReroll { get; private set; } = new HashSet<BaseItemSO>();
 
 
     private void Start()
     {
+        // Ensures the pedestal has exactly one container for the 3D model
         EnsureSingleContainer();
+
+        // Generates the initial item for this pedestal
         RefreshItem();
         hasGeneratedThisVisit = true;
     }
 
 
+    /*
+     * Ensures that only one ItemContainer exists under this pedestal.
+     * Removes duplicates if found.
+     */
     private void EnsureSingleContainer()
     {
-        List<Transform> containers = new();
+        List<Transform> containers = new List<Transform>();
 
         foreach (Transform t in GetComponentsInChildren<Transform>())
         {
@@ -63,12 +80,14 @@ public class ShopPedestalRandomizer : MonoBehaviour
     }
 
 
+    /*
+     * Creates a new container for the 3D item model.
+     */
     private void CreateContainer()
     {
         itemContainer = new GameObject("ItemContainer").transform;
         itemContainer.SetParent(transform);
 
-        // OPTIMIZADO: una sola llamada
         itemContainer.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         itemContainer.localScale = Vector3.one;
     }
@@ -85,6 +104,9 @@ public class ShopPedestalRandomizer : MonoBehaviour
     }
 
 
+    /*
+     * Generates the item only if it has not been generated yet during this visit.
+     */
     public void GenerateIfNeeded()
     {
         if (!hasGeneratedThisVisit)
@@ -94,18 +116,26 @@ public class ShopPedestalRandomizer : MonoBehaviour
         }
     }
 
+    /*
+     * Resets the pedestal state for the next shop visit.
+     */
     public void ResetForNextVisit()
     {
         hasGeneratedThisVisit = false;
         isAwaitingDecision = false;
     }
 
+
+    /*
+     * Selects a valid item and spawns its 3D model on the pedestal.
+     */
     public void RefreshItem()
     {
         EnsureSingleContainer();
 
         possibleItems ??= new BaseItemSO[0];
 
+        // Removes any previous model
         for (int i = itemContainer.childCount - 1; i >= 0; i--)
         {
             var child = itemContainer.GetChild(i);
@@ -115,9 +145,9 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
         spawnedModel = null;
 
-        List<BaseItemSO> availableItems = new();
+        List<BaseItemSO> availableItems = new List<BaseItemSO>();
 
-        // 1) Manual items
+        // Adds manually assigned items
         foreach (var item in possibleItems)
         {
             if (item == null) continue;
@@ -129,7 +159,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
             availableItems.Add(item);
         }
 
-        // 2) Autoload from Resources
+        // Loads items from Resources folders
         string[] folders = { "Dice", "Consumables", "Permanents", "LootBox" };
 
         foreach (var folder in folders)
@@ -157,6 +187,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
             return;
         }
 
+        // Selects a random item from the available list
         chosenItem = availableItems[Random.Range(0, availableItems.Count)];
         Debug.Log("[Pedestal] " + name + " chose: " + chosenItem.itemID);
 
@@ -165,6 +196,10 @@ public class ShopPedestalRandomizer : MonoBehaviour
         SpawnModel();
     }
 
+
+    /*
+     * Instantiates the 3D model of the chosen item.
+     */
     private void SpawnModel()
     {
         if (chosenItem == null || chosenItem.Prefab3D == null)
@@ -178,15 +213,18 @@ public class ShopPedestalRandomizer : MonoBehaviour
         spawnedModel.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         spawnedModel.transform.localScale = Vector3.one;
 
+        // Removes physics components from the model
         foreach (var rb in spawnedModel.GetComponentsInChildren<Rigidbody>())
             if (Application.isPlaying) Destroy(rb); else DestroyImmediate(rb);
 
         foreach (var col in spawnedModel.GetComponentsInChildren<Collider>())
             if (Application.isPlaying) Destroy(col); else DestroyImmediate(col);
 
+        // Centers the model visually
         var center = spawnedModel.AddComponent<AutoCenterModel>();
         center.Normalize(chosenItem);
 
+        // Positions the model on top of the pedestal
         MeshRenderer pedestalRenderer = GetComponentInChildren<MeshRenderer>();
         Vector3 topCenter = transform.position;
 
@@ -206,6 +244,10 @@ public class ShopPedestalRandomizer : MonoBehaviour
     }
 
 
+    /*
+     * Handles the YES/NO answer from the Ouija zones.
+     * Applies the purchase if confirmed.
+     */
     public void HandleOuijaAnswer(OuijaAnswerZone.AnswerType answer)
     {
         if (!isAwaitingDecision)
@@ -214,9 +256,11 @@ public class ShopPedestalRandomizer : MonoBehaviour
         if (chosenItem == null)
         {
             isAwaitingDecision = false;
+            buyingMode = false;
             return;
         }
 
+        // Applies the purchase if the player confirms
         if (answer == OuijaAnswerZone.AnswerType.Yes)
         {
             int currentGold = StatManager.Instance.GetCurrentValue(StatType.Gold);
@@ -228,6 +272,7 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
                 UsedItemsThisVisit.Add(chosenItem);
 
+                // Removes the model from the pedestal
                 if (spawnedModel != null)
                 {
                     if (Application.isPlaying)
@@ -240,26 +285,46 @@ public class ShopPedestalRandomizer : MonoBehaviour
             }
         }
 
+        // Hides the popup
         OptionPopupManager.Instance.HidePopup();
 
+        // Clears state
         isAwaitingDecision = false;
+        buyingMode = false;
 
         if (currentPedestal == this)
             currentPedestal = null;
     }
 
 
+    /*
+     * Triggered when the player enters the pedestal area.
+     * Shows the purchase popup if allowed.
+     */
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player"))
             return;
 
+        // Blocks purchase if selling mode is active
+        if (SellPedestal.sellingMode)
+            return;
+
+        // Blocks purchase if another pedestal is already active
+        if (buyingMode)
+            return;
+
+        // Activates buying mode
+        buyingMode = true;
+
+        // Blocks if another pedestal is awaiting a decision
         if (currentPedestal != null && currentPedestal.isAwaitingDecision)
             return;
 
         currentPedestal = this;
         isAwaitingDecision = true;
 
+        // Shows the purchase popup
         if (OptionPopupManager.Instance != null && chosenItem != null)
         {
             OptionPopupManager.Instance.ShowMessage(
@@ -271,13 +336,20 @@ public class ShopPedestalRandomizer : MonoBehaviour
     }
 
 
+    /*
+     * Triggered when the player leaves the pedestal area.
+     * Clears the pedestal state if no decision is pending.
+     */
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Player"))
             return;
 
         if (!isAwaitingDecision && currentPedestal == this)
+        {
             currentPedestal = null;
+            buyingMode = false;
+        }
     }
 
 

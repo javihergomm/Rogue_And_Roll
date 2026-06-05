@@ -13,7 +13,7 @@ public static class Unlocks
         "character_rojo",
         "character_azul",
         "character_verde",
-        "item_dice_d20",
+        "item_dice_d6",
         "item_lootbox_negative",
         "item_lootbox_positive",
         "item_permanents_precision_amulet",

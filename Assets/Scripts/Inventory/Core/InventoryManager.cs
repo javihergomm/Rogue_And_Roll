@@ -193,18 +193,21 @@ public class InventoryManager : MonoBehaviour
         if (slot == null)
             return;
 
+        // ---------------------------------------------------------
+        // SELL MODE: redirect the click to the active SellPedestal
+        // ---------------------------------------------------------
+        if (sellMode.IsActive)
+        {
+            // Forward the click to the pedestal
+            sellMode.HandleClick(slot);
+            return;
+        }
+
         BaseItemSO item = slot.ItemSO;
 
         // Permanent items cannot be unequipped
         if (item is PermanentSO perm && perm.CannotBeUnequipped)
             return;
-
-        // Sell mode
-        if (sellMode.IsActive)
-        {
-            sellMode.HandleClick(slot);
-            return;
-        }
 
         // Replace mode
         if (slots.IsWaitingForReplace)

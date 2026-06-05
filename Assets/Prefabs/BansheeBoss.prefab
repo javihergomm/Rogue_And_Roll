@@ -45,6 +45,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BansheeBoss
   data: {fileID: 11400000, guid: ce4345100e6acb943a6d4743fd13dbb4, type: 2}
-  movement: {fileID: 0}
+  movement: {fileID: 8580833200976862543, guid: 4725713aefe17a141a811387680fdc66, type: 3}
   player: {fileID: 0}
+  CupInstance: {fileID: 0}
+  TokenInstance: {fileID: 0}
+  isActive: 0
   maxRoll: 6

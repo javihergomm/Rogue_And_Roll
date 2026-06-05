@@ -66,6 +66,7 @@ public class Movement : MonoBehaviour
     public int pendingSteps = 0;
     public bool turnShouldEnd = true;
     public bool movementIsPlayerControlled = true;
+    public bool pausedByShop = false;
 
     public int lastTotalMovement = 0;
 
@@ -161,7 +162,12 @@ public class Movement : MonoBehaviour
      */
     private IEnumerator MoveWithVisibilityCheck(int? fixedSteps = null)
     {
-        yield return null;
+        // Prevent movement if paused by the shop
+        if (pausedByShop)
+        {
+            while (pausedByShop)
+                yield return null;
+        }
 
         // Apply visibility effects
         if (isPlayer && cachedRenderer != null)
@@ -202,7 +208,10 @@ public class Movement : MonoBehaviour
      */
     private IEnumerator Move(int steps)
     {
-        Debug.Log($"[Movement] Move START with steps = {steps}");
+        // Stop movement immediately if paused by the shop
+        if (pausedByShop)
+            yield break;
+
         if (actualPos <= 0)
         {
             OnMovementFinished?.Invoke();
@@ -274,12 +283,43 @@ public class Movement : MonoBehaviour
                 {
                     Round++;
 
+                    // Round 2: unlock one random locked item
                     if (Round == 2)
-                        Unlocks.Unlock("ID_DEL_OBJETO");
+                    {
+                        BaseItemSO[] allItems = Resources.LoadAll<BaseItemSO>("Items");
+
+                        var locked = new System.Collections.Generic.List<BaseItemSO>();
+
+                        foreach (var item in allItems)
+                        {
+                            if (item != null && !Unlocks.IsUnlocked(item.itemID))
+                                locked.Add(item);
+                        }
+
+                        if (locked.Count > 0)
+                        {
+                            BaseItemSO reward = locked[UnityEngine.Random.Range(0, locked.Count)];
+                            Unlocks.Unlock(reward.itemID);
+
+                            Debug.Log("[Round 2 Unlock] Unlocked: " + reward.itemID);
+                        }
+                    }
+
+                    // Round 4: unlock metal characters
+                    if (Round == 4)
+                    {
+                        Unlocks.Unlock("character_verde_metalico");
+                        Unlocks.Unlock("character_rojo_metalico");
+                        Unlocks.Unlock("character_amarillo_metalico");
+                        Unlocks.Unlock("character_azul_metalico");
+
+                        Debug.Log("[Round 4 Unlock] Metal characters unlocked.");
+                    }
 
                     if (EnemyManager.Instance != null)
                         EnemyManager.Instance.CheckSpawnConditions();
                 }
+
             }
 
             /*
@@ -519,7 +559,6 @@ public class Movement : MonoBehaviour
         isExtraMovement = false;
         lastPos = actualPos;
         startPos = actualPos;
-
     }
 
 #if UNITY_EDITOR

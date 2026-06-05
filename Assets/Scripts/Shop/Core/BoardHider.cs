@@ -41,14 +41,24 @@ public class BoardHider : MonoBehaviour
             if (obj == null)
                 continue;
 
-            // If the object contains Movement, hide only the visuals
+            // If the object contains Movement, hide only the visuals AND disable colliders
             Movement mov = obj.GetComponentInChildren<Movement>();
             if (mov != null)
             {
-                // Hide or show all renderers without disabling the GameObject
+                // Hide or show all renderers
                 Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
                 foreach (var r in renderers)
                     r.enabled = show;
+
+                // Disable or enable all colliders
+                Collider[] colliders = obj.GetComponentsInChildren<Collider>();
+                foreach (var c in colliders)
+                    c.enabled = show;
+
+                // Disable rigidbody collisions
+                Rigidbody[] bodies = obj.GetComponentsInChildren<Rigidbody>();
+                foreach (var rb in bodies)
+                    rb.detectCollisions = show;
 
                 continue;
             }
