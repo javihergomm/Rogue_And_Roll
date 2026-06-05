@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Trebol4Hojas
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: "Tr\xE9bol de 4 Hojas"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 8cfe485350cd9454687936a8598a097a, type: 3}
   itemDescription: Convierte una casilla negativa en una luckbox.
-  prefab3D: {fileID: 0}
+  prefab3D: {fileID: 8397202332664028351, guid: acf170b0c5e76a04ea4891123bdcc978, type: 3}
   itemID: item_consumable_trebol_4_hojas
-  buyPrice: 0
-  sellPrice: 0
+  buyPrice: 15
+  sellPrice: 10
   polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0

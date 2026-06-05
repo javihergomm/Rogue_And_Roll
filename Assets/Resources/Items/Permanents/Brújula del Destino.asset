@@ -17,8 +17,8 @@ MonoBehaviour:
   itemDescription: Permite elegir entre dos resultados posibles del dado.
   prefab3D: {fileID: 7491300678527347004, guid: d8ce4da759b23d240a0f66b54ab20173, type: 3}
   itemID: item_permanents_destiny_compass
-  buyPrice: 0
-  sellPrice: 0
+  buyPrice: 25
+  sellPrice: 15
   polarity: 1
   StoreRotationOffset: {x: -45, y: 180, z: 0}
   StoreHeightOffset: -0.05

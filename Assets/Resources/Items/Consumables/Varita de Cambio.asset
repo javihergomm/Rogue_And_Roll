@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Varita de Cambio
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: Varita de Cambio
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: d4bebacba0105d0458ebde522cc073af, type: 3}
   itemDescription: Convierte una luckbox en su efecto opuesto.
   prefab3D: {fileID: 8558679982063144916, guid: 34a53e5b7e339f1459bc460029fe76d0, type: 3}
   itemID: item_consumables_change_wand
-  buyPrice: 0
-  sellPrice: 0
+  buyPrice: 15
+  sellPrice: 10
   polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0

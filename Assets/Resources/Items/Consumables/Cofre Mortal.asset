@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Cofre Mortal
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: Cofre Mortal
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: f9b52ed471dc98f42b2fd908d7f20bd5, type: 3}
   itemDescription: Intercambia una casilla normal por una mala.
-  prefab3D: {fileID: 0}
+  prefab3D: {fileID: 5723857864536007231, guid: c785314d9ae58dc49b6282935a08a861, type: 3}
   itemID: item_consumables_deadly_chest
-  buyPrice: 0
-  sellPrice: 0
+  buyPrice: 5
+  sellPrice: 100
   polarity: 2
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0

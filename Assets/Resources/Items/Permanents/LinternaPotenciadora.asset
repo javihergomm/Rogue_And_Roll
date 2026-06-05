@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: LinternaPotenciadora
   m_EditorClassIdentifier: Assembly-CSharp::PermanentSO
   itemName: Linterna Potenciadora
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 862fd4543f11bce46910d47f9fdd79e2, type: 3}
   itemDescription: Duplica el efecto de casillas positivas.
   prefab3D: {fileID: 1087326196185605937, guid: 410e470556e2a5c48b99dadb21eb5287, type: 3}
   itemID: item_consumable_linterna_potenciadora
-  buyPrice: 0
-  sellPrice: 0
+  buyPrice: 25
+  sellPrice: 10
   polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0

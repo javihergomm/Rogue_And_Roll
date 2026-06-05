@@ -15,10 +15,10 @@ MonoBehaviour:
   itemName: Incienso Maldito
   icon: {fileID: 21300000, guid: 96135ecc78773a349bb85b616e47c358, type: 3}
   itemDescription: Impide moverse durante varios turnos.
-  prefab3D: {fileID: 646729421180538869, guid: 19330aff26f4fc54fbb126fe7f905147, type: 3}
+  prefab3D: {fileID: 8800690620430349843, guid: 210361931ba7715429acd348e856a29c, type: 3}
   itemID: item_consumables_cursed_incense
-  buyPrice: 0
-  sellPrice: 0
+  buyPrice: 15
+  sellPrice: 10
   polarity: 2
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0

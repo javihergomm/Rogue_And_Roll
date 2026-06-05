@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: "Poci\xF3n del Azar"
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: "Poci\xF3n del Azar"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: d7b0361b78187bc4d94cf5c75b1f32fc, type: 3}
   itemDescription: Multiplica el resultado del dado entre x2 y x5.
-  prefab3D: {fileID: 2555957798442794710, guid: 84237c784c63bb64880760fdb617a577, type: 3}
+  prefab3D: {fileID: 5998425392111728895, guid: b3f26b90cba21144ab0efa56638664f5, type: 3}
   itemID: item_consumables_potion_of_chance
-  buyPrice: 0
-  sellPrice: 0
+  buyPrice: 15
+  sellPrice: 10
   polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: -0.7

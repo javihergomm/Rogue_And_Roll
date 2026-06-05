@@ -17,7 +17,7 @@ MonoBehaviour:
   itemDescription: Otorga una vida extra.
   prefab3D: {fileID: 0}
   itemID: item_permanent_gato_9_vidas
-  buyPrice: 0
+  buyPrice: 40
   sellPrice: 0
   polarity: 3
   StoreRotationOffset: {x: 0, y: 0, z: 0}

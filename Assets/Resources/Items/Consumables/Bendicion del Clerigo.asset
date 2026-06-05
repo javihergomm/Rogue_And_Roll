@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Bendicion del Clerigo
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: "Bendici\xF3n del Cl\xE9rigo"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ac810a4f093567a4ca01fa60fe58170b, type: 3}
   itemDescription: Permite mover dos veces durante varios turnos.
-  prefab3D: {fileID: 0}
+  prefab3D: {fileID: 6608858962183876622, guid: 4e028e9b1c6fd364bb94f6a5d35270c4, type: 3}
   itemID: item_consumables_cleric_blessing
-  buyPrice: 0
-  sellPrice: 0
+  buyPrice: 15
+  sellPrice: 10
   polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0

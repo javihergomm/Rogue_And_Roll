@@ -15,10 +15,10 @@ MonoBehaviour:
   itemName: Espejo Maldito
   icon: {fileID: 21300000, guid: e66f662cc7df5504dac49f415e15b3a3, type: 3}
   itemDescription: Teletransporta a la casilla buena o entrada de tienda mas cercana.
-  prefab3D: {fileID: 0}
+  prefab3D: {fileID: 1190563381169679060, guid: 9b2c1297de82a564dbdecf8a4f4618ee, type: 3}
   itemID: item_consumable_espejo_maldito
-  buyPrice: 0
-  sellPrice: 0
+  buyPrice: 5
+  sellPrice: 100
   polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: 0

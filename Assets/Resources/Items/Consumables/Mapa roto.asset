@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Mapa roto
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: Mapa roto
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: b71e052312f5b634294143699daba128, type: 3}
   itemDescription: Desorienta al jugador y oculta la tirada.
   prefab3D: {fileID: 4295172184554600023, guid: 68a77e41474ed714e94409c8cbed8e30, type: 3}
   itemID: item_consumables_broken_map
-  buyPrice: 0
+  buyPrice: 5
   sellPrice: 0
   polarity: 2
   StoreRotationOffset: {x: 0, y: 0, z: 0}

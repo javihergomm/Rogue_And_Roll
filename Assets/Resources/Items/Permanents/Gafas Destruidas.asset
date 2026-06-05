@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Gafas Destruidas
   m_EditorClassIdentifier: Assembly-CSharp::PermanentSO
   itemName: Gafas Destruidas
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 0e93c0b04b6fc8e45ac6510d21ecf0ec, type: 3}
   itemDescription: Duplica el efecto de casillas peligrosas.
   prefab3D: {fileID: 919132149155446097, guid: 2932a904d894d3841ac62d81d93e026d, type: 3}
   itemID: item_permanents_broken_glasses
-  buyPrice: 0
+  buyPrice: 5
   sellPrice: 0
   polarity: 2
   StoreRotationOffset: {x: 0, y: 0, z: 0}

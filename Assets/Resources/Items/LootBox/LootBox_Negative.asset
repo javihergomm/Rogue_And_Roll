@@ -18,7 +18,7 @@ MonoBehaviour:
     al abrirlo descubrir\xE1s lo que guarda."
   prefab3D: {fileID: 7122970295413716730, guid: 1f164fd9655e6ac48a7e7fddf788f149, type: 3}
   itemID: item_lootbox_negative
-  buyPrice: 0
+  buyPrice: 20
   sellPrice: 0
   polarity: 0
   StoreRotationOffset: {x: 0, y: 0, z: 0}

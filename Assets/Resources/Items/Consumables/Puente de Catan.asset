@@ -17,8 +17,8 @@ MonoBehaviour:
   itemDescription: Crea un atajo durante la ronda.
   prefab3D: {fileID: 5683758079633837136, guid: 262904a93677e5e44a17178dc8164e71, type: 3}
   itemID: item_consumables_catan_bridge
-  buyPrice: 4
-  sellPrice: 2
+  buyPrice: 15
+  sellPrice: 10
   polarity: 1
   StoreRotationOffset: {x: 0, y: 0, z: 0}
   StoreHeightOffset: -0.15
