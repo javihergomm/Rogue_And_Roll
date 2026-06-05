@@ -50,9 +50,7 @@ public class TurnManager : MonoBehaviour
 
         Instance = this;
 
-        // ---------------------------------------------------------
-        // FULL STATE RESET (critical for returning from pause menu)
-        // ---------------------------------------------------------
+        // Full state reset
         state = TurnState.PlayerTurn;
         TurnNumber = 0;
 
@@ -63,7 +61,6 @@ public class TurnManager : MonoBehaviour
 
         rollsUsedThisTurn = 0;
         rollsAllowedThisTurn = 1;
-        // ---------------------------------------------------------
     }
 
     private void Start()
@@ -115,9 +112,14 @@ public class TurnManager : MonoBehaviour
         TurnNumber++;
         state = TurnState.PlayerTurn;
 
+        // Reset roll counters for the new turn
         rollsUsedThisTurn = 0;
         rollsAllowedThisTurn = 1;
 
+        // Notify UI
+        StatManager.Instance.TriggerStatsChanged();
+
+        // Apply passive effects
         StatManager.Instance.NextTurn();
         var ctx = StatManager.Instance.PassiveCtx;
 
@@ -286,18 +288,33 @@ public class TurnManager : MonoBehaviour
 
     public int GetRollsAllowed() => rollsAllowedThisTurn;
 
+    /*
+     * Adds extra rolls to the player's maximum roll count for this turn.
+     */
     public void AddExtraRolls(int amount)
     {
         rollsAllowedThisTurn += amount;
+
+        // Notify UI
+        StatManager.Instance.TriggerStatsChanged();
     }
 
+    /*
+     * Returns true if the player still has rolls available.
+     */
     public bool CanPlayerRoll()
     {
         return rollsUsedThisTurn < rollsAllowedThisTurn;
     }
 
+    /*
+     * Registers that the player has used one roll.
+     */
     public void RegisterPlayerRoll()
     {
         rollsUsedThisTurn++;
+
+        // Notify UI
+        StatManager.Instance.TriggerStatsChanged();
     }
 }

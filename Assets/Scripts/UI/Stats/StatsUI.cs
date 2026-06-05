@@ -57,7 +57,6 @@ public class StatsUI : MonoBehaviour
         if (StatManager.Instance != null)
             StatManager.Instance.OnStatsChanged += RefreshUI;
 
-        // Ensures UI starts with correct values
         StatManager.Instance.TriggerStatsChanged();
     }
 
@@ -93,10 +92,14 @@ public class StatsUI : MonoBehaviour
         var sm = StatManager.Instance;
         float currentY = 0f;
 
-        // Rolls (used / allowed)
+        // Rolls (available / max)
         int used = TurnManager.Instance.GetRollsUsed();
         int allowed = TurnManager.Instance.GetRollsAllowed();
-        CreateRow("Tiradas", rollsIcon, used + "/" + allowed, ref currentY);
+
+        int available = allowed - used;
+        int max = allowed;
+
+        CreateRow("Tiradas", rollsIcon, available + "/" + max, ref currentY);
 
         // Gold
         int gold = sm.GetCurrentValue(StatType.Gold);
