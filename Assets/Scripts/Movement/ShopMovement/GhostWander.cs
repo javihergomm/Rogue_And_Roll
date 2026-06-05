@@ -13,6 +13,10 @@ public class GhostWander : MonoBehaviour
     public Transform center;
     public float maxDistance = 3f;
 
+    [Header("Board Area Limit")]
+    public float boardRadius = 1f;     // Set this to match your board size
+    public float extraMargin = 1f;     // How much outside the board they can fly
+
     [Header("Vertical Float")]
     public float floatAmplitude = 0.5f;
     public float floatSpeed = 1f;
@@ -47,27 +51,20 @@ public class GhostWander : MonoBehaviour
 
     void Start()
     {
-        // Auto-asignar GhostCreator si no está asignado
+        // Auto-assign GhostCreator if not set
         if (center == null)
         {
             GameObject creator = GameObject.Find("GhostCreator");
             if (creator != null)
                 center = creator.transform;
             else
-                Debug.LogError("GhostWander: No se encontró GhostCreator en la escena.");
+                Debug.LogError("GhostWander: GhostCreator not found in scene.");
         }
 
-        // Ajustar radio según cámara
-        Camera cam = Camera.main;
-        if (cam != null && center != null)
-        {
-            float dist = Vector3.Distance(cam.transform.position, center.position);
-            float visibleRadius = Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) * dist;
+        // Fixed board-based radius
+        maxDistance = boardRadius + extraMargin;
 
-            maxDistance = visibleRadius * 0.4f; // 40% del área visible
-        }
-
-        // Posición inicial dentro del círculo
+        // Initial position inside the circle
         if (center != null)
         {
             Vector2 circle = Random.insideUnitCircle * maxDistance;
@@ -83,7 +80,6 @@ public class GhostWander : MonoBehaviour
 
         smoothDir = transform.forward;
     }
-
 
     void Update()
     {
@@ -130,12 +126,12 @@ public class GhostWander : MonoBehaviour
     {
         float t = Time.time * noiseSpeed;
 
-        // 1. Perlin Noise -> dirección deseada (solo para ROTAR)
+        // 1. Perlin Noise -> desired direction (rotation only)
         float nx = Mathf.PerlinNoise(noiseOffsetX, t) * 2f - 1f;
         float nz = Mathf.PerlinNoise(noiseOffsetZ, t) * 2f - 1f;
         Vector3 desiredDir = new Vector3(nx, 0f, nz).normalized;
 
-        // 2. Corrección hacia el centro si se aleja demasiado
+        // 2. Correction toward center if too far
         Vector3 toCenter = center.position - transform.position;
         float dist = toCenter.magnitude;
 
@@ -145,23 +141,23 @@ public class GhostWander : MonoBehaviour
             desiredDir = Vector3.Lerp(desiredDir, toCenter.normalized, lerp).normalized;
         }
 
-        // 3. Evitar giros hacia atrás respecto al forward visual
+        // 3. Prevent backward turns
         if (Vector3.Dot(transform.forward, desiredDir) < 0f)
         {
             desiredDir = Vector3.ProjectOnPlane(desiredDir, Vector3.up);
             desiredDir = Vector3.Lerp(transform.forward, desiredDir, 0.5f).normalized;
         }
 
-        // 4. Suavizado de dirección
+        // 4. Smooth direction
         smoothDir = Vector3.Lerp(smoothDir, desiredDir, Time.deltaTime * 2f);
 
-        // 5. Reforzar que smoothDir nunca quede detrás
+        // 5. Ensure smoothDir never goes behind
         if (Vector3.Dot(transform.forward, smoothDir) < 0f)
         {
             smoothDir = Vector3.Lerp(transform.forward, smoothDir, 0.3f).normalized;
         }
 
-        // 6. Rotación suave hacia smoothDir
+        // 6. Smooth rotation
         float maxTurnSpeed = 120f;
         Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
 
@@ -171,16 +167,26 @@ public class GhostWander : MonoBehaviour
             maxTurnSpeed * Time.deltaTime
         );
 
-        // 7. Movimiento SIEMPRE hacia delante visual 
-        Vector3 forwardDir = -transform.forward; 
+        // 7. Always move forward visually
+        Vector3 forwardDir = -transform.forward;
         Vector3 newPos = transform.position + speed * Time.deltaTime * forwardDir;
 
-        // 8. Flotación vertical
+        // 8. Vertical float
         newPos.y = baseY + Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
+
+        // 9. Clamp inside board radius
+        Vector3 flatPos = new Vector3(newPos.x, center.position.y, newPos.z);
+        Vector3 flatToCenter = flatPos - center.position;
+
+        if (flatToCenter.magnitude > maxDistance)
+        {
+            flatToCenter = flatToCenter.normalized * maxDistance;
+            newPos = center.position + flatToCenter;
+            newPos.y = baseY + Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
+        }
 
         transform.position = newPos;
     }
-
 
     private void StartDisappear()
     {
@@ -208,8 +214,7 @@ public class GhostWander : MonoBehaviour
         if (!Physics.Raycast(ray, out RaycastHit hit, 100f))
             return;
 
-        if (hit.collider.transform != transform &&
-            !hit.collider.transform.IsChildOf(transform))
+        if (hit.collider.GetComponentInParent<GhostWander>() != this)
             return;
 
         BaseItemSO reward = TryGiveReward();

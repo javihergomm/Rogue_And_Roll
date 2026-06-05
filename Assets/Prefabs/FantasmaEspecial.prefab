@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6004786153305617324}
   - component: {fileID: 8408711406075496294}
   - component: {fileID: 4935104707644961292}
+  - component: {fileID: 6912101542639963345}
   m_Layer: 0
   m_Name: FantasmaEspecial
   m_TagString: Untagged
@@ -109,13 +110,36 @@ MonoBehaviour:
   noiseScale: 0.5
   noiseSpeed: 0.5
   center: {fileID: 0}
-  maxDistance: 2
+  maxDistance: 1
+  boardRadius: 1
+  extraMargin: 1
   floatAmplitude: 0.5
   floatSpeed: 1
   groupCheckDistance: 1.2
   maxAllowedNearby: 2
   invisibleMoveTime: 1.5
   isSpecial: 1
-  rewardA: {fileID: 0}
-  rewardB: {fileID: 0}
+  rewardA: {fileID: 11400000, guid: 7f63bde7f64550a47bb86c8fc24654d3, type: 2}
+  rewardB: {fileID: 11400000, guid: ff90fed3d8584894bbeec7cb024d3a55, type: 2}
   rewardChance: 1
+--- !u!135 &6912101542639963345
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8048286614692587187}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.6
+  m_Center: {x: 0, y: 0, z: 0.3}

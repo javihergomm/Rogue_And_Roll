@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSO
   characterID: character_rojo
   characterName: Rojo
-  description: 'El cubilete clasico. Sin efectos especiales: solo tu suerte, tu ruta
-    y tu estrategia. La experiencia mas pura del juego.'
+  description: "El cubilete cl\xE1sico. Sin efectos especiales: solo tu suerte, tu
+    ruta y tu estrategia. La experiencia m\xE1s pura del juego."
   unlockHint: 
   icon: {fileID: 21300000, guid: 45c3c9bc52d91ff4782b8368c8c5e478, type: 3}
   characterColor: {r: 0.6754716, g: 0, b: 0, a: 1}

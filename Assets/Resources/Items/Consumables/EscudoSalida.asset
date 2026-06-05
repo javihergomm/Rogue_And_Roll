@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EscudoSalida
   m_EditorClassIdentifier: Assembly-CSharp::ConsumableSO
   itemName: Escudo de Salida
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 25ea45101898c2c4787dff6b7fa0c15c, type: 3}
   itemDescription: Anula el efecto de la proxima casilla mala y se consume.
   prefab3D: {fileID: 8592708307953126093, guid: 1605472ed2e19fe469172a73246f0832, type: 3}
   itemID: item_consumable_escudo_salida

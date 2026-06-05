@@ -6,13 +6,12 @@ using System.Collections.Generic;
  * ----------
  * Stores references to gameplay objects that must be hidden when entering the shop.
  * Objects register themselves dynamically (cups, tokens, dice, enemies).
- * No tags, no name checks, no component guessing.
  */
 public class BoardHider : MonoBehaviour
 {
     public static BoardHider Instance;
 
-    private List<GameObject> objectsToHide = new();
+    [SerializeField] private List<GameObject> objectsToHide = new();
 
     private void Awake()
     {
@@ -39,8 +38,23 @@ public class BoardHider : MonoBehaviour
 
         foreach (var obj in objectsToHide)
         {
-            if (obj != null)
-                obj.SetActive(show);
+            if (obj == null)
+                continue;
+
+            // If the object contains Movement, hide only the visuals
+            Movement mov = obj.GetComponentInChildren<Movement>();
+            if (mov != null)
+            {
+                // Hide or show all renderers without disabling the GameObject
+                Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+                foreach (var r in renderers)
+                    r.enabled = show;
+
+                continue;
+            }
+
+            // Purely visual objects can be fully enabled/disabled
+            obj.SetActive(show);
         }
     }
 }

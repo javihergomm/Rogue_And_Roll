@@ -147,7 +147,7 @@ public class Movement : MonoBehaviour
         effectAlreadyTriggered = false;
         turnShouldEnd = true;
         ignoreBridgeThisMove = false;
-
+        movementIsPlayerControlled = false;
         if (isPlayer)
             CharacterEffectManager.Instance.NotifyMovementStart(this);
 
@@ -202,6 +202,7 @@ public class Movement : MonoBehaviour
      */
     private IEnumerator Move(int steps)
     {
+        Debug.Log($"[Movement] Move START with steps = {steps}");
         if (actualPos <= 0)
         {
             OnMovementFinished?.Invoke();
@@ -221,10 +222,15 @@ public class Movement : MonoBehaviour
          * If the player would pass a checkpoint, movement is cut short
          * and the shop is entered.
          */
-        if (isPlayer && nextCheckpoint > 0)
+        if (isPlayer && nextCheckpoint > 0 && movementIsPlayerControlled)
         {
             int hypotheticalSpot = actualPos + steps;
-            hypotheticalSpot %= spots.Length + 1;
+
+            int total = spots.Length;
+            while (hypotheticalSpot > total)
+                hypotheticalSpot -= total;
+            while (hypotheticalSpot < 1)
+                hypotheticalSpot += total;
 
             if (hypotheticalSpot > nextCheckpoint)
                 steps = nextCheckpoint - actualPos;
@@ -240,15 +246,11 @@ public class Movement : MonoBehaviour
          * Step-by-step movement loop.
          */
         for (int i = 0; i < totalSteps; i++)
+
         {
+            int nextSpot = GetNextSpotIndex(actualPos, direction);
             int previousPos = actualPos;
-
-            actualPos += direction;
-
-            if (actualPos > positions.Length)
-                actualPos = 1;
-            if (actualPos < 1)
-                actualPos = positions.Length;
+            actualPos = nextSpot;
 
             /*
              * Lap progression and enemy spawn checks.
@@ -342,6 +344,8 @@ public class Movement : MonoBehaviour
              */
             if (direction > 0 && spots[actualPos - 1].checkpoint && isPlayer && movementIsPlayerControlled)
             {
+                Debug.Log($"[Movement] CHECKPOINT DETECTED at spot {actualPos}");
+                Debug.Log($"[Movement] Spot index = {spots[actualPos - 1].index}, checkpoint = {spots[actualPos - 1].checkpoint}");
                 if (ignoreInitialCheckpoint)
                 {
                     ignoreInitialCheckpoint = false;
@@ -350,6 +354,7 @@ public class Movement : MonoBehaviour
                 {
                     int remaining = totalSteps - (i + 1);
                     pendingSteps = remaining;
+                    Debug.Log($"[Movement] pendingSteps SET on shop entry = {pendingSteps} (remaining={remaining})");
                     turnShouldEnd = false;
 
                     shopExitManager.EnterShop();
@@ -391,6 +396,17 @@ public class Movement : MonoBehaviour
         if (isPlayer)
             CharacterEffectManager.Instance.NotifyMovementEnd(this);
     }
+
+    private int GetNextSpotIndex(int current, int direction)
+    {
+        int next = current + direction;
+
+        if (next > 68) next = 1;
+        if (next < 1) next = 68;
+
+        return next;
+    }
+
 
     /*
      * ExtraMovementRoutine
@@ -502,6 +518,8 @@ public class Movement : MonoBehaviour
         ignoreInitialCheckpoint = true;
         isExtraMovement = false;
         lastPos = actualPos;
+        startPos = actualPos;
+
     }
 
 #if UNITY_EDITOR

@@ -19,7 +19,7 @@ public class PauseButton : MonoBehaviour
     /*
      * Opens the pause menu popup and freezes the game.
      */
-    public void AbrirMenuPausa()
+    public void OpenPauseMenu()
     {
         if (isPaused)
             return;
