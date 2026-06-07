@@ -21,7 +21,7 @@ MonoBehaviour:
   cupSpawnPointName: 
   tileSpotIndex: 0
   lapsToActivate: 0.1
-  requiresPlayerLap: 1
+  requiresPlayerLap: 0
   spawnOnlyOnce: 1
   hasSpawnedOnce: 1
   durabilityLaps: 1

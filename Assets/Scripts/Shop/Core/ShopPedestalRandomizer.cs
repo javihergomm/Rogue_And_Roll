@@ -2,10 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using static BaseItemSO;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 /*
  * ShopPedestalRandomizer
  * ----------------------
@@ -179,8 +175,6 @@ public class ShopPedestalRandomizer : MonoBehaviour
             }
         }
 
-        Debug.Log("[Pedestal] " + name + " availableItems = " + availableItems.Count);
-
         if (availableItems.Count == 0)
         {
             chosenItem = null;
@@ -189,7 +183,6 @@ public class ShopPedestalRandomizer : MonoBehaviour
 
         // Selects a random item from the available list
         chosenItem = availableItems[Random.Range(0, availableItems.Count)];
-        Debug.Log("[Pedestal] " + name + " chose: " + chosenItem.itemID);
 
         UsedItemsThisReroll.Add(chosenItem);
 
@@ -352,41 +345,4 @@ public class ShopPedestalRandomizer : MonoBehaviour
         }
     }
 
-
-#if UNITY_EDITOR
-    public void EditorPreview(BaseItemSO item)
-    {
-        EnsureSingleContainer();
-
-        chosenItem = item;
-
-        for (int i = itemContainer.childCount - 1; i >= 0; i--)
-        {
-            var child = itemContainer.GetChild(i);
-            DestroyImmediate(child.gameObject);
-        }
-
-        SpawnModel();
-        SceneView.RepaintAll();
-    }
-
-    public void EditorClearPreview()
-    {
-        EnsureSingleContainer();
-
-        for (int i = itemContainer.childCount - 1; i >= 0; i--)
-        {
-            var child = itemContainer.GetChild(i);
-            DestroyImmediate(child.gameObject);
-        }
-
-        SceneView.RepaintAll();
-    }
-
-    public void ForceRefreshForEditor()
-    {
-        EnsureSingleContainer();
-        SceneView.RepaintAll();
-    }
-#endif
 }

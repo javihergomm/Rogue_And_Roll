@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using Object = UnityEngine.Object;
 using System.Collections;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
+/*
+ * ShopExitManager
+ * ---------------
+ * Handles all logic related to entering and exiting the shop.
+ */
 public class ShopExitManager : MonoBehaviour
 {
-    [Header("References (assign in Inspector)")]
+    [Header("References")]
     [SerializeField] private List<GameObject> shopPedestals = new();
     [SerializeField] private List<GameObject> decisionEmpties = new();
     [SerializeField] private GameObject ghostSpawnRoot;
@@ -32,13 +33,13 @@ public class ShopExitManager : MonoBehaviour
     [SerializeField] private bool inShop = false;
 
     [Header("Ouija Pointer")]
-    [SerializeField] private GameObject tableroOuijaPuntero;
+    [SerializeField] private GameObject ouijaPointer;
 
     [Header("Fixed Pointer Position")]
-    [SerializeField] private Vector3 punteroFixedLocalPos;
-    [SerializeField] private Vector3 punteroFixedLocalRot;
-    private Vector3 punteroInitialLocalPos;
-    private Quaternion punteroInitialLocalRot;
+    [SerializeField] private Vector3 pointerFixedLocalPos;
+    [SerializeField] private Vector3 pointerFixedLocalRot;
+    private Vector3 pointerInitialLocalPos;
+    private Quaternion pointerInitialLocalRot;
 
     [Header("Animator")]
     [SerializeField] private Animator animator;
@@ -50,20 +51,20 @@ public class ShopExitManager : MonoBehaviour
     [Header("Lights")]
     [SerializeField] private GameObject normalLight;
     [SerializeField] private GameObject hellLight;
- 
+
     public static bool ShopIsInSellMode = false;
     public event Action<bool> OnShopStateChanged;
 
     private void Start()
     {
-        // Stores the initial pointer transform so it can be restored later
-        if (tableroOuijaPuntero != null)
+        // Store initial pointer transform
+        if (ouijaPointer != null)
         {
-            punteroInitialLocalPos = tableroOuijaPuntero.transform.localPosition;
-            punteroInitialLocalRot = tableroOuijaPuntero.transform.localRotation;
+            pointerInitialLocalPos = ouijaPointer.transform.localPosition;
+            pointerInitialLocalRot = ouijaPointer.transform.localRotation;
         }
 
-        // If the player starts outside the shop, hide all shop elements
+        // Hide shop elements if starting outside the shop
         if (!inShop)
         {
             foreach (var pedestal in shopPedestals)
@@ -72,13 +73,13 @@ public class ShopExitManager : MonoBehaviour
             foreach (var empty in decisionEmpties)
                 if (empty != null) empty.SetActive(false);
 
-            if (tableroOuijaPuntero != null)
-                tableroOuijaPuntero.SetActive(false);
+            if (ouijaPointer != null)
+                ouijaPointer.SetActive(false);
         }
     }
 
     // ---------------------------------------------------------
-    // ENTER SHOP
+    // ENTER SHOP (manual, via UI button)
     // ---------------------------------------------------------
     public void EnterShop()
     {
@@ -87,11 +88,11 @@ public class ShopExitManager : MonoBehaviour
 
         inShop = true;
 
-        // Plays the shop entrance animation
+        // Play entrance animation
         if (animator != null)
             animator.SetTrigger("TiendaEntrar");
 
-        // Disables all enemy logic while inside the shop
+        // Disable enemy logic
         if (EnemyManager.Instance != null)
         {
             foreach (var enemy in EnemyManager.Instance.enemies)
@@ -108,39 +109,17 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
-        // Disables dice rolling while inside the shop
+        // Disable dice system while inside the shop
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = false;
 
-        // Resets the Ouija pointer to its initial position
-        if (tableroOuijaPuntero != null)
+        // Reset pointer to initial position
+        if (ouijaPointer != null)
         {
-            tableroOuijaPuntero.transform.SetLocalPositionAndRotation(
-                punteroInitialLocalPos,
-                punteroInitialLocalRot
+            ouijaPointer.transform.SetLocalPositionAndRotation(
+                pointerInitialLocalPos,
+                pointerInitialLocalRot
             );
-        }
-
-        // Prepares pedestal memory but DOES NOT generate items here.
-        // Item generation happens only in OnEnterEnd().
-        if (Unlocks.IsUnlocked("item_dice_d4"))
-        {
-            ShopPedestalRandomizer.PrepareForReroll();
-            ShopPedestalRandomizer.ClearVisitMemory();
-
-            foreach (var pedestalObj in shopPedestals)
-            {
-                if (pedestalObj == null) continue;
-
-                if (pedestalObj.TryGetComponent<ShopPedestalRandomizer>(out var pedestal))
-                {
-                    pedestal.ResetForNextVisit();
-                }
-            }
-        }
-        else
-        {
-            Debug.Log("[Shop] First visit: NO automatic reroll.");
         }
 
         OnShopStateChanged?.Invoke(true);
@@ -151,29 +130,24 @@ public class ShopExitManager : MonoBehaviour
     // ---------------------------------------------------------
     public void ConfirmExit()
     {
-        // Ignore if the player is not currently inside the shop
         if (!inShop)
             return;
 
-        // Remove all spawned ghosts
         ClearGhosts();
 
-        // Hide the ghost spawn root
         if (ghostSpawnRoot != null)
             ghostSpawnRoot.SetActive(false);
 
-        // Play the shop exit animation
         if (animator != null)
             animator.SetTrigger("TiendaSalir");
     }
 
     public void CancelExit()
     {
-        // Cancels the exit and restores shop UI
         inShop = true;
 
-        if (tableroOuijaPuntero != null)
-            tableroOuijaPuntero.SetActive(true);
+        if (ouijaPointer != null)
+            ouijaPointer.SetActive(true);
 
         foreach (var pedestal in shopPedestals)
             if (pedestal != null) pedestal.SetActive(true);
@@ -205,32 +179,22 @@ public class ShopExitManager : MonoBehaviour
     // ---------------------------------------------------------
     public void OnEnterStart()
     {
-        // Turn off both lights during the transition animation
         if (normalLight != null) normalLight.SetActive(false);
         if (hellLight != null) hellLight.SetActive(false);
 
-        // Plays the thunder sound from the roof
         if (thunderEmitter != null && thunderClip != null)
             thunderEmitter.PlayExternalOneShot(thunderClip);
 
-        // Find the player's Movement component
-        Movement playerMovement = Array.Find(
-            Object.FindObjectsByType<Movement>(FindObjectsInactive.Include),
-            m => m != null && m.isPlayer
-        );
+        Movement playerMovement = FindAnyObjectByType<Movement>(FindObjectsInactive.Include);
 
-        // Pause player movement during the shop entrance animation
         if (playerMovement != null)
             playerMovement.pausedByShop = true;
 
-        // Hide board visual effects
         BridgeOfCatanEffect.HideVisual();
 
-        // Disable dice rolling while inside the shop
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = false;
 
-        // Disable all enemy logic and visuals
         if (EnemyManager.Instance != null)
         {
             foreach (var enemy in EnemyManager.Instance.enemies)
@@ -250,50 +214,25 @@ public class ShopExitManager : MonoBehaviour
 
     public void OnEnterEnd()
     {
-        // Turn on the hell light once the shop entrance animation finishes
         if (hellLight != null) hellLight.SetActive(true);
 
-        // Show all pedestals
         foreach (var pedestal in shopPedestals)
             if (pedestal != null) pedestal.SetActive(true);
 
-        // Show all decision markers
         foreach (var empty in decisionEmpties)
             if (empty != null) empty.SetActive(true);
 
-        // Activate the Ouija pointer and place it in its fixed position
-        if (tableroOuijaPuntero != null)
+        if (ouijaPointer != null)
         {
-            tableroOuijaPuntero.SetActive(true);
-            tableroOuijaPuntero.transform.localPosition = punteroFixedLocalPos;
-            tableroOuijaPuntero.transform.localEulerAngles = punteroFixedLocalRot;
+            ouijaPointer.SetActive(true);
+            ouijaPointer.transform.localPosition = pointerFixedLocalPos;
+            ouijaPointer.transform.localEulerAngles = pointerFixedLocalRot;
         }
 
-        // Activate the ghost root and spawn ghosts
         if (ghostSpawnRoot != null)
             ghostSpawnRoot.SetActive(true);
 
         SpawnGhosts();
-
-        // Prepare pedestal memory and generate items (single reroll)
-        ShopPedestalRandomizer.PrepareForReroll();
-        ShopPedestalRandomizer.ClearVisitMemory();
-
-        foreach (var pedestalObj in shopPedestals)
-        {
-            if (pedestalObj == null) continue;
-
-            if (pedestalObj.TryGetComponent<ShopPedestalRandomizer>(out ShopPedestalRandomizer ped))
-            {
-                ped.ResetForNextVisit();
-                ped.GenerateIfNeeded();
-                ped.RefreshItem();
-            }
-        }
-
-        // Unlock the reroll feature on the first visit
-        if (!Unlocks.IsUnlocked("item_dice_d4"))
-            Unlocks.Unlock("item_dice_d4");
     }
 
     // ---------------------------------------------------------
@@ -301,28 +240,21 @@ public class ShopExitManager : MonoBehaviour
     // ---------------------------------------------------------
     public void OnExitStart()
     {
-        //Removes all ghosts
         ClearGhosts();
 
-        // Restore normal lighting after leaving the shop
         if (normalLight != null) normalLight.SetActive(true);
 
-        // Disable ghost spawn root
         if (ghostSpawnRoot != null)
             ghostSpawnRoot.SetActive(false);
 
-        // Mark shop as exited and notify listeners
         inShop = false;
         OnShopStateChanged?.Invoke(false);
 
-        // Show board visual effects again
         BridgeOfCatanEffect.ShowVisual();
 
-        // Re-enable dice system
         if (DiceRollManager.Instance != null)
             DiceRollManager.Instance.enabled = true;
 
-        // Disable all enemy logic until the exit animation fully ends
         if (EnemyManager.Instance != null)
         {
             foreach (var enemy in EnemyManager.Instance.enemies)
@@ -339,58 +271,55 @@ public class ShopExitManager : MonoBehaviour
             }
         }
 
-        // Pause player movement during the exit animation
-        Movement playerMovement = Array.Find(
-            Object.FindObjectsByType<Movement>(FindObjectsInactive.Include),
-            m => m != null && m.isPlayer
-        );
+        Movement playerMovement = FindAnyObjectByType<Movement>(FindObjectsInactive.Include);
 
         if (playerMovement != null)
-            playerMovement.pausedByShop = true;
+        {
+            playerMovement.pausedByShop = false;
+            playerMovement.pendingSteps = 0;
+            playerMovement.turnShouldEnd = false;
+        }
     }
+
 
     public void OnExitEnd()
     {
-        // Turn off hell light
         if (hellLight != null) hellLight.SetActive(false);
 
-        // Plays the thunder sound from the roof
         if (thunderEmitter != null && thunderClip != null)
             thunderEmitter.PlayExternalOneShot(thunderClip);
 
-        // Hide all shop pedestals
         foreach (var pedestal in shopPedestals)
             if (pedestal != null) pedestal.SetActive(false);
 
-        // Hide decision markers
         foreach (var empty in decisionEmpties)
             if (empty != null) empty.SetActive(false);
 
-        // Hide the Ouija pointer
-        if (tableroOuijaPuntero != null)
-            tableroOuijaPuntero.SetActive(false);
+        if (ouijaPointer != null)
+            ouijaPointer.SetActive(false);
 
-        // Resume player movement after a short delay
+        
+        Movement playerMovement = FindAnyObjectByType<Movement>(FindObjectsInactive.Include);
+        if (playerMovement != null)
+        {
+            playerMovement.pendingSteps = 0;
+            playerMovement.turnShouldEnd = false;
+            playerMovement.turnShouldEnd = false;
+        }
+
         StartCoroutine(HandlePlayerExitAfterDelay());
     }
 
     private IEnumerator HandlePlayerExitAfterDelay()
     {
-        // Wait a short moment to ensure the exit animation is visually finished
         yield return new WaitForSeconds(0.15f);
 
-        // Find the player's Movement component
-        Movement playerMovement = Array.Find(
-            Object.FindObjectsByType<Movement>(FindObjectsInactive.Include),
-            m => m != null && m.isPlayer
-        );
+        Movement playerMovement = FindAnyObjectByType<Movement>(FindObjectsInactive.Include);
 
         if (playerMovement != null)
         {
-            // Ensure the player object is active again
             playerMovement.gameObject.SetActive(true);
 
-            // Re-enable enemy logic now that the exit animation is done
             if (EnemyManager.Instance != null)
             {
                 foreach (var enemy in EnemyManager.Instance.enemies)
@@ -407,10 +336,9 @@ public class ShopExitManager : MonoBehaviour
                 }
             }
 
-            // Resume player movement after leaving the shop
             playerMovement.pausedByShop = false;
 
-            // If the player had pending movement, resume it now
+            // Resume pending movement ONLY if the player entered via checkpoint
             if (playerMovement.pendingSteps > 0)
             {
                 int steps = playerMovement.pendingSteps;
@@ -421,9 +349,9 @@ public class ShopExitManager : MonoBehaviour
                 yield break;
             }
 
-            // Otherwise, end the player's turn normally
-            playerMovement.turnShouldEnd = true;
-            TurnManager.Instance.ForcePlayerTurnEnd();
+            // No pending movement: do NOT end the turn.
+            // The player will manually roll the dice.
+            playerMovement.turnShouldEnd = false;
         }
     }
 
@@ -439,12 +367,12 @@ public class ShopExitManager : MonoBehaviour
 
         for (int i = 0; i < ghostCount; i++)
         {
-            bool isThisSpecial = (i == specialIndex);
+            bool isSpecial = (i == specialIndex);
 
-            GameObject prefabToUse = isThisSpecial ? specialGhostPrefab : normalGhostPrefab;
+            GameObject prefab = isSpecial ? specialGhostPrefab : normalGhostPrefab;
 
             GameObject g = Instantiate(
-                prefabToUse,
+                prefab,
                 ghostSpawnCenter.position,
                 Quaternion.identity
             );
@@ -453,7 +381,7 @@ public class ShopExitManager : MonoBehaviour
             {
                 wander.center = ghostSpawnCenter;
                 wander.maxDistance = ghostSpawnRadius;
-                wander.isSpecial = isThisSpecial;
+                wander.isSpecial = isSpecial;
             }
 
             activeGhosts.Add(g);
@@ -467,95 +395,4 @@ public class ShopExitManager : MonoBehaviour
 
         activeGhosts.Clear();
     }
-
-    // ---------------------------------------------------------
-    // EDITOR ONLY
-    // ---------------------------------------------------------
-#if UNITY_EDITOR
-    public void EditorPreviewShop()
-    {
-        Debug.Log("=== SHOP EDITOR PREVIEW ===");
-
-        foreach (var pedestal in shopPedestals)
-            if (pedestal != null)
-                pedestal.SetActive(true);
-
-        foreach (var pedestal in shopPedestals)
-        {
-            if (pedestal == null) continue;
-
-            var comp = pedestal.GetComponent("ShopPedestal");
-            if (comp != null)
-            {
-                var method = comp.GetType().GetMethod("EditorPreview");
-                method?.Invoke(comp, null);
-            }
-        }
-
-        var shopCameraPoint = GameObject.Find("ShopCameraPoint");
-        if (Camera.main != null && shopCameraPoint != null)
-        {
-            Camera.main.transform.SetPositionAndRotation(
-                shopCameraPoint.transform.position,
-                shopCameraPoint.transform.rotation
-            );
-        }
-
-        var player = GameObject.Find("Player");
-        if (player != null)
-            player.SetActive(false);
-
-        var enemiesRoot = GameObject.Find("Enemies");
-        if (enemiesRoot != null)
-        {
-            foreach (Transform child in enemiesRoot.transform)
-                child.gameObject.SetActive(false);
-        }
-
-        Debug.Log("Shop preview activated in Scene View.");
-    }
-
-    public void EditorExitShop()
-    {
-        Debug.Log("=== SHOP EDITOR EXIT ===");
-
-        foreach (var pedestal in shopPedestals)
-            if (pedestal != null)
-                pedestal.SetActive(false);
-
-        foreach (var pedestal in shopPedestals)
-        {
-            if (pedestal == null) continue;
-
-            var comp = pedestal.GetComponent("ShopPedestal");
-            if (comp != null)
-            {
-                var method = comp.GetType().GetMethod("ClearPreview");
-                method?.Invoke(comp, null);
-            }
-        }
-
-        var player = GameObject.Find("Player");
-        if (player != null)
-            player.SetActive(true);
-
-        var enemiesRoot = GameObject.Find("Enemies");
-        if (enemiesRoot != null)
-        {
-            foreach (Transform child in enemiesRoot.transform)
-                child.gameObject.SetActive(true);
-        }
-
-        var originalPoint = GameObject.Find("OriginalCameraPoint");
-        if (Camera.main != null && originalPoint != null)
-        {
-            Camera.main.transform.SetPositionAndRotation(
-                originalPoint.transform.position,
-                originalPoint.transform.rotation
-            );
-        }
-
-        Debug.Log("Shop editor preview exited. Scene restored.");
-    }
-#endif
 }

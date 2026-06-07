@@ -12,14 +12,20 @@ public class BridgeOfCatanEffect : BaseConsumableEffect
     private int rightIndex;
     private bool active = false;
 
-    // 0 = recien colocado
-    // 1 = ha pasado turno enemigo (o turno jugador si no hay enemigos)
-    // 2 = eliminar en el siguiente turno jugador
+    // 0 = just placed
+    // 1 = enemy turn passed (or player turn if no enemies)
+    // 2 = remove on next player turn
     private int phase = 0;
 
-    // Referencia global al ultimo puente visual instanciado
+    // Global reference to the last instantiated bridge visual
     public static GameObject lastBridgeVisual;
 
+    /*
+     * Activate
+     * --------
+     * Places the bridge between two ColorSpot indices, registers the
+     * connection, spawns the visual, and marks the effect as temporary.
+     */
     public override void Activate(ConsumableContext ctx)
     {
         if (ctx == null)
@@ -28,7 +34,6 @@ public class BridgeOfCatanEffect : BaseConsumableEffect
         ColorSpot colorSpot = ctx.TargetColorSpot;
         if (colorSpot == null)
         {
-            Debug.Log("Bridge of Catan can only be placed on a ColorSpot.");
             ctx.WasUsed = false;
             return;
         }
@@ -38,17 +43,16 @@ public class BridgeOfCatanEffect : BaseConsumableEffect
 
         if (SpotConnectionManager.Instance == null)
         {
-            Debug.LogError("SpotConnectionManager.Instance is NULL.");
             ctx.WasUsed = false;
             return;
         }
 
-        // Registrar puente (bidireccional si tu manager ya lo soporta)
+        // Register the bridge connection
         SpotConnectionManager.Instance.RegisterBridge(leftIndex, rightIndex);
         active = true;
         phase = 0;
 
-        // Instanciar visual con rotacion segun tipo de ColorSpot
+        // Spawn the visual with rotation depending on the ColorSpot type
         if (bridgePrefab != null)
         {
             Quaternion rot = Quaternion.identity;
@@ -68,35 +72,46 @@ public class BridgeOfCatanEffect : BaseConsumableEffect
             lastBridgeVisual = instance;
         }
 
-        // Registrar como efecto temporal
+        // Register as a temporary effect
         CharacterEffectManager.Instance.AddTemporaryEffect(this);
 
         ctx.WasUsed = true;
     }
 
+    /*
+     * OnTurnStart
+     * -----------
+     * Handles the lifetime of the bridge across turns.
+     */
     public override void OnTurnStart()
     {
         if (!active)
             return;
 
-        // Fase 0 -> recien colocado
+        // Phase 0 -> just placed
         if (phase == 0)
         {
             phase = 1;
             return;
         }
 
-        // Fase 1 -> turno enemigo o turno jugador si no hay enemigos
+        // Phase 1 -> enemy turn passed (or player turn if no enemies)
         if (phase == 1)
         {
             phase = 2;
             return;
         }
 
-        // Fase 2 -> eliminar
+        // Phase 2 -> remove the bridge
         RemoveBridge();
     }
 
+    /*
+     * RemoveBridge
+     * ------------
+     * Unregisters the connection, removes the temporary effect,
+     * destroys the visual, and clears state.
+     */
     private void RemoveBridge()
     {
         if (!active)
@@ -106,21 +121,20 @@ public class BridgeOfCatanEffect : BaseConsumableEffect
 
         SpotConnectionManager.Instance.UnregisterBridge(leftIndex, rightIndex);
 
-        // Eliminar efecto temporal
+        // Remove temporary effect
         CharacterEffectManager.Instance.RemoveTemporaryEffect(this);
 
-        // Eliminar visual si existe
+        // Destroy the visual if it exists
         if (lastBridgeVisual != null)
         {
             Object.Destroy(lastBridgeVisual);
             lastBridgeVisual = null;
         }
 
-        Debug.Log("Bridge of Catan expired after 1 round.");
     }
 
     // ---------------------------------------------------------
-    // Metodos para ocultar/mostrar el puente visual
+    // Methods to hide or show the bridge visual
     // ---------------------------------------------------------
 
     public static void HideVisual()

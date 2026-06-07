@@ -3,15 +3,13 @@ using UnityEngine;
 /*
  * ExitShieldEffect
  * ----------------
- * Se activa cuando el jugador usa el objeto Escudo de Salida.
- * Arma un escudo que anula el efecto de la próxima casilla mala
- * y después se consume.
+ * Grants a shield that blocks the next bad spot the player steps on.
+ * After blocking one bad spot, the shield is consumed automatically.
  *
- * Comportamiento:
- * - SpotController debe comprobar si el escudo está activo.
- * - Si está activo y el jugador cae en casilla mala:
- *      · Se anula el efecto negativo.
- *      · Se consume el escudo.
+ * Behavior:
+ * - SpotController checks if the shield is active.
+ * - If active and the player enters a bad spot:
+ *      The negative effect is ignored and the shield is removed.
  */
 [CreateAssetMenu(
     fileName = "ExitShieldEffect",
@@ -26,9 +24,8 @@ public class ExitShieldEffect : BaseConsumableEffect
 
         SpotController ctrl = SpotController.Instance;
 
-        // Activar modo escudo: la próxima casilla mala será ignorada.
+        // Enable shield mode: the next bad spot will be ignored
         ctrl.exitShieldActive = true;
-
 
         ctx.WasUsed = true;
     }

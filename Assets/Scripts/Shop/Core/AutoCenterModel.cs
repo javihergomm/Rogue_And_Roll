@@ -2,55 +2,57 @@ using UnityEngine;
 
 public class AutoCenterModel : MonoBehaviour
 {
+    // Normalizes position, rotation and scale based on item settings
     public void Normalize(BaseItemSO item)
     {
         if (item == null)
             return;
 
-        // Posición y rotación en una sola llamada (optimización)
+        // Reset position and apply rotation
         transform.SetLocalPositionAndRotation(
             Vector3.zero,
             Quaternion.Euler(item.StoreRotationOffset)
         );
 
-        // Escala final
+        // Apply scale
         transform.localScale = Vector3.one * item.StoreScaleMultiplier;
 
-        // Bounds tras rotación + escala
+        // Compute bounds after rotation and scale
         Bounds b = ComputeLocalBounds();
 
-        // Ajustes de posición agrupados
         Vector3 p = transform.localPosition;
 
-        // Base a Y = 0
+        // Move base to Y = 0
         p.y -= b.min.y;
 
-        // Offset de altura
+        // Apply height offset
         p.y += item.StoreHeightOffset;
 
-        // Recalcular bounds para centrar horizontalmente
+        // Recompute bounds to center horizontally
         b = ComputeLocalBounds();
         p.x -= b.center.x;
         p.z -= b.center.z;
 
-        // Offsets X y Z del item
+        // Apply item X/Z offsets
         p.x += item.StoreXPositionOffset;
         p.z += item.StoreZPositionOffset;
 
-        // Aplicar posición final
+        // Final position
         transform.localPosition = p;
     }
 
+    // Computes combined local bounds of all MeshFilters
     private Bounds ComputeLocalBounds()
     {
         MeshFilter[] filters = GetComponentsInChildren<MeshFilter>();
-        Bounds combined = new();
+        Bounds combined = new Bounds();
         bool first = true;
 
         foreach (var f in filters)
         {
             Mesh mesh = f.sharedMesh;
-            if (mesh == null) continue;
+            if (mesh == null)
+                continue;
 
             Bounds b = mesh.bounds;
 

@@ -84,25 +84,7 @@ public class InventoryManager : MonoBehaviour
         // Listen to lootbox events
         LootBoxEvents.OnLootBoxOpened += HandleLootBoxReward;
     }
-    private void Start()
-    {
-        // ... tu código existente de carga de catálogo, slots, etc.
-
-        // ============================================================
-        // GIVE 1 LIMO AT GAME START
-        // ============================================================
-
-        if (itemCatalog.TryGetValue("item_special_slime_even_only", out BaseItemSO limo))
-        {
-            AddItem(limo, 1);
-        }
-        else
-        {
-            Debug.LogError("InventoryManager: item_consumable_limo not found in catalog.");
-        }
-    }
-
-
+    
     /*
      * Loads all item ScriptableObjects from Resources/Items folders
      * into a dictionary for fast lookup by itemID.

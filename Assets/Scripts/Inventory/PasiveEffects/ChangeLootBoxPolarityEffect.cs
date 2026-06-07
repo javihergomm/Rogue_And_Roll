@@ -13,21 +13,19 @@ public class ChangeLootBoxPolarityEffect : BaseConsumableEffect
 
         BaseItemSO item = ctx.TargetSlot.ItemSO;
 
+        // Must be a lootbox
         if (item is not LootBoxSO lootbox)
         {
-            Debug.Log("Varita de Cambio: el objeto seleccionado no es una lootbox.");
             ctx.WasUsed = false;
             return;
         }
 
-        // Invertir polaridad
+        // Flip polarity
         lootbox.ForcePolarity(
             lootbox.Type == LootBoxSO.LootType.Positive
                 ? LootBoxSO.LootType.Negative
                 : LootBoxSO.LootType.Positive
         );
-
-        Debug.Log("Varita de Cambio: polaridad invertida.");
 
         ctx.WasUsed = true;
     }

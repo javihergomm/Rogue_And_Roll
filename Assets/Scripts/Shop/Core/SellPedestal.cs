@@ -45,7 +45,6 @@ public class SellPedestal : MonoBehaviour
         // Open inventory without pausing the game
         InventoryManager.Instance.OpenInventory();
 
-        Debug.Log("Sell pedestal activated. Inventory opened without pausing.");
     }
 
     /*
@@ -80,7 +79,6 @@ public class SellPedestal : MonoBehaviour
             );
         }
 
-        Debug.Log("Pending sale set for: " + item.ItemName + ". Inventory closed, awaiting Ouija decision.");
     }
 
     /*
@@ -109,13 +107,9 @@ public class SellPedestal : MonoBehaviour
 
             // Add gold
             StatManager.Instance.ChangeStat(StatType.Gold, pendingItem.SellPrice);
+ 
+        }
 
-            Debug.Log("Sold: " + pendingItem.ItemName + " for " + pendingItem.SellPrice + " Pesetas.");
-        }
-        else
-        {
-            Debug.Log("Sale cancelled for " + pendingItem.ItemName);
-        }
 
         // Hide popup
         if (OptionPopupManager.Instance != null)
@@ -142,7 +136,6 @@ public class SellPedestal : MonoBehaviour
         InventoryManager.Instance.ClearActiveSellPedestal();
         InventoryManager.Instance.CloseInventory();
 
-        Debug.Log("Selling mode ended.");
     }
 
     /*
@@ -158,7 +151,6 @@ public class SellPedestal : MonoBehaviour
             currentSellPedestal = null;
             sellingMode = false;
 
-            Debug.Log("Sell pedestal deactivated (no decision pending).");
         }
     }
 }

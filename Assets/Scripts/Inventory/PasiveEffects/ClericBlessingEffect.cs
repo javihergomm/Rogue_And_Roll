@@ -3,14 +3,16 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ClericBlessingEffect", menuName = "Effects/Passive/ClericBlessing")]
 public class ClericBlessingEffect : BasePassiveEffect
 {
-    [SerializeField] private int turnsActive = 1;
-    private int remaining;
+    [SerializeField] private int turnsActive = 1; // Total turns active
+    private int remaining;                        // Turns left
 
     public override void Activate()
     {
+        // Clone so each activation has its own timer
         var clone = Instantiate(this);
         clone.remaining = clone.turnsActive;
 
+        // Register effect
         StatManager.Instance.RegisterPassiveEffect(clone);
     }
 
@@ -18,13 +20,13 @@ public class ClericBlessingEffect : BasePassiveEffect
     {
         if (remaining > 0)
         {
-            // Permite un movimiento extra este turno
+            // Add one extra move this turn
             ctx.ExtraMoves += 1;
             remaining--;
         }
         else
         {
-            // El efecto termina
+            // Remove when finished
             StatManager.Instance.ActivePassiveEffects.Remove(this);
         }
     }

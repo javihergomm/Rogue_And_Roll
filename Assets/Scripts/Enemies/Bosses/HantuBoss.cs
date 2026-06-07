@@ -18,7 +18,6 @@ public class HantuBoss : EnemyBase
 
         if (movement.ActualPos == playerMovement.ActualPos)
         {
-            Debug.Log("[Hantu] Landed on player tile. Killing player.");
             KillPlayerNow();
         }
     }
@@ -40,7 +39,6 @@ public class HantuBoss : EnemyBase
 
         if (IsEnemyMovementBlocked())
         {
-            Debug.Log("[Hantu] Movement blocked this turn.");
             TurnManager.Instance.ForceEnemyTurnEnd();
             return;
         }
@@ -54,10 +52,6 @@ public class HantuBoss : EnemyBase
             addedTwo = true;
         }
 
-        Debug.Log("[Hantu] Base roll: " + (roll - (addedTwo ? 2 : 0)) +
-                  (addedTwo ? " (+2 bonus)" : "") +
-                  " => Final: " + roll);
-
         TurnManager.NotifyEnemyRoll(roll);
 
         movement.OnMovementFinished += OnMovementFinished;
@@ -69,7 +63,6 @@ public class HantuBoss : EnemyBase
     private void OnMovementFinished()
     {
         movement.OnMovementFinished -= OnMovementFinished;
-        Debug.Log("[Hantu] Movement finished. Enemy turn ends.");
         TurnManager.Instance.ForceEnemyTurnEnd();
     }
 }

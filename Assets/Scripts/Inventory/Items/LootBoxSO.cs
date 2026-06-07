@@ -75,7 +75,6 @@ public class LootBoxSO : BaseItemSO
 
         if (pool == null || pool.Length == 0)
         {
-            Debug.LogWarning("[LootBoxSO] LootBox '" + name + "' has no rewards for polarity " + lootType + ".");
             return null;
         }
 
@@ -130,7 +129,6 @@ public class LootBoxSO : BaseItemSO
 
         if (reward == null)
         {
-            Debug.LogWarning("[LootBoxSO] LootBox '" + name + "' returned NULL reward.");
             return;
         }
 

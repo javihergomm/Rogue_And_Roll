@@ -78,43 +78,4 @@ public class ShopRerollManager : MonoBehaviour
         }
     }
 
-#if UNITY_EDITOR
-    /*
-     * EditorForceReroll
-     * -----------------
-     * Forces a full reroll in the editor without needing gold or rerolls.
-     * Useful for testing shop item generation.
-     */
-    public void EditorForceReroll()
-    {
-        ShopPedestalRandomizer.PrepareForReroll();
-        ShopPedestalRandomizer.ClearVisitMemory();
-
-        var pedestals = UnityEngine.Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsInactive.Exclude);
-
-        foreach (var pedestal in pedestals)
-        {
-            pedestal.ResetForNextVisit();
-            pedestal.GenerateIfNeeded();
-        }
-
-        UnityEditor.SceneView.RepaintAll();
-    }
-
-    /*
-     * EditorClearAll
-     * --------------
-     * Clears all pedestal previews in the editor.
-     * Useful when resetting the shop layout.
-     */
-    public void EditorClearAll()
-    {
-        var pedestals = UnityEngine.Object.FindObjectsByType<ShopPedestalRandomizer>(FindObjectsInactive.Exclude);
-
-        foreach (var pedestal in pedestals)
-            pedestal.EditorClearPreview();
-
-        UnityEditor.SceneView.RepaintAll();
-    }
-#endif
 }

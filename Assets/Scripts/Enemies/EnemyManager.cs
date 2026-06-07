@@ -61,7 +61,6 @@ public class EnemyManager : MonoBehaviour
             yield return null;
         }
 
-        Debug.Log("EnemyManager: PlayerMovement encontrado correctamente.");
     }
 
     // ============================================================
@@ -83,7 +82,6 @@ public class EnemyManager : MonoBehaviour
 
             if (e != null && e.isActive && e.ShouldDespawn(currentLap))
             {
-                Debug.Log("EnemyManager: Despawning enemy " + e.name + " por durabilidad.");
 
                 if (e.CupInstance != null)
                     Destroy(e.CupInstance);
@@ -128,7 +126,6 @@ public class EnemyManager : MonoBehaviour
 
                 if (!demonIsActive && (spawnByRoll || spawnByLaps))
                 {
-                    Debug.Log("EnemyManager: Demonio aparece (vueltas o 666).");
                     SpawnEnemy(enemySO);
                 }
 
@@ -147,7 +144,6 @@ public class EnemyManager : MonoBehaviour
 
             if (!alreadySpawned)
             {
-                Debug.Log($"EnemyManager: {enemySO.name} aparece por vueltas ({currentLap}).");
                 SpawnEnemy(enemySO);
             }
         }
@@ -162,7 +158,6 @@ public class EnemyManager : MonoBehaviour
 
         if (!enemyObj.TryGetComponent<EnemyBase>(out EnemyBase enemy))
         {
-            Debug.LogError("EnemyManager: Enemy prefab missing EnemyBase.");
             Destroy(enemyObj);
             return;
         }

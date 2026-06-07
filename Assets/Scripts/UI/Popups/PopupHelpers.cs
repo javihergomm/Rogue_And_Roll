@@ -126,4 +126,18 @@ public static class PopupHelpers
             2f // short duration to avoid blocking gameplay
         );
     }
+    // -------------------------------------------------------------------------
+    // NOT ON CHECKPOINT POPUP
+    // -------------------------------------------------------------------------
+    public static void ShowNotOnCheckpointPopup(List<int> checkpointIndices)
+    {
+        string message = "Debes estar en un checkpoint para entrar a la tienda.\n\nCheckpoints:\n";
+
+        foreach (int cp in checkpointIndices)
+            message += "- Casilla " + cp + "\n";
+
+        OptionPopupManager.Instance.ShowTimedMessage(message, 3f);
+    }
+
+
 }

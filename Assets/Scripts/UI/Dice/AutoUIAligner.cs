@@ -121,19 +121,6 @@ public class AutoUIAlignerWithPreview : MonoBehaviour
         }
     }
 
-    public void RandomizeEffects()
-    {
-        string[] pool = { "fuego", "veneno", "critico", "stun", "cura" };
-
-        for (int i = 0; i < numberOfDice; i++)
-        {
-            if (simulatedResults[i] == 0)
-                simulatedEffects[i] = "";
-            else
-                simulatedEffects[i] = pool[Random.Range(0, pool.Length)];
-        }
-    }
-
     private void EnsureListSize<T>(List<T> list, int size)
     {
         while (list.Count < size)

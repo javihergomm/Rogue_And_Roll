@@ -1,8 +1,21 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/*
+ * RevenantBoss
+ * ------------
+ * Enemy that kills the player if:
+ * - It lands on the same tile as the player.
+ * - After moving, both share at least one "row" defined by index ranges.
+ *
+ * Movement:
+ * - Rolls a fixed enemy dice.
+ * - Moves forward by the rolled amount.
+ * - After movement, checks row overlap to determine if the player dies.
+ */
 public class RevenantBoss : EnemyBase
 {
+    // Row definitions: each tuple represents a start-end index range.
     private readonly (int start, int end)[] rows = new (int, int)[]
     {
         (1, 8),
@@ -24,9 +37,9 @@ public class RevenantBoss : EnemyBase
         if (!isActive || movement == null || playerMovement == null)
             return;
 
+        // Instant kill if both are on the same tile
         if (movement.ActualPos == playerMovement.ActualPos)
         {
-            Debug.Log("[Revenant] Landed on player tile. Killing player.");
             KillPlayerNow();
         }
     }
@@ -41,24 +54,24 @@ public class RevenantBoss : EnemyBase
         if (!isActive || movement == null)
             return;
 
-        // BLOQUEO REAL
+        // Movement blocked by effects
         if (IsEnemyMovementBlocked())
         {
-            Debug.Log("[Revenant] Movement blocked this turn.");
             TurnManager.Instance.ForceEnemyTurnEnd();
             return;
         }
 
         int roll = EnemyDice.ThrowDice();
-
-        Debug.Log("[Revenant] Rolled: " + roll);
         TurnManager.NotifyEnemyRoll(roll);
 
         movement.OnMovementFinished += CheckCaptureAfterMove;
         movement.StartMovingFixed(roll);
     }
 
-
+    /*
+     * After movement, checks if Revenant and player share any row.
+     * If they do, the player dies.
+     */
     private void CheckCaptureAfterMove()
     {
         movement.OnMovementFinished -= CheckCaptureAfterMove;
@@ -75,7 +88,6 @@ public class RevenantBoss : EnemyBase
             {
                 if (r == p)
                 {
-                    Debug.Log("[Revenant] Player and Revenant share a row. Killing player.");
                     KillPlayerNow();
                     TurnManager.Instance.ForceEnemyTurnEnd();
                     return;
@@ -83,10 +95,13 @@ public class RevenantBoss : EnemyBase
             }
         }
 
-        Debug.Log("[Revenant] No shared row. Enemy turn ends.");
         TurnManager.Instance.ForceEnemyTurnEnd();
     }
 
+    /*
+     * Checks if a spot index is inside a start-end range.
+     * Supports wrap-around ranges (e.g., 67 -> 1).
+     */
     private bool IsInRange(int spot, int start, int end)
     {
         return start <= end
@@ -94,9 +109,12 @@ public class RevenantBoss : EnemyBase
             : spot >= start || spot <= end;
     }
 
+    /*
+     * Returns all row indices that contain the given spot.
+     */
     private int[] GetRowsForSpot(int spot)
     {
-        List<int> result = new();
+        List<int> result = new List<int>();
 
         for (int i = 0; i < rows.Length; i++)
         {

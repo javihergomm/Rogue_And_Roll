@@ -108,12 +108,7 @@ public class SpotController : MonoBehaviour
 
         foreach (Spot s in spots)
             s.checkpoint = checkpoints.Contains(s.index);
-
-        // DEBUG: Print all checkpoints assigned
-        string cps = string.Join(", ",
-            spots.Where(s => s.checkpoint).Select(s => s.index)
-        );
-        Debug.Log($"[SpotController] Checkpoints assigned for color {color}: {cps}");
+        
     }
 
 

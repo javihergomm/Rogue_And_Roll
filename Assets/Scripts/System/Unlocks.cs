@@ -2,11 +2,19 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * Unlocks
+ * -------
+ * Manages the list of unlocked items and characters.
+ * Supports saving, loading, and checking unlock status.
+ */
 public static class Unlocks
 {
     private static HashSet<string> unlocked = new();
 
-    // IDs que empiezan desbloqueados
+    /*
+     * Default items that start unlocked at the beginning of the game.
+     */
     private static readonly string[] defaultUnlocked =
     {
         "character_amarillo",
@@ -26,11 +34,17 @@ public static class Unlocks
         "item_permanent_gato_9_vidas"
     };
 
+    /*
+     * Returns true if the given ID is unlocked.
+     */
     public static bool IsUnlocked(string id)
     {
         return unlocked.Contains(id);
     }
 
+    /*
+     * Unlocks an item and shows a popup if it was not unlocked before.
+     */
     public static void Unlock(string id)
     {
         if (unlocked.Add(id))
@@ -46,14 +60,16 @@ public static class Unlocks
         }
     }
 
-
+    /*
+     * Loads unlock data from PlayerPrefs.
+     * If no data exists, initializes with default unlocked items.
+     */
     public static void Load()
     {
         if (!PlayerPrefs.HasKey("unlock_data"))
         {
             unlocked = new HashSet<string>();
 
-            // Agregar los desbloqueados por defecto
             foreach (var id in defaultUnlocked)
                 unlocked.Add(id);
 
@@ -66,6 +82,9 @@ public static class Unlocks
         unlocked = new HashSet<string>(wrapper.ids);
     }
 
+    /*
+     * Saves the current unlock list to PlayerPrefs.
+     */
     public static void Save()
     {
         var wrapper = new Wrapper(unlocked);
@@ -73,12 +92,20 @@ public static class Unlocks
         PlayerPrefs.SetString("unlock_data", json);
     }
 
+    /*
+     * Wrapper used for JSON serialization.
+     */
     [Serializable]
     private class Wrapper
     {
         public List<string> ids;
         public Wrapper(HashSet<string> set) => ids = new List<string>(set);
     }
+
+    /*
+     * Resolves the category of an item based on its folder or asset path.
+     * Uses caching to avoid repeated lookups.
+     */
     public static class ItemCategoryResolver
     {
         private static Dictionary<string, string> cache = new();
@@ -88,28 +115,10 @@ public static class Unlocks
             if (item == null)
                 return "???";
 
-            // Cache para evitar búsquedas repetidas
             if (cache.TryGetValue(item.name, out var cat))
                 return cat;
 
-#if UNITY_EDITOR
-            // EDITOR: ruta real del asset
-            string path = UnityEditor.AssetDatabase.GetAssetPath(item);
-
-            if (path.Contains("/Dice/"))
-                return cache[item.name] = "Dado";
-
-            if (path.Contains("/Consumables/"))
-                return cache[item.name] = "Consumibles";
-
-            if (path.Contains("/Permanents/"))
-                return cache[item.name] = "Permanentes";
-
-            if (path.Contains("/LootBox/"))
-                return cache[item.name] = "Especial";
-#endif
-
-            // BUILD: buscar por carpeta en Resources usando itemID (no ItemName)
+            // Runtime category detection using Resources folder structure
             string[] folders = { "Dice", "Consumables", "Permanents", "LootBox" };
 
             foreach (var folder in folders)
@@ -133,28 +142,13 @@ public static class Unlocks
 
             return "???";
         }
-
     }
+
+    /*
+     * Returns all unlocked IDs.
+     */
     public static IEnumerable<string> GetAllUnlockedIDs()
     {
         return unlocked;
     }
-
-
-#if UNITY_EDITOR
-    [UnityEditor.MenuItem("Game/Reset Unlocks")]
-    public static void ResetUnlocks()
-    {
-        PlayerPrefs.DeleteKey("unlock_data");
-        unlocked.Clear();
-
-        foreach (var id in defaultUnlocked)
-            unlocked.Add(id);
-
-        Save();
-
-        Debug.Log("Unlocks reseteados para pruebas.");
-    }
-#endif
-
 }

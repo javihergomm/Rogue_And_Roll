@@ -11,6 +11,7 @@ public class CharacterSelectionUI
         descText = desc;
     }
 
+    // Updates name and description based on unlock state
     public void UpdateInfo(CharacterSO data)
     {
         bool unlocked = Unlocks.IsUnlocked(data.characterID);
@@ -26,7 +27,7 @@ public class CharacterSelectionUI
             }
             else
             {
-                // Si no has puesto un unlockHint, muestra un texto por defecto
+                // Default text if no unlock hint is provided
                 descText.text = string.IsNullOrEmpty(data.unlockHint)
                     ? "Este personaje está bloqueado."
                     : data.unlockHint;

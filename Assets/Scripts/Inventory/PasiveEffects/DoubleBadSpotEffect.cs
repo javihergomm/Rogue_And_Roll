@@ -6,43 +6,41 @@ using UnityEngine;
 )]
 public class DoubleBadSpotEffect : BasePassiveEffect
 {
-    [SerializeField] private bool permanent = true;
-    [SerializeField] private int durationTurns = 0;
+    [SerializeField] private bool permanent = true; // If true, never expires
+    [SerializeField] private int durationTurns = 0; // Duration if not permanent
 
-    private int remaining;
+    private int remaining; // Turns left
 
     public override void Activate()
     {
-        // Crear instancia independiente
+        // Clone so each activation has its own timer
         var clone = Instantiate(this);
 
-        // Configurar duración
+        // Set duration
         clone.remaining = permanent ? -1 : durationTurns;
 
-        // Activar flag
+        // Enable flag
         StatManager.Instance.PassiveCtx.DoubleBadSpotEffects = true;
 
-        // Registrar en CharacterEffectManager
+        // Register effect
         CharacterEffectManager.Instance.AddPassiveEffect(clone);
     }
 
     public override void OnTurnStart()
     {
-        // Permanente -> no expira nunca
+        // Permanent effect
         if (remaining == -1)
             return;
 
-        // Todavía quedan turnos
+        // Still active
         if (remaining > 0)
         {
             remaining--;
             return;
         }
 
-        // Expiró -> desactivar flag
+        // End effect
         StatManager.Instance.PassiveCtx.DoubleBadSpotEffects = false;
-
-        // Eliminar efecto
         CharacterEffectManager.Instance.RemovePassiveEffect(this);
     }
 }

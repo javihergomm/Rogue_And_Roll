@@ -14,8 +14,8 @@ public class GhostWander : MonoBehaviour
     public float maxDistance = 3f;
 
     [Header("Board Area Limit")]
-    public float boardRadius = 1f;     // Set this to match your board size
-    public float extraMargin = 1f;     // How much outside the board they can fly
+    public float boardRadius = 1f;     
+    public float extraMargin = 1f;     
 
     [Header("Vertical Float")]
     public float floatAmplitude = 0.5f;
@@ -57,8 +57,6 @@ public class GhostWander : MonoBehaviour
             GameObject creator = GameObject.Find("GhostCreator");
             if (creator != null)
                 center = creator.transform;
-            else
-                Debug.LogError("GhostWander: GhostCreator not found in scene.");
         }
 
         // Fixed board-based radius
