@@ -20,11 +20,11 @@ MonoBehaviour:
   buyPrice: 20
   sellPrice: 10
   polarity: 1
-  StoreRotationOffset: {x: 0, y: -20, z: 0}
+  StoreRotationOffset: {x: -25, y: -20, z: 0}
   StoreHeightOffset: 0.1
   StoreScaleMultiplier: 0.6
-  StoreZPositionOffset: 0
-  StoreXPositionOffset: -0.2
+  StoreZPositionOffset: 0.2
+  StoreXPositionOffset: 0
   CannotBeUnequipped: 0
   effects:
   - {fileID: 11400000, guid: 3ddfe44174454d748acf33ae38a7b60f, type: 2}

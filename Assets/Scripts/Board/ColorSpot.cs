@@ -3,9 +3,8 @@ using UnityEngine;
 /*
  * ColorSpot
  * ---------
- * Simple marker component used to define
- * the two board positions that the Bridge of Catan
- * will connect.
+ * Defines the two board positions 
+ * that the Bridge of Catan will connect.
  */
 public class ColorSpot : MonoBehaviour
 {

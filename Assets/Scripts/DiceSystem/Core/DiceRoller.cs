@@ -45,16 +45,19 @@ public class DiceRoller : MonoBehaviour
 
     private bool isRolling = false;
 
+    // Ensures the result is only sent once
+    private bool resultSent = false;
+
     private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
+        TryGetComponent(out rb);
         cam = Camera.main;
         InitFaceMap();
     }
 
     private void OnEnable()
     {
-        rb = GetComponent<Rigidbody>();
+        TryGetComponent(out rb);
 
         if (rb == null)
             return;
@@ -84,9 +87,6 @@ public class DiceRoller : MonoBehaviour
 
         foreach (var entry in serializedFaceMap)
             FaceMap[entry.normal] = entry.value;
-
-        if (FaceMap.Count == 0)
-            Debug.LogWarning(name + ": Prefab has no FaceMap assigned.");
     }
 
     /*
@@ -99,18 +99,18 @@ public class DiceRoller : MonoBehaviour
 
     /*
      * Applies force and torque to start the roll.
-     * Does NOT start the roll routine automatically.
+     * Does not start the roll routine automatically.
      */
     public void RollDice()
     {
         if (rb == null)
             return;
 
-        // No need for HasSlotRolledThisTurn anymore.
         if (isRolling)
             return;
 
         isRolling = true;
+        resultSent = false;
 
         ResetPhysics();
 
@@ -144,7 +144,7 @@ public class DiceRoller : MonoBehaviour
 
         int physicalRoll = GetFaceUp();
 
-        DiceContext ctx = new()
+        DiceContext ctx = new DiceContext
         {
             turnNumber = StatManager.Instance.CurrentTurn,
             previousRoll = StatManager.Instance.PreviousRoll,
@@ -154,8 +154,9 @@ public class DiceRoller : MonoBehaviour
         // Ask DiceRollManager if this face should be corrected
         int? targetFace = DiceRollManager.Instance.GetTargetFaceForRoll(linkedSlot, physicalRoll, ctx);
 
+        // Wait for mid-air correction to finish before continuing
         if (targetFace.HasValue && targetFace.Value != physicalRoll)
-            StartCoroutine(ApplyMidAirCorrection(targetFace.Value));
+            yield return StartCoroutine(ApplyMidAirCorrection(targetFace.Value));
 
         // Wait until the dice fully stops
         while (!rb.IsSleeping())
@@ -175,9 +176,13 @@ public class DiceRoller : MonoBehaviour
 
         isRolling = false;
 
-        // Report final result
-        DiceRollManager.Instance.OnDiceResult(linkedSlot, finalFace);
-        InventoryManager.Instance.RefreshActiveDiceUI();
+        // Ensure the result is only sent once
+        if (!resultSent)
+        {
+            resultSent = true;
+            DiceRollManager.Instance.OnDiceResult(linkedSlot, finalFace);
+            InventoryManager.Instance.RefreshActiveDiceUI();
+        }
     }
 
     /*
@@ -286,9 +291,9 @@ public class DiceRoller : MonoBehaviour
         rb.angularVelocity = Vector3.zero;
         rb.Sleep();
     }
+
     public bool IsRolling()
     {
         return isRolling;
     }
-
 }

@@ -15,8 +15,8 @@ MonoBehaviour:
   enemyID: hantu_boss
   enemyName: Hantu Boss
   enemyPrefab: {fileID: 1185976962625026789, guid: 8086441cd14a5a84b819ef9b737d8fab, type: 3}
-  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
-  tilePrefab: {fileID: 9126656830565562572, guid: 4725713aefe17a141a811387680fdc66, type: 3}
+  cupPrefab: {fileID: 1154710427816662426, guid: 0aed55d43f78bed43b5f080c17fe6069, type: 3}
+  tilePrefab: {fileID: 3360471855335895995, guid: f93d5e934c5c5304192449253c98713e, type: 3}
   effects: []
   cupSpawnPointName: 
   tileSpotIndex: 0
@@ -25,4 +25,4 @@ MonoBehaviour:
   spawnOnlyOnce: 1
   hasSpawnedOnce: 1
   durabilityLaps: 1
-  spawnSFX: {fileID: 0}
+  spawnSFX: {fileID: 8300000, guid: 37dc11722fc87f341bf5719c3196b958, type: 3}

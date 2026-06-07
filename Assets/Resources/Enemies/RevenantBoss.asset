@@ -15,11 +15,14 @@ MonoBehaviour:
   enemyID: revenant_boss
   enemyName: Revenant Boss
   enemyPrefab: {fileID: 9161978350601678203, guid: 2743ca94505de7d4788a3204155b1ccc, type: 3}
-  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
-  tilePrefab: {fileID: 9126656830565562572, guid: 4725713aefe17a141a811387680fdc66, type: 3}
+  cupPrefab: {fileID: 1154710427816662426, guid: 0aed55d43f78bed43b5f080c17fe6069, type: 3}
+  tilePrefab: {fileID: 3360471855335895995, guid: f93d5e934c5c5304192449253c98713e, type: 3}
   effects: []
   cupSpawnPointName: 
   tileSpotIndex: 0
   lapsToActivate: 4
   requiresPlayerLap: 1
   spawnOnlyOnce: 1
+  hasSpawnedOnce: 0
+  durabilityLaps: 1
+  spawnSFX: {fileID: 8300000, guid: 5a5840c9fc5ea944d8a8083a68f4986e, type: 3}

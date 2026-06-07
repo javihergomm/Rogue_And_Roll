@@ -15,8 +15,8 @@ MonoBehaviour:
   enemyID: demon_boss
   enemyName: Demon Boss
   enemyPrefab: {fileID: 4559722108389615459, guid: 311e70351be9b51438784ca1a463cc77, type: 3}
-  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
-  tilePrefab: {fileID: 9126656830565562572, guid: 4725713aefe17a141a811387680fdc66, type: 3}
+  cupPrefab: {fileID: 4597249670495352272, guid: 7977028c6a8d5df45a6e90db0baab36b, type: 3}
+  tilePrefab: {fileID: 711879325383730479, guid: b6bd28d196be0ab4880497722fc8e7dd, type: 3}
   effects: []
   cupSpawnPointName: 
   tileSpotIndex: 0

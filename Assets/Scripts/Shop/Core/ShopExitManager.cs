@@ -43,6 +43,10 @@ public class ShopExitManager : MonoBehaviour
     [Header("Animator")]
     [SerializeField] private Animator animator;
 
+    [Header("Shop Sounds")]
+    [SerializeField] private SoundGenerator thunderEmitter;
+    [SerializeField] private AudioClip thunderClip;
+
     [Header("Lights")]
     [SerializeField] private GameObject normalLight;
     [SerializeField] private GameObject hellLight;
@@ -205,6 +209,10 @@ public class ShopExitManager : MonoBehaviour
         if (normalLight != null) normalLight.SetActive(false);
         if (hellLight != null) hellLight.SetActive(false);
 
+        // Plays the thunder sound from the roof
+        if (thunderEmitter != null && thunderClip != null)
+            thunderEmitter.PlayExternalOneShot(thunderClip);
+
         // Find the player's Movement component
         Movement playerMovement = Array.Find(
             Object.FindObjectsByType<Movement>(FindObjectsInactive.Include),
@@ -293,9 +301,11 @@ public class ShopExitManager : MonoBehaviour
     // ---------------------------------------------------------
     public void OnExitStart()
     {
-        // Turn off hell light and remove all ghosts
-        if (hellLight != null) hellLight.SetActive(false);
+        //Removes all ghosts
         ClearGhosts();
+
+        // Restore normal lighting after leaving the shop
+        if (normalLight != null) normalLight.SetActive(true);
 
         // Disable ghost spawn root
         if (ghostSpawnRoot != null)
@@ -341,8 +351,12 @@ public class ShopExitManager : MonoBehaviour
 
     public void OnExitEnd()
     {
-        // Restore normal lighting after leaving the shop
-        if (normalLight != null) normalLight.SetActive(true);
+        // Turn off hell light
+        if (hellLight != null) hellLight.SetActive(false);
+
+        // Plays the thunder sound from the roof
+        if (thunderEmitter != null && thunderClip != null)
+            thunderEmitter.PlayExternalOneShot(thunderClip);
 
         // Hide all shop pedestals
         foreach (var pedestal in shopPedestals)

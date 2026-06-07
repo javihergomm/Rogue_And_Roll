@@ -15,13 +15,14 @@ MonoBehaviour:
   enemyID: banshee_boss
   enemyName: Banshee Boss
   enemyPrefab: {fileID: 4475031751384962166, guid: c3f157343baddf04fbda42edd9ea5aa8, type: 3}
-  cupPrefab: {fileID: 4612419572812352905, guid: e3b56902958cee640b0a62916344673b, type: 3}
-  tilePrefab: {fileID: 9126656830565562572, guid: 4725713aefe17a141a811387680fdc66, type: 3}
+  cupPrefab: {fileID: 817362210715100686, guid: 8aa49615f27251741a98f457b5ecd4f9, type: 3}
+  tilePrefab: {fileID: 3235645545125210764, guid: 37af7c53b33bfb7409209200bd4a6e85, type: 3}
   effects: []
   cupSpawnPointName: 
   tileSpotIndex: 0
   lapsToActivate: 5
   requiresPlayerLap: 1
   spawnOnlyOnce: 1
+  hasSpawnedOnce: 0
   durabilityLaps: 1
-  spawnSFX: {fileID: 0}
+  spawnSFX: {fileID: 8300000, guid: 9b26e4eed6151cc4e851a63c364f8f0d, type: 3}

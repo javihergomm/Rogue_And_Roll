@@ -208,6 +208,12 @@ public class Movement : MonoBehaviour
      */
     private IEnumerator Move(int steps)
     {
+        Debug.Log("[MOVE DEBUG] =====================================");
+        Debug.Log("[MOVE DEBUG] Starting Move()");
+        Debug.Log("[MOVE DEBUG] actualPos BEFORE movement = " + actualPos);
+        Debug.Log("[MOVE DEBUG] steps requested = " + steps);
+        Debug.Log("[MOVE DEBUG] nextCheckpoint = " + nextCheckpoint);
+
         // Stop movement immediately if paused by the shop
         if (pausedByShop)
             yield break;
@@ -220,6 +226,10 @@ public class Movement : MonoBehaviour
             if (isPlayer)
                 CharacterEffectManager.Instance.NotifyMovementEnd(this);
 
+            // End the player's turn if movement finished normally
+            if (isPlayer && turnShouldEnd)
+                TurnManager.Instance.ForcePlayerTurnEnd();
+
             yield break;
         }
 
@@ -230,19 +240,32 @@ public class Movement : MonoBehaviour
          * Checkpoint logic:
          * If the player would pass a checkpoint, movement is cut short
          * and the shop is entered.
+         *
+         * DEBUG: print distance and cut results
          */
         if (isPlayer && nextCheckpoint > 0 && movementIsPlayerControlled)
         {
-            int hypotheticalSpot = actualPos + steps;
-
             int total = spots.Length;
-            while (hypotheticalSpot > total)
-                hypotheticalSpot -= total;
-            while (hypotheticalSpot < 1)
-                hypotheticalSpot += total;
 
-            if (hypotheticalSpot > nextCheckpoint)
-                steps = nextCheckpoint - actualPos;
+            // Calculate distance to checkpoint with wrap-around
+            int distanceToCheckpoint = nextCheckpoint - actualPos;
+            if (distanceToCheckpoint < 0)
+                distanceToCheckpoint += total;
+
+            Debug.Log("[MOVE DEBUG] distanceToCheckpoint = " + distanceToCheckpoint);
+
+            // If the dice roll exceeds the distance, cut movement to checkpoint
+            if (steps > distanceToCheckpoint)
+            {
+                Debug.Log("[MOVE DEBUG] Cutting steps because checkpoint is ahead");
+                Debug.Log("[MOVE DEBUG] steps BEFORE cut = " + steps);
+                steps = distanceToCheckpoint;
+                Debug.Log("[MOVE DEBUG] steps AFTER cut = " + steps);
+            }
+            else
+            {
+                Debug.Log("[MOVE DEBUG] No cut. steps = " + steps + " distanceToCheckpoint = " + distanceToCheckpoint);
+            }
         }
 
         if (!isPlayer)
@@ -251,13 +274,18 @@ public class Movement : MonoBehaviour
         int direction = steps >= 0 ? 1 : -1;
         int totalSteps = Mathf.Abs(steps);
 
+        Debug.Log("[MOVE DEBUG] totalSteps AFTER cut = " + totalSteps);
+
         /*
          * Step-by-step movement loop.
          */
         for (int i = 0; i < totalSteps; i++)
-
         {
+            Debug.Log("[MOVE DEBUG] Step " + (i + 1) + " / " + totalSteps);
+
             int nextSpot = GetNextSpotIndex(actualPos, direction);
+            Debug.Log("[MOVE DEBUG] Moving from " + actualPos + " to " + nextSpot);
+
             int previousPos = actualPos;
             actualPos = nextSpot;
 
@@ -282,6 +310,7 @@ public class Movement : MonoBehaviour
                 if (crossedSpawn)
                 {
                     Round++;
+                    Debug.Log("[MOVE DEBUG] Crossed spawn. New round = " + Round);
 
                     // Round 2: unlock one random locked item
                     if (Round == 2)
@@ -319,7 +348,6 @@ public class Movement : MonoBehaviour
                     if (EnemyManager.Instance != null)
                         EnemyManager.Instance.CheckSpawnConditions();
                 }
-
             }
 
             /*
@@ -348,6 +376,8 @@ public class Movement : MonoBehaviour
             if (!ignoreBridgeThisMove && connections.Count > 0)
             {
                 int targetSpot = connections[0];
+                Debug.Log("[MOVE DEBUG] Bridge teleport to " + targetSpot);
+
                 int prev = actualPos;
                 actualPos = targetSpot;
 
@@ -384,8 +414,9 @@ public class Movement : MonoBehaviour
              */
             if (direction > 0 && spots[actualPos - 1].checkpoint && isPlayer && movementIsPlayerControlled)
             {
-                Debug.Log($"[Movement] CHECKPOINT DETECTED at spot {actualPos}");
-                Debug.Log($"[Movement] Spot index = {spots[actualPos - 1].index}, checkpoint = {spots[actualPos - 1].checkpoint}");
+                Debug.Log("[MOVE DEBUG] CHECKPOINT DETECTED at spot " + actualPos);
+                Debug.Log("[MOVE DEBUG] Spot index = " + spots[actualPos - 1].index + ", checkpoint = " + spots[actualPos - 1].checkpoint);
+
                 if (ignoreInitialCheckpoint)
                 {
                     ignoreInitialCheckpoint = false;
@@ -393,8 +424,14 @@ public class Movement : MonoBehaviour
                 else
                 {
                     int remaining = totalSteps - (i + 1);
+
+                    Debug.Log("[MOVE DEBUG] remaining steps = " + remaining);
+                    Debug.Log("[MOVE DEBUG] pendingSteps BEFORE assignment = " + pendingSteps);
+
                     pendingSteps = remaining;
-                    Debug.Log($"[Movement] pendingSteps SET on shop entry = {pendingSteps} (remaining={remaining})");
+
+                    Debug.Log("[MOVE DEBUG] pendingSteps AFTER assignment = " + pendingSteps);
+
                     turnShouldEnd = false;
 
                     shopExitManager.EnterShop();
@@ -430,12 +467,21 @@ public class Movement : MonoBehaviour
 
         lastPos = actualPos;
 
+        Debug.Log("[MOVE DEBUG] Movement finished at spot " + actualPos);
+        Debug.Log("[MOVE DEBUG] turnShouldEnd = " + turnShouldEnd);
+        Debug.Log("[MOVE DEBUG] pendingSteps (final) = " + pendingSteps);
+
         OnMovementFinished?.Invoke();
         SendRealMovementToUI(lastSpotEffectText);
 
         if (isPlayer)
             CharacterEffectManager.Instance.NotifyMovementEnd(this);
+
+        // End the player's turn if movement finished normally
+        if (isPlayer && turnShouldEnd)
+            TurnManager.Instance.ForcePlayerTurnEnd();
     }
+
 
     private int GetNextSpotIndex(int current, int direction)
     {
@@ -499,7 +545,6 @@ public class Movement : MonoBehaviour
             allEffects += string.Join(", ", diceEffects);
         }
 
-        // Modern API: FindAnyObjectByType
         var ui = UnityEngine.Object.FindAnyObjectByType<ActiveDiceUI>();
         if (ui != null)
             ui.SetLastTurnSummary(realMovement, allEffects, false);
@@ -513,17 +558,36 @@ public class Movement : MonoBehaviour
     public int GetNextCheckpoint()
     {
         int total = spots.Length;
+        int bestDistance = int.MaxValue;
+        int bestCheckpoint = -1;
 
-        for (int i = 1; i <= total; i++)
+        Debug.Log("[MOVE DEBUG] --- GetNextCheckpoint() ---");
+        Debug.Log("[MOVE DEBUG] actualPos = " + actualPos);
+
+        for (int i = 0; i < total; i++)
         {
-            int nextPos = ((actualPos - 1 + i) % total);
+            if (!spots[i].checkpoint)
+                continue;
 
-            if (spots[nextPos].checkpoint)
-                return spots[nextPos].index;
+            int cpIndex = spots[i].index;
+
+            int distance = cpIndex - actualPos;
+            if (distance < 0)
+                distance += total;
+
+            Debug.Log("[MOVE DEBUG] checkpoint candidate = " + cpIndex + " distance = " + distance);
+
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestCheckpoint = cpIndex;
+            }
         }
 
-        return -1;
+        Debug.Log("[MOVE DEBUG] NEXT CHECKPOINT = " + bestCheckpoint + " (distance = " + bestDistance + ")");
+        return bestCheckpoint;
     }
+
 
     private void PlayMovementSound()
     {
